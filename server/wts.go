@@ -70,6 +70,7 @@ func (sm *sessionManager) Add(ssn *webtransport.Session) error {
 			time.Sleep(5 * time.Second)
 		}
 		delete(sm.sessions, host)
+		log.Println("deleted", host)
 	}()
 	return nil
 }
