@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/btwiuse/quichost"
 )
@@ -16,4 +17,5 @@ func main() {
 	addr := ln.Addr()
 	location := fmt.Sprintf("%s://%s", addr.Network(), addr.String())
 	log.Println("listening on", location)
+	http.Serve(ln, http.FileServer(http.Dir(".")))
 }

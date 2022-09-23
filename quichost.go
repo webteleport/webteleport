@@ -14,7 +14,7 @@ import (
 )
 
 type Listener interface {
-	Accept() (Conn, error)
+	Accept() (net.Conn, error)
 	Close() error
 	Addr() net.Addr
 }
@@ -28,7 +28,7 @@ type Conn interface {
 	SetWriteDeadline(time.Time) error
 }
 
-func Listen(u string) (Listener, error) {
+func Listen(u string) (net.Listener, error) {
 	up, err := url.Parse(u)
 	if err != nil {
 		return nil, nil
@@ -41,7 +41,7 @@ func Listen(u string) (Listener, error) {
 	if err != nil {
 		return nil, nil
 	}
-	stm0, err := session.OpenStream()
+	stm0, err := session.AcceptStream(ctx)
 	if err != nil {
 		return nil, nil
 	}
@@ -72,8 +72,12 @@ type listener struct {
 	host    string
 }
 
-func (l *listener) Accept() (Conn, error) {
-	return l.session.AcceptStream(context.Background())
+func (l *listener) Accept() (net.Conn, error) {
+	stream, err := l.session.AcceptStream(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return StreamConn{stream, l.session.LocalAddr(), l.session.RemoteAddr()}, nil
 }
 
 func (l *listener) Close() error {
@@ -91,3 +95,12 @@ func (l *listener) Network() string {
 func (l *listener) String() string {
 	return l.host
 }
+
+type StreamConn struct {
+	webtransport.Stream
+	LA net.Addr
+	RA net.Addr
+}
+
+func (sc StreamConn) LocalAddr() net.Addr  { return sc.LA }
+func (sc StreamConn) RemoteAddr() net.Addr { return sc.RA }

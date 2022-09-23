@@ -13,6 +13,7 @@ import (
 
 	"github.com/lucas-clemente/quic-go/http3"
 	"github.com/marten-seemann/webtransport-go"
+	"github.com/btwiuse/quichost"
 )
 
 func webtransportServer(port string) *webtransport.Server {
@@ -53,22 +54,13 @@ type sessionManager struct {
 	sessions map[string]*webtransport.Session
 }
 
-type streamConn struct {
-	webtransport.Stream
-	lad net.Addr
-	rad net.Addr
-}
-
-func (sc streamConn) LocalAddr() net.Addr  { return sc.lad }
-func (sc streamConn) RemoteAddr() net.Addr { return sc.rad }
-
 func (sm *sessionManager) Add(ssn *webtransport.Session) error {
 	stm0, err := ssn.OpenStreamSync(context.Background())
 	if err != nil {
 		return err
 	}
 	host := fmt.Sprintf("%d.quichost.k0s.io", sm.counter)
-	_, err = io.WriteString(stm0, fmt.Sprintf("HOST %d\n", sm.counter))
+	_, err = io.WriteString(stm0, fmt.Sprintf("HOST %s\n", host))
 	if err != nil {
 		return err
 	}
@@ -76,7 +68,7 @@ func (sm *sessionManager) Add(ssn *webtransport.Session) error {
 	sm.sessions[host] = ssn
 	go func() {
 		for {
-			io.WriteString(stm0, fmt.Sprintf("%s\n", "LINE"))
+			io.WriteString(stm0, fmt.Sprintf("%s\n", "PING"))
 			time.Sleep(5 * time.Second)
 		}
 		delete(sm.sessions, host)
@@ -93,7 +85,7 @@ func (sm *sessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tr := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			stream, err := ssn.OpenStreamSync(ctx)
-			return streamConn{stream, ssn.LocalAddr(), ssn.RemoteAddr()}, err
+			return quichost.StreamConn{stream, ssn.LocalAddr(), ssn.RemoteAddr()}, err
 		},
 	}
 	rp := &httputil.ReverseProxy{
@@ -101,6 +93,7 @@ func (sm *sessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Println("director: rewriting Host", r.URL, r.Host)
 			req.Host = r.Host
 			req.URL.Host = r.Host
+			req.URL.Scheme = "http"
 		},
 		Transport: tr,
 	}

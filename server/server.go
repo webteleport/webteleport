@@ -23,6 +23,7 @@ func main() {
 		if !ok {
 			w.Header().Set("Alt-Svc", altsvc)
 			io.WriteString(w, r.Host)
+			return
 		}
 		defaultSessionManager.ServeHTTP(w, r)
 	})
