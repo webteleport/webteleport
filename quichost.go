@@ -1,16 +1,35 @@
 package quichost
 
 import (
+	"bufio"
 	"context"
+	"io"
 	"log"
 	"net"
 	"net/url"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/marten-seemann/webtransport-go"
 )
 
-func Listen(u string) (net.Listener, error) {
+type Listener interface {
+	Accept() (Conn, error)
+	Close() error
+	Addr() net.Addr
+}
+
+type Conn interface {
+	io.Reader
+	io.Writer
+	io.Closer
+	SetDeadline(time.Time) error
+	SetReadDeadline(time.Time) error
+	SetWriteDeadline(time.Time) error
+}
+
+func Listen(u string) (Listener, error) {
 	up, err := url.Parse(u)
 	if err != nil {
 		return nil, nil
@@ -20,19 +39,46 @@ func Listen(u string) (net.Listener, error) {
 	log.Println("dialing", u)
 	ctx, _ := context.WithTimeout(context.TODO(), 3*time.Second)
 	session, err := dial(ctx, up)
-	return &listener{session}, nil
+	if err != nil {
+		return nil, nil
+	}
+	stm0, err := session.OpenStream()
+	if err != nil {
+		return nil, nil
+	}
+	hostchan := make(chan string)
+	ln := &listener{
+		session: session,
+		stm0:    stm0,
+	}
+	// go io.Copy(os.Stdout, stm0)
+	go func() {
+		scanner := bufio.NewScanner(stm0)
+		for scanner.Scan() {
+			line := scanner.Text()
+			log.Println(line)
+			if strings.HasPrefix(line, "HOST ") {
+				hostchan <- strings.TrimPrefix(line, "HOST ")
+			}
+		}
+	}()
+	go io.Copy(stm0, os.Stdin)
+	ln.host = <-hostchan
+	return ln, nil
 }
 
 type listener struct {
 	session *webtransport.Session
+	stm0    webtransport.Stream
+	host    string
 }
 
-func (l *listener) Accept() (net.Conn, error) {
-	return nil, nil
+func (l *listener) Accept() (Conn, error) {
+	return l.session.AcceptStream(context.Background())
 }
 
 func (l *listener) Close() error {
-	return nil
+	return l.session.Close()
 }
 
 func (l *listener) Addr() net.Addr {
@@ -44,5 +90,5 @@ func (l *listener) Network() string {
 }
 
 func (l *listener) String() string {
-	return "TODO.quichost.k0s.io:https"
+	return l.host
 }
