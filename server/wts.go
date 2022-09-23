@@ -15,20 +15,24 @@ import (
 	"github.com/marten-seemann/webtransport-go"
 )
 
-func webtransportServer(port string) *webtransport.Server {
+func webtransportServer(port string, next http.Handler) *webtransport.Server {
 	s := &webtransport.Server{
 		CheckOrigin: func(*http.Request) bool { return true },
 	}
 	s.H3 = http3.Server{
 		Addr:            port,
-		Handler:         webtransportHandler(s),
+		Handler:         webtransportHandler(s, next),
 		EnableDatagrams: true,
 	}
 	return s
 }
 
-func webtransportHandler(s *webtransport.Server) http.Handler {
+func webtransportHandler(s *webtransport.Server, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Host != "quichost.k0s.io:300" {
+			next.ServeHTTP(w, r)
+			return
+		}
 		ssn, err := s.Upgrade(w, r)
 		if err != nil {
 			log.Printf("upgrading failed: %s", err)

@@ -29,7 +29,7 @@ func Run([]string) error {
 	})
 
 	go func() {
-		wts := webtransportServer(port)
+		wts := webtransportServer(port, http.DefaultServeMux)
 		cert := utils.EnvCert("localhost.pem")
 		key := utils.EnvKey("localhost-key.pem")
 		log.Println("listening on UDP https://127.0.0.1" + port)
