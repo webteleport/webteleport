@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -19,5 +20,14 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, r.Host)
 	})
+
+	go func() {
+		wts := webtransportServer(port)
+		cert := utils.EnvCert("localhost.pem")
+		key := utils.EnvKey("localhost-key.pem")
+		log.Println(fmt.Sprintf("listening on https://127.0.0.1%s", port))
+		log.Fatalln(wts.ListenAndServeTLS(cert, key))
+	}()
+
 	http.Serve(ln, http.DefaultServeMux)
 }
