@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -12,7 +11,7 @@ import (
 
 func main() {
 	port := utils.EnvPort(":3000")
-	log.Println("listening on https://127.0.0.1" + port)
+	log.Println("listening on TCP http://127.0.0.1" + port)
 	ln, err := net.Listen("tcp4", port)
 	if err != nil {
 		log.Fatalln(err)
@@ -25,7 +24,7 @@ func main() {
 		wts := webtransportServer(port)
 		cert := utils.EnvCert("localhost.pem")
 		key := utils.EnvKey("localhost-key.pem")
-		log.Println(fmt.Sprintf("listening on https://127.0.0.1%s", port))
+		log.Println("listening on UDP https://127.0.0.1" + port)
 		log.Fatalln(wts.ListenAndServeTLS(cert, key))
 	}()
 
