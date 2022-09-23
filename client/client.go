@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"fmt"
@@ -8,14 +8,13 @@ import (
 	"github.com/btwiuse/quichost"
 )
 
-func main() {
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+func Run([]string) error {
 	ln, err := quichost.Listen("https://quichost.k0s.io")
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 	addr := ln.Addr()
 	location := fmt.Sprintf("%s://%s", addr.Network(), addr.String())
 	log.Println("listening on", location)
-	http.Serve(ln, http.FileServer(http.Dir(".")))
+	return http.Serve(ln, http.FileServer(http.Dir(".")))
 }

@@ -1,8 +1,7 @@
-package main
+package server
 
 import (
 	"context"
-	_ "embed"
 	"fmt"
 	"io"
 	"log"
@@ -36,7 +35,6 @@ func webtransportHandler(s *webtransport.Server) http.Handler {
 			w.WriteHeader(500)
 			return
 		}
-		// go echoConn(conn)
 		err = defaultSessionManager.Add(ssn)
 		if err != nil {
 			log.Printf("initializing session failed: %s", err)
@@ -98,18 +96,4 @@ func (sm *sessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Transport: tr,
 	}
 	rp.ServeHTTP(w, r)
-}
-
-func echoConn(conn *webtransport.Session) {
-	log.Println(conn.RemoteAddr(), "new session")
-	ctx := context.Background()
-	for {
-		stream, err := conn.AcceptStream(ctx)
-		if err != nil {
-			log.Println(conn.RemoteAddr(), "session closed")
-			break
-		}
-		log.Println(conn.RemoteAddr(), "new stream")
-		go io.Copy(stream, stream)
-	}
 }

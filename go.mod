@@ -4,12 +4,14 @@ go 1.19
 
 require (
 	github.com/btwiuse/h3 v0.0.0-20220919172148-51b6e2f27e33
+	github.com/btwiuse/multicall v0.0.0
 	github.com/ebi-yade/altsvc-go v0.1.1
 	github.com/lucas-clemente/quic-go v0.29.0
 	github.com/marten-seemann/webtransport-go v0.1.0
 )
 
 require (
+	github.com/alexpantyukhin/go-pattern-match v0.0.0-20200628201436-c57d5ad3f2c5 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
