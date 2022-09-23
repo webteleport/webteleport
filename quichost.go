@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
@@ -62,7 +61,7 @@ func Listen(u string) (Listener, error) {
 			}
 		}
 	}()
-	go io.Copy(stm0, os.Stdin)
+	// go io.Copy(stm0, os.Stdin)
 	ln.host = <-hostchan
 	return ln, nil
 }

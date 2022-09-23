@@ -19,8 +19,12 @@ func main() {
 		log.Fatalln(err)
 	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Alt-Svc", altsvc)
-		io.WriteString(w, r.Host)
+		_, ok := defaultSessionManager.sessions[r.Host]
+		if !ok {
+			w.Header().Set("Alt-Svc", altsvc)
+			io.WriteString(w, r.Host)
+		}
+		defaultSessionManager.ServeHTTP(w, r)
 	})
 
 	go func() {
