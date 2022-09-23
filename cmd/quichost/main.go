@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
+	"github.com/btwiuse/multicall"
 	"github.com/btwiuse/quichost/client"
 	"github.com/btwiuse/quichost/server"
-	"github.com/btwiuse/multicall"
 )
 
 func main() {

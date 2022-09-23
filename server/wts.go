@@ -10,9 +10,9 @@ import (
 	"net/http/httputil"
 	"time"
 
+	"github.com/btwiuse/quichost"
 	"github.com/lucas-clemente/quic-go/http3"
 	"github.com/marten-seemann/webtransport-go"
-	"github.com/btwiuse/quichost"
 )
 
 func webtransportServer(port string) *webtransport.Server {
@@ -66,7 +66,11 @@ func (sm *sessionManager) Add(ssn *webtransport.Session) error {
 	sm.sessions[host] = ssn
 	go func() {
 		for {
-			io.WriteString(stm0, fmt.Sprintf("%s\n", "PING"))
+			_, err := io.WriteString(stm0, fmt.Sprintf("%s\n", "PING"))
+			if err != nil {
+				log.Println(err)
+				break
+			}
 			time.Sleep(5 * time.Second)
 		}
 		delete(sm.sessions, host)
