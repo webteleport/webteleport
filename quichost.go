@@ -18,7 +18,7 @@ func Listen(u string) (net.Listener, error) {
 	log.Println(up.Scheme)
 	log.Println(up.Host)
 	log.Println("dialing", u)
-	ctx, _ := context.WithTimeout(context.TODO(), time.Second)
+	ctx, _ := context.WithTimeout(context.TODO(), 3*time.Second)
 	session, err := dial(ctx, up)
 	return &listener{session}, nil
 }
