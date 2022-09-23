@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -11,12 +12,14 @@ import (
 
 func main() {
 	port := utils.EnvPort(":3000")
+	altsvc := utils.EnvAltSvc(fmt.Sprintf(`h3="%s"`, port))
 	log.Println("listening on TCP http://127.0.0.1" + port)
 	ln, err := net.Listen("tcp4", port)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Alt-Svc", altsvc)
 		io.WriteString(w, r.Host)
 	})
 
