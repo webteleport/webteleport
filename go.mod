@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/btwiuse/h3 v0.0.0-20220919172148-51b6e2f27e33
+	github.com/ebi-yade/altsvc-go v0.1.1
 	github.com/lucas-clemente/quic-go v0.29.0
 	github.com/marten-seemann/webtransport-go v0.1.0
 )

@@ -1,9 +1,13 @@
 package quichost
 
 import (
+	"context"
 	"log"
 	"net"
 	"net/url"
+	"time"
+
+	"github.com/marten-seemann/webtransport-go"
 )
 
 func Listen(u string) (net.Listener, error) {
@@ -13,10 +17,15 @@ func Listen(u string) (net.Listener, error) {
 	}
 	log.Println(up.Scheme)
 	log.Println(up.Host)
-	return &listener{}, nil
+	log.Println("dialing", u)
+	ctx, _ := context.WithTimeout(context.TODO(), time.Second)
+	session, err := dial(ctx, up)
+	return &listener{session}, nil
 }
 
-type listener struct{}
+type listener struct {
+	session *webtransport.Session
+}
 
 func (l *listener) Accept() (net.Conn, error) {
 	return nil, nil
