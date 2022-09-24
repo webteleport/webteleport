@@ -9,6 +9,8 @@ import (
 	"github.com/btwiuse/h3/utils"
 )
 
+var HOST = utils.EnvHost("skynet.k0s.io")
+
 func Run([]string) error {
 	port := utils.EnvPort(":3000")
 	altsvc := utils.EnvAltSvc(fmt.Sprintf(`h3="%s"`, port))
@@ -19,7 +21,7 @@ func Run([]string) error {
 	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("[00]", r.Proto, r.Method, r.Host, r.URL.Path)
-		_, ok := defaultSessionManager.sessions[r.Host]
+		_, ok := defaultSessionManager.Get(r.Host)
 		if !ok {
 			w.Header().Set("Alt-Svc", altsvc)
 			http.Error(w, r.Host+"not found", http.StatusNotFound)

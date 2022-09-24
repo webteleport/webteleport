@@ -25,4 +25,4 @@ TODO
 - [ ] reverseproxy WebTransport requests
 - [ ] support user specified hostname, requiring netrc authentication
 - [x] support custom root domain, for example `HOST=usesthis.app`
-- [ ] support concurrent rw on session manager map
+- [x] support concurrent rw on session manager map
