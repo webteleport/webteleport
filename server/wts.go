@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/btwiuse/quichost"
+	"github.com/btwiuse/skynet"
 	"github.com/lucas-clemente/quic-go/http3"
 	"github.com/marten-seemann/webtransport-go"
 )
@@ -34,13 +34,13 @@ func webtransportHandler(s *webtransport.Server, next http.Handler) http.Handler
 		// 1. simple http
 		// 2. websockets
 		// 3. webtransport (not yet supported by reverseproxy)
-		if r.Host != "quichost.k0s.io:300" {
+		if r.Host != "skynet.k0s.io:300" {
 			// passthrough requests made by webtransport-go, i.e.
 			// strip the port:
 			//
-			// xxx.quichost.k0s.io:300
+			// xxx.skynet.k0s.io:300
 			// =>
-			// xxx.quichost.k0s.io
+			// xxx.skynet.k0s.io
 			if host, _, ok := strings.Cut(r.Host, ":"); ok {
 				r.Host = host
 			}
@@ -48,8 +48,8 @@ func webtransportHandler(s *webtransport.Server, next http.Handler) http.Handler
 			return
 		}
 		log.Println("[01]", r.Proto, r.Method, r.Host, r.URL.Path)
-		// handle quichost client registration
-		// Host: quichost.k0s.io:300
+		// handle skynet client registration
+		// Host: skynet.k0s.io:300
 		ssn, err := s.Upgrade(w, r)
 		if err != nil {
 			log.Printf("upgrading failed: %s", err)
@@ -78,7 +78,7 @@ func (sm *sessionManager) Add(ssn *webtransport.Session) error {
 	if err != nil {
 		return err
 	}
-	host := fmt.Sprintf("%d.quichost.k0s.io", sm.counter)
+	host := fmt.Sprintf("%d.skynet.k0s.io", sm.counter)
 	_, err = io.WriteString(stm0, fmt.Sprintf("HOST %s\n", host))
 	if err != nil {
 		return err
@@ -119,7 +119,7 @@ func (sm *sessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tr := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			stream, err := ssn.OpenStreamSync(ctx)
-			return quichost.StreamConn{stream, ssn.LocalAddr(), ssn.RemoteAddr()}, err
+			return skynet.StreamConn{stream, ssn.LocalAddr(), ssn.RemoteAddr()}, err
 		},
 	}
 	rp := &httputil.ReverseProxy{

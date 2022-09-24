@@ -1,26 +1,27 @@
-# quichost
+# skynet
 
 install:
 
 ```
-$ go install github.com/btwiuse/quichost/cmd/quichost@latest
+$ go install github.com/btwiuse/skynet/cmd/skynet@latest
 ```
 
 server:
 
 ```
-$ quichost server
+$ skynet server
 ```
 
 example clients:
 
 ```
-$ quichost client
-$ quichost gos
-$ quichost echo
+$ skynet client
+$ skynet gos
+$ skynet echo
 ```
 
 TODO
+
 - [ ] reverseproxy WebTransport requests
 - [ ] support user specified hostname, requiring netrc authentication
 - [ ] support custom root domain, for example `ROOT=usesthis.app`

@@ -1,4 +1,4 @@
-module github.com/btwiuse/quichost
+module github.com/btwiuse/skynet
 
 go 1.19
 

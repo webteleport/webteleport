@@ -1,4 +1,4 @@
-package quichost
+package skynet
 
 import (
 	"context"

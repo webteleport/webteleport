@@ -5,11 +5,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/btwiuse/quichost"
+	"github.com/btwiuse/skynet"
 )
 
 func Run([]string) error {
-	ln, err := quichost.Listen("https://quichost.k0s.io")
+	ln, err := skynet.Listen("https://skynet.k0s.io")
 	if err != nil {
 		return err
 	}

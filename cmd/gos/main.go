@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/btwiuse/quichost/echo"
+	"github.com/btwiuse/skynet/echo"
 )
 
 func main() {
