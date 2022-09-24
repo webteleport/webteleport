@@ -11,10 +11,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/btwiuse/h3/utils"
 	"github.com/btwiuse/skynet"
 	"github.com/lucas-clemente/quic-go/http3"
 	"github.com/marten-seemann/webtransport-go"
 )
+
+var HOST = utils.EnvHost("skynet.k0s.io")
 
 func webtransportServer(port string, next http.Handler) *webtransport.Server {
 	s := &webtransport.Server{
@@ -34,18 +37,25 @@ func webtransportHandler(s *webtransport.Server, next http.Handler) http.Handler
 		// 1. simple http
 		// 2. websockets
 		// 3. webtransport (not yet supported by reverseproxy)
-		if r.Host != "skynet.k0s.io:300" {
-			// passthrough requests made by webtransport-go, i.e.
-			// strip the port:
-			//
-			// xxx.skynet.k0s.io:300
-			// =>
-			// xxx.skynet.k0s.io
-			if host, _, ok := strings.Cut(r.Host, ":"); ok {
-				r.Host = host
-			}
+		host, _, ok := strings.Cut(r.Host, ":")
+		isSimple := !ok
+		isWebtransport := ok && host != HOST
+		isSkynetClient := ok && host == HOST
+		switch {
+		// passthrough requests made by webtransport-go, i.e.
+		// strip the port:
+		//
+		// xxx.skynet.k0s.io:300
+		// =>
+		// xxx.skynet.k0s.io
+		case isWebtransport:
+			r.Host = host
+			fallthrough
+		case isSimple:
 			next.ServeHTTP(w, r)
 			return
+		case isSkynetClient:
+			break
 		}
 		log.Println("[01]", r.Proto, r.Method, r.Host, r.URL.Path)
 		// handle skynet client registration
@@ -78,8 +88,8 @@ func (sm *sessionManager) Add(ssn *webtransport.Session) error {
 	if err != nil {
 		return err
 	}
-	host := fmt.Sprintf("%d.skynet.k0s.io", sm.counter)
-	_, err = io.WriteString(stm0, fmt.Sprintf("HOST %s\n", host))
+	subhost := fmt.Sprintf("%d.%s", sm.counter, HOST)
+	_, err = io.WriteString(stm0, fmt.Sprintf("HOST %s\n", subhost))
 	if err != nil {
 		return err
 	}

@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -23,7 +22,7 @@ func Run([]string) error {
 		_, ok := defaultSessionManager.sessions[r.Host]
 		if !ok {
 			w.Header().Set("Alt-Svc", altsvc)
-			io.WriteString(w, r.Host)
+			http.Error(w, r.Host+"not found", http.StatusNotFound)
 			return
 		}
 		defaultSessionManager.ServeHTTP(w, r)
