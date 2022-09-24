@@ -6,6 +6,8 @@ import (
 
 	"github.com/btwiuse/multicall"
 	"github.com/btwiuse/quichost/client"
+	"github.com/btwiuse/quichost/echo"
+	"github.com/btwiuse/quichost/gos"
 	"github.com/btwiuse/quichost/server"
 )
 
@@ -19,6 +21,8 @@ func main() {
 
 var cmdRun multicall.RunnerFuncMap = map[string]multicall.RunnerFunc{
 	"client": client.Run,
+	"echo":   echo.Run,
+	"gos":    gos.Run,
 	"server": server.Run,
 }
 

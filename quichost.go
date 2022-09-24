@@ -28,7 +28,9 @@ type Conn interface {
 	SetWriteDeadline(time.Time) error
 }
 
-func Listen(u string) (net.Listener, error) {
+var _ net.Listener = (*listener)(nil)
+
+func Listen(u string) (*listener, error) {
 	up, err := url.Parse(u)
 	if err != nil {
 		return nil, nil
@@ -94,6 +96,10 @@ func (l *listener) Network() string {
 
 func (l *listener) String() string {
 	return l.host
+}
+
+func (l *listener) URL() string {
+	return l.Network() + "://" + l.String()
 }
 
 type StreamConn struct {
