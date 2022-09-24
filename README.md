@@ -19,3 +19,9 @@ $ quichost client
 $ quichost gos
 $ quichost echo
 ```
+
+TODO
+- [ ] reverseproxy WebTransport requests
+- [ ] support user specified hostname, requiring netrc authentication
+- [ ] support custom root domain, for example `ROOT=usesthis.app`
+- [ ] support concurrent rw on session manager map
