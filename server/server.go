@@ -19,6 +19,7 @@ func Run([]string) error {
 		return err
 	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("[00]", r.Proto, r.Method, r.Host, r.URL.Path)
 		_, ok := defaultSessionManager.sessions[r.Host]
 		if !ok {
 			w.Header().Set("Alt-Svc", altsvc)

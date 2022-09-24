@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"strings"
 	"time"
 
 	"github.com/btwiuse/quichost"
@@ -29,10 +30,26 @@ func webtransportServer(port string, next http.Handler) *webtransport.Server {
 
 func webtransportHandler(s *webtransport.Server, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// passthrough normal requests:
+		// 1. simple http
+		// 2. websockets
+		// 3. webtransport (not yet supported by reverseproxy)
 		if r.Host != "quichost.k0s.io:300" {
+			// passthrough requests made by webtransport-go, i.e.
+			// strip the port:
+			//
+			// xxx.quichost.k0s.io:300
+			// =>
+			// xxx.quichost.k0s.io
+			if host, _, ok := strings.Cut(r.Host, ":"); ok {
+				r.Host = host
+			}
 			next.ServeHTTP(w, r)
 			return
 		}
+		log.Println("[01]", r.Proto, r.Method, r.Host, r.URL.Path)
+		// handle quichost client registration
+		// Host: quichost.k0s.io:300
 		ssn, err := s.Upgrade(w, r)
 		if err != nil {
 			log.Printf("upgrading failed: %s", err)
@@ -69,16 +86,16 @@ func (sm *sessionManager) Add(ssn *webtransport.Session) error {
 	sm.counter += 1
 	sm.sessions[host] = ssn
 	go func() {
+		var err error
 		for {
-			_, err := io.WriteString(stm0, fmt.Sprintf("%s\n", "PING"))
+			_, err = io.WriteString(stm0, fmt.Sprintf("%s\n", "PING"))
 			if err != nil {
-				log.Println(err)
 				break
 			}
 			time.Sleep(5 * time.Second)
 		}
 		delete(sm.sessions, host)
-		log.Println("deleted", host)
+		log.Println(err, "deleted", host)
 	}()
 	return nil
 }
@@ -89,6 +106,16 @@ func (sm *sessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.NotFoundHandler().ServeHTTP(w, r)
 		return
 	}
+	dr := func(req *http.Request) {
+		// log.Println("director: rewriting Host", r.URL, r.Host)
+		req.Host = r.Host
+		req.URL.Host = r.Host
+		req.URL.Scheme = "http"
+		// for webtransport, Proto is "webtransport" instead of "HTTP/1.1"
+		// However, reverseproxy doesn't support webtransport yet
+		// so setting this field currently doesn't have any effect
+		// req.Proto = r.Proto
+	}
 	tr := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			stream, err := ssn.OpenStreamSync(ctx)
@@ -96,12 +123,7 @@ func (sm *sessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	rp := &httputil.ReverseProxy{
-		Director: func(req *http.Request) {
-			log.Println("director: rewriting Host", r.URL, r.Host)
-			req.Host = r.Host
-			req.URL.Host = r.Host
-			req.URL.Scheme = "http"
-		},
+		Director:  dr,
 		Transport: tr,
 	}
 	rp.ServeHTTP(w, r)
