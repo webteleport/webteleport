@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/btwiuse/skynet/echo"
+	"github.com/btwiuse/skynet/gos"
 )
 
 func main() {
-	log.Fatalln(echo.Run(os.Args[1:]))
+	log.Fatalln(gos.Run(os.Args[1:]))
 }
