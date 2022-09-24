@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -13,8 +12,6 @@ func Run([]string) error {
 	if err != nil {
 		return err
 	}
-	addr := ln.Addr()
-	location := fmt.Sprintf("%s://%s", addr.Network(), addr.String())
-	log.Println("listening on", location)
+	log.Println("listening on", ln.URL())
 	return http.Serve(ln, http.FileServer(http.Dir(".")))
 }
