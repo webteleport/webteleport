@@ -15,7 +15,9 @@ import (
 	"github.com/marten-seemann/webtransport-go"
 )
 
-var MaxIncomingStreams = 65535
+var EnableDatagrams = true
+var MaxIncomingStreams int64 = 1 << 60
+var MaxIncomingUniStreams int64 = 1 << 60
 
 func extractH3(h http.Header) ([]string, bool) {
 	line := h.Get("Alt-Svc")
@@ -71,9 +73,10 @@ func Dial(ctx context.Context, u *url.URL, hdr http.Header) (*webtransport.Sessi
 	addr := graft(u.Host, alt)
 	d := &webtransport.Dialer{
 		RoundTripper: &http3.RoundTripper{
-			EnableDatagrams: true,
+			EnableDatagrams: EnableDatagrams,
 			QuicConfig: &quic.Config{
-				MaxIncomingStreams: MaxIncomingStreams,
+				MaxIncomingStreams:    MaxIncomingStreams,
+				MaxIncomingUniStreams: MaxIncomingStreams,
 			},
 		},
 	}

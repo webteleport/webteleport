@@ -88,15 +88,14 @@ func (sm *sessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// so setting this field currently doesn't have any effect
 		// req.Proto = r.Proto
 	}
-	stmN := 0
 	tr := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			// what if there is / should there be a timeout?
+			// ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 			stream, err := ssn.OpenStreamSync(ctx)
 			if err != nil {
-				log.Println(err, stmN)
 				return nil, err
 			}
-			stmN += 1
 			conn := &ufo.StreamConn{stream, ssn}
 			return conn, nil
 		},
