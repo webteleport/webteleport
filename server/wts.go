@@ -9,56 +9,52 @@ import (
 	"github.com/marten-seemann/webtransport-go"
 )
 
-func webtransportServer(port string, next http.Handler) *webtransport.Server {
+func webtransportServer(next http.Handler) *webtransport.Server {
 	s := &webtransport.Server{
 		CheckOrigin: func(*http.Request) bool { return true },
 	}
 	s.H3 = http3.Server{
-		Addr:            port,
-		Handler:         webtransportHandler(s, next),
+		Addr:            PORT,
+		Handler:         &wts{s, next},
 		EnableDatagrams: true,
 	}
 	return s
 }
 
-func webtransportHandler(s *webtransport.Server, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// passthrough normal requests:
-		// 1. simple http
-		// 2. websockets
-		// 3. webtransport (not yet supported by reverseproxy)
-		host, _, ok := strings.Cut(r.Host, ":")
-		isSimple := !ok
-		isWebtransport := ok && host != HOST
-		isSkynetClient := ok && host == HOST
-		switch {
-		// passthrough requests made by webtransport-go, i.e.
-		// strip the port:
-		//
-		// xxx.ufo.k0s.io:300
-		// =>
-		// xxx.ufo.k0s.io
-		case isWebtransport:
-			r.Host = host
-			fallthrough
-		case isSimple:
-			next.ServeHTTP(w, r)
-			return
-		case isSkynetClient:
-			break
-		}
-		log.Println("[01]", r.Proto, r.Method, r.Host, r.URL.Path)
-		// handle ufo client registration
-		// Host: ufo.k0s.io:300
-		ssn, err := s.Upgrade(w, r)
-		if err != nil {
-			log.Printf("upgrading failed: %s", err)
-			w.WriteHeader(500)
-			return
-		}
-		err = defaultSessionManager.Add(ssn)
-		if err != nil {
-			log.Printf("initializing session failed: %s", err)
-		}
-	})
+// udp server handles
+// - UFO client registration (CONNECT HOST)
+// - requests over HTTP/3 (others)
+type wts struct {
+	*webtransport.Server
+	Next http.Handler
+}
+
+func (s *wts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// passthrough normal requests to next:
+	// 1. simple http / websockets (Host: x.localhost)
+	// 2. webtransport (Host: x.localhost:300, not yet supported by reverseproxy)
+	if !isUFO(r) {
+		s.Next.ServeHTTP(w, r)
+		return
+	}
+	log.Println("[UFO]", r.RemoteAddr, r.Proto, r.Method, r.Host)
+	// handle ufo client registration
+	// Host: ufo.k0s.io:300
+	ssn, err := s.Upgrade(w, r)
+	if err != nil {
+		log.Printf("upgrading failed: %s", err)
+		w.WriteHeader(500)
+		return
+	}
+	err = defaultSessionManager.Add(ssn)
+	if err != nil {
+		log.Printf("adding session failed: %s", err)
+	}
+}
+
+func isUFO(r *http.Request) bool {
+	host, _, _ := strings.Cut(r.Host, ":")
+	isConnect := r.Method == http.MethodConnect
+	isRoot := host == HOST
+	return isRoot && isConnect
 }

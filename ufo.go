@@ -30,10 +30,6 @@ func Listen(u string) (*listener, error) {
 		return nil, err
 	}
 	hostchan := make(chan string)
-	ln := &listener{
-		session: session,
-		stm0:    stm0,
-	}
 	// go io.Copy(os.Stdout, stm0)
 	go func() {
 		scanner := bufio.NewScanner(stm0)
@@ -47,18 +43,34 @@ func Listen(u string) (*listener, error) {
 				hostchan <- strings.TrimPrefix(line, "HOST ")
 				continue
 			}
-			log.Println(line)
+			log.Println("stm0: unknown command:", line)
 		}
 	}()
 	// go io.Copy(stm0, os.Stdin)
-	ln.host = <-hostchan
+	ln := &listener{
+		session: session,
+		stm0:    stm0,
+		scheme:  up.Scheme,
+		host:    <-hostchan,
+		port:    getport(up),
+	}
 	return ln, nil
+}
+
+func getport(u *url.URL) string {
+	_, p, ok := strings.Cut(u.Host, ":")
+	if ok {
+		return ":" + p
+	}
+	return ""
 }
 
 type listener struct {
 	session *webtransport.Session
 	stm0    webtransport.Stream
+	scheme  string
 	host    string
+	port    string
 }
 
 func (l *listener) Accept() (net.Conn, error) {
@@ -73,18 +85,22 @@ func (l *listener) Close() error {
 	return l.session.Close()
 }
 
+// Addr returns listener itself which is an implementor of net.Addr
 func (l *listener) Addr() net.Addr {
 	return l
 }
 
+// Network returns the protocol scheme, either http or https
 func (l *listener) Network() string {
-	return "https"
+	return l.scheme
 }
 
+// String returns the host(:port) address of listener
 func (l *listener) String() string {
-	return l.host
+	return l.host + l.port
 }
 
+// URL returns the public accessible address of the listener
 func (l *listener) URL() string {
 	return l.Network() + "://" + l.String()
 }

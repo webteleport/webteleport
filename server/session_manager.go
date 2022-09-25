@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"strings"
 	"sync"
 	"time"
 
@@ -34,8 +35,9 @@ func (sm *sessionManager) Del(k string) {
 }
 
 func (sm *sessionManager) Get(k string) (*webtransport.Session, bool) {
+	host, _, _ := strings.Cut(k, ":")
 	sm.slock.RLock()
-	ssn, ok := sm.sessions[k]
+	ssn, ok := sm.sessions[host]
 	sm.slock.RUnlock()
 	return ssn, ok
 }
@@ -72,7 +74,8 @@ func (sm *sessionManager) Add(ssn *webtransport.Session) error {
 func (sm *sessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ssn, ok := sm.Get(r.Host)
 	if !ok {
-		http.NotFoundHandler().ServeHTTP(w, r)
+		w.Header().Set("Alt-Svc", ALT_SVC)
+		http.Error(w, r.Host+" not found", http.StatusNotFound)
 		return
 	}
 	dr := func(req *http.Request) {

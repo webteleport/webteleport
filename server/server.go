@@ -7,36 +7,29 @@ import (
 	"net/http"
 
 	"github.com/btwiuse/h3/utils"
+	"k0s.io/pkg/middleware"
 )
 
-var HOST = utils.EnvHost("ufo.k0s.io")
+var HOST = utils.EnvHost("localhost")
+var CERT = utils.EnvCert("localhost.pem")
+var KEY = utils.EnvKey("localhost-key.pem")
+var PORT = utils.EnvPort(":3000")
+var ALT_SVC = utils.EnvAltSvc(fmt.Sprintf(`h3="%s"`, PORT))
 
 func Run([]string) error {
-	port := utils.EnvPort(":3000")
-	altsvc := utils.EnvAltSvc(fmt.Sprintf(`h3="%s"`, port))
-	log.Println("listening on TCP http://127.0.0.1" + port)
-	ln, err := net.Listen("tcp4", port)
+	log.Println("listening on TCP http://" + HOST + PORT)
+	ln, err := net.Listen("tcp4", PORT)
 	if err != nil {
 		return err
 	}
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("[00]", r.Proto, r.Method, r.Host, r.URL.Path)
-		_, ok := defaultSessionManager.Get(r.Host)
-		if !ok {
-			w.Header().Set("Alt-Svc", altsvc)
-			http.Error(w, r.Host+" not found", http.StatusNotFound)
-			return
-		}
-		defaultSessionManager.ServeHTTP(w, r)
-	})
+
+	handler := middleware.LoggingMiddleware(middleware.AllowAllCorsMiddleware(defaultSessionManager))
 
 	go func() {
-		wts := webtransportServer(port, http.DefaultServeMux)
-		cert := utils.EnvCert("localhost.pem")
-		key := utils.EnvKey("localhost-key.pem")
-		log.Println("listening on UDP https://127.0.0.1" + port)
-		log.Fatalln(wts.ListenAndServeTLS(cert, key))
+		wts := webtransportServer(handler)
+		log.Println("listening on UDP https://" + HOST + PORT)
+		log.Fatalln(wts.ListenAndServeTLS(CERT, KEY))
 	}()
 
-	return http.Serve(ln, http.DefaultServeMux)
+	return http.Serve(ln, handler)
 }

@@ -8,8 +8,15 @@ import (
 	"k0s.io/pkg/middleware"
 )
 
-func Run([]string) error {
-	ln, err := ufo.Listen("https://ufo.k0s.io")
+func Arg0(args []string, fallback string) string {
+	if len(args) > 0 {
+		return args[0]
+	}
+	return fallback
+}
+
+func Run(args []string) error {
+	ln, err := ufo.Listen(Arg0(args, "https://ufo.k0s.io"))
 	if err != nil {
 		log.Fatalln(err)
 	}
