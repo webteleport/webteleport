@@ -1,4 +1,4 @@
-package skynet
+package ufo
 
 import (
 	"bufio"

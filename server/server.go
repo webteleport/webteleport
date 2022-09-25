@@ -9,7 +9,7 @@ import (
 	"github.com/btwiuse/h3/utils"
 )
 
-var HOST = utils.EnvHost("skynet.k0s.io")
+var HOST = utils.EnvHost("ufo.k0s.io")
 
 func Run([]string) error {
 	port := utils.EnvPort(":3000")

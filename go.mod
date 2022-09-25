@@ -1,4 +1,4 @@
-module github.com/btwiuse/skynet
+module github.com/btwiuse/ufo
 
 go 1.19
 

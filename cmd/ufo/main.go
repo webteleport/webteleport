@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"github.com/btwiuse/multicall"
-	"github.com/btwiuse/skynet/client"
-	"github.com/btwiuse/skynet/echo"
-	"github.com/btwiuse/skynet/gos"
-	"github.com/btwiuse/skynet/server"
+	"github.com/btwiuse/ufo/client"
+	"github.com/btwiuse/ufo/echo"
+	"github.com/btwiuse/ufo/gos"
+	"github.com/btwiuse/ufo/server"
 )
 
 func main() {

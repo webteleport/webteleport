@@ -2,24 +2,24 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    name: skynet
-  name: skynet
+    name: ufo
+  name: ufo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: skynet
+      app: ufo
   template:
     metadata:
       labels:
-        app: skynet
+        app: ufo
     spec:
       containers:
       - image: btwiuse/arch:golang
-        name: skynet
+        name: ufo
         ports:
         - containerPort: 3000
-          hostPort: 301
+          hostPort: 302
           protocol: UDP
         - containerPort: 3000
           protocol: TCP
@@ -27,9 +27,9 @@ spec:
         - name: PORT
           value: "3000"
         - name: HOST
-          value: skynet.k0s.io
+          value: ufo.k0s.io
         - name: ALT_SVC
-          value: h3=":301"
+          value: h3=":302"
         - name: CERT
           value: /tls/tls.crt
         - name: KEY
@@ -43,18 +43,18 @@ spec:
           pacman -Syu --noconfirm
           git config --global user.name navigaid
           git config --global user.email navigaid@gmail.com
-          git clone https://github.com/btwiuse/skynet /skynet
-          cd /skynet
+          git clone https://github.com/btwiuse/ufo /ufo
+          cd /ufo
           go mod tidy
-          GOBIN=/usr/local/bin go install ./cmd/skynet
-          skynet server
+          GOBIN=/usr/local/bin go install ./cmd/ufo
+          ufo server
         volumeMounts:
         - mountPath: /tls
           name: tls
       restartPolicy: Always
       volumes:
       - secret:
-          secretName: skynet.k0s.io
+          secretName: ufo.k0s.io
         name: tls
 ---
 apiVersion: networking.k8s.io/v1
@@ -62,60 +62,60 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: traefik
-  name: skynet.k0s.io
+  name: ufo.k0s.io
 spec:
   rules:
-  - host: skynet.k0s.io
+  - host: ufo.k0s.io
     http:
       paths:
       - backend:
           service:
-            name: skynet
+            name: ufo
             port:
               number: 3000
         path: /
         pathType: ImplementationSpecific
-  - host: '*.skynet.k0s.io'
+  - host: '*.ufo.k0s.io'
     http:
       paths:
       - backend:
           service:
-            name: skynet
+            name: ufo
             port:
               number: 3000
         path: /
         pathType: ImplementationSpecific
   tls:
   - hosts:
-    - skynet.k0s.io
-    - '*.skynet.k0s.io'
-    secretName: skynet.k0s.io
+    - ufo.k0s.io
+    - '*.ufo.k0s.io'
+    secretName: ufo.k0s.io
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: skynet.k0s.io
+  name: ufo.k0s.io
 spec:
   dnsNames:
-  - skynet.k0s.io
-  - '*.skynet.k0s.io'
+  - ufo.k0s.io
+  - '*.ufo.k0s.io'
   issuerRef:
     group: cert-manager.io
     kind: ClusterIssuer
     name: letsencrypt
-  secretName: skynet.k0s.io
+  secretName: ufo.k0s.io
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    name: skynet
-  name: skynet
+    name: ufo
+  name: ufo
 spec:
   ports:
   - port: 3000
     protocol: TCP
     targetPort: 3000
   selector:
-    app: skynet
+    app: ufo
   type: ClusterIP

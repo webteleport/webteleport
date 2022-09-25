@@ -1,5 +1,5 @@
-// this is an example consumer of the skynet package
-// it listens on a random skynet with registered handlers for webtransport && websocket connections
+// this is an example consumer of the ufo package
+// it listens on a random ufo with registered handlers for webtransport && websocket connections
 // currently websocket works fine
 // while webtransport is broken because reverseproxy doesn't support it yet
 
@@ -13,13 +13,13 @@ import (
 	"strings"
 
 	"github.com/btwiuse/pretty"
-	"github.com/btwiuse/skynet"
+	"github.com/btwiuse/ufo"
 	"github.com/lucas-clemente/quic-go/http3"
 	"k0s.io/pkg/wrap"
 )
 
 func Run([]string) error {
-	ln, err := skynet.Listen("https://skynet.k0s.io")
+	ln, err := ufo.Listen("https://ufo.k0s.io")
 	if err != nil {
 		return err
 	}
@@ -49,8 +49,8 @@ func Run([]string) error {
 	}))
 }
 
-// HOST=0.skynet.k0s.io PORT=300 h3 client
-// websocat --binary wss://0.skynet.k0s.io
+// HOST=0.ufo.k0s.io PORT=300 h3 client
+// websocat --binary wss://0.ufo.k0s.io
 func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 	connSrc, err := wrap.Wrconn(w, r)
 	if err != nil {
@@ -62,7 +62,7 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 	go io.Copy(connSrc, connSrc)
 }
 
-// HOST=0.skynet.k0s.io PORT=300 h3 client
+// HOST=0.ufo.k0s.io PORT=300 h3 client
 // doesn't work yet
 func handleWebtransport(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodConnect {
@@ -95,4 +95,4 @@ func handleWebtransport(w http.ResponseWriter, r *http.Request) {
 	_ = hijacker
 }
 
-// curl3 https://7.skynet.k0s.io:300 --http3 -H "Host: 7.skynet.k0s.io"
+// curl3 https://7.ufo.k0s.io:300 --http3 -H "Host: 7.ufo.k0s.io"

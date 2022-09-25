@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/btwiuse/skynet"
+	"github.com/btwiuse/ufo"
 	"github.com/marten-seemann/webtransport-go"
 )
 
@@ -88,7 +88,7 @@ func (sm *sessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tr := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			stream, err := ssn.OpenStreamSync(ctx)
-			return skynet.StreamConn{stream, ssn.LocalAddr(), ssn.RemoteAddr()}, err
+			return ufo.StreamConn{stream, ssn.LocalAddr(), ssn.RemoteAddr()}, err
 		},
 	}
 	rp := &httputil.ReverseProxy{

@@ -35,9 +35,9 @@ func webtransportHandler(s *webtransport.Server, next http.Handler) http.Handler
 		// passthrough requests made by webtransport-go, i.e.
 		// strip the port:
 		//
-		// xxx.skynet.k0s.io:300
+		// xxx.ufo.k0s.io:300
 		// =>
-		// xxx.skynet.k0s.io
+		// xxx.ufo.k0s.io
 		case isWebtransport:
 			r.Host = host
 			fallthrough
@@ -48,8 +48,8 @@ func webtransportHandler(s *webtransport.Server, next http.Handler) http.Handler
 			break
 		}
 		log.Println("[01]", r.Proto, r.Method, r.Host, r.URL.Path)
-		// handle skynet client registration
-		// Host: skynet.k0s.io:300
+		// handle ufo client registration
+		// Host: ufo.k0s.io:300
 		ssn, err := s.Upgrade(w, r)
 		if err != nil {
 			log.Printf("upgrading failed: %s", err)

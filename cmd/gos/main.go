@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/btwiuse/skynet/gos"
+	"github.com/btwiuse/ufo/gos"
 )
 
 func main() {
