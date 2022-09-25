@@ -24,7 +24,7 @@ func Run([]string) error {
 		_, ok := defaultSessionManager.Get(r.Host)
 		if !ok {
 			w.Header().Set("Alt-Svc", altsvc)
-			http.Error(w, r.Host+"not found", http.StatusNotFound)
+			http.Error(w, r.Host+" not found", http.StatusNotFound)
 			return
 		}
 		defaultSessionManager.ServeHTTP(w, r)
