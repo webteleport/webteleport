@@ -9,6 +9,8 @@ spec:
   selector:
     matchLabels:
       app: ufo
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
@@ -62,6 +64,8 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: traefik
+    ingress.kubernetes.io/ssl-redirect: "true"
+    ingress.kubernetes.io/force-ssl-redirect: "true"
   name: ufo.k0s.io
 spec:
   rules:
