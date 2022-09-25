@@ -9,10 +9,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/btwiuse/ufo/client"
+	"github.com/btwiuse/ufo/hello"
 )
 
 // curl3 https://7.ufo.k0s.io:300 --http3 -H "Host: 7.ufo.k0s.io"
 func main() {
-	log.Fatalln(client.Run(os.Args[1:]))
+	log.Fatalln(hello.Run(os.Args[1:]))
 }

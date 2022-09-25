@@ -5,6 +5,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -14,14 +15,25 @@ import (
 
 var _ net.Listener = (*listener)(nil)
 
+func Serve(u string, handler http.Handler) error {
+	ln, err := Listen(u)
+	if err != nil {
+		return err
+	}
+	log.Println("listening on", ln.URL())
+	if handler == nil {
+		handler = http.DefaultServeMux
+	}
+	return http.Serve(ln, handler)
+}
+
 func Listen(u string) (*listener, error) {
 	up, err := url.Parse(u)
 	if err != nil {
 		return nil, err
 	}
-	log.Println("dialing", u)
 	ctx, _ := context.WithTimeout(context.TODO(), 3*time.Second)
-	session, err := dial(ctx, up)
+	session, err := Dial(ctx, up, nil)
 	if err != nil {
 		return nil, err
 	}

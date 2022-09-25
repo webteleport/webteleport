@@ -6,6 +6,7 @@ require (
 	github.com/btwiuse/h3 v0.0.0-20220919172148-51b6e2f27e33
 	github.com/btwiuse/multicall v0.0.0
 	github.com/btwiuse/pretty v0.2.1
+	github.com/btwiuse/sse v0.0.1
 	github.com/ebi-yade/altsvc-go v0.1.1
 	github.com/lucas-clemente/quic-go v0.29.0
 	github.com/marten-seemann/webtransport-go v0.1.0

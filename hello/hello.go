@@ -1,6 +1,7 @@
-package client
+package hello
 
 import (
+	"io"
 	"log"
 	"net/http"
 
@@ -13,5 +14,8 @@ func Run([]string) error {
 		return err
 	}
 	log.Println("listening on", ln.URL())
-	return http.Serve(ln, http.FileServer(http.Dir(".")))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "Hello, UFO!\n")
+	})
+	return http.Serve(ln, nil)
 }

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -15,6 +14,8 @@ import (
 	"github.com/lucas-clemente/quic-go/http3"
 	"github.com/marten-seemann/webtransport-go"
 )
+
+var MaxIncomingStreams = 65535
 
 func extractH3(h http.Header) ([]string, bool) {
 	line := h.Get("Alt-Svc")
@@ -35,19 +36,29 @@ func extractH3(h http.Header) ([]string, bool) {
 	return results, len(results) > 0
 }
 
-func setport(base, ep string) (string, error) {
-	host, port, err := net.SplitHostPort(ep)
-	if err != nil {
-		return "", err
+// graft returns Host(base):Port(alt)
+//
+// assuming
+// - base is host[:port]
+// - alt is [host]:port
+func graft(base, alt string) string {
+	althost, altport, _ := strings.Cut(alt, ":")
+	if altport == "" {
+		// altport not found
+		// it should never happen
+		return base
 	}
-	if host != "" {
-		return "", err
+	if althost != "" {
+		// alt is host:port
+		// it is rare
+		return alt
 	}
 	basehost, _, _ := strings.Cut(base, ":")
-	return basehost + ":" + port, nil
+	return basehost + ":" + altport
 }
 
-func dial(ctx context.Context, u *url.URL) (*webtransport.Session, error) {
+// Dial is a wrapper around webtransport.Dial with automatic HTTP/3 service discovery
+func Dial(ctx context.Context, u *url.URL, hdr http.Header) (*webtransport.Session, error) {
 	resp, err := http.Head(u.String())
 	if err != nil {
 		return nil, err
@@ -56,25 +67,21 @@ func dial(ctx context.Context, u *url.URL) (*webtransport.Session, error) {
 	if !ok {
 		return nil, errors.New("HTTP/3 service discovery failed: no Alt-Svc header found")
 	}
-	ep := endpoints[0]
-	hp, err := setport(u.Host, ep)
-	if err != nil {
-		return nil, err
-	}
+	alt := endpoints[0]
+	addr := graft(u.Host, alt)
 	d := &webtransport.Dialer{
 		RoundTripper: &http3.RoundTripper{
 			EnableDatagrams: true,
 			QuicConfig: &quic.Config{
-				MaxIncomingStreams:    65535,
-				MaxIncomingUniStreams: 65535,
+				MaxIncomingStreams: MaxIncomingStreams,
 			},
 		},
 	}
-	up := fmt.Sprintf("https://%s", hp)
-	log.Printf("dialing %s (UDP)", up)
-	_, session, err := d.Dial(ctx, up, nil)
+	// we are dialing an HTTP/3 address, so it is guaranteed to be https://
+	uri := "https://" + addr
+	_, session, err := d.Dial(ctx, uri, hdr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error dialing %s (UDP): %w", uri, err)
 	}
-	return session, err
+	return session, nil
 }

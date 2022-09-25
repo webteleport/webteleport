@@ -5,10 +5,11 @@ import (
 	"os"
 
 	"github.com/btwiuse/multicall"
-	"github.com/btwiuse/ufo/client"
 	"github.com/btwiuse/ufo/echo"
 	"github.com/btwiuse/ufo/gos"
+	"github.com/btwiuse/ufo/hello"
 	"github.com/btwiuse/ufo/server"
+	"github.com/btwiuse/ufo/sse"
 )
 
 func main() {
@@ -20,10 +21,11 @@ func main() {
 }
 
 var cmdRun multicall.RunnerFuncMap = map[string]multicall.RunnerFunc{
-	"client": client.Run,
+	"hello":  hello.Run,
 	"echo":   echo.Run,
 	"gos":    gos.Run,
 	"server": server.Run,
+	"sse":    sse.Run,
 }
 
 func Run(args []string) error {

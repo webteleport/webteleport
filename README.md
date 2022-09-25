@@ -48,8 +48,9 @@ $ go install github.com/btwiuse/ufo/cmd/ufo@latest
 example apps:
 
 ```
-$ ufo client
+$ ufo hello
 $ ufo gos
+$ ufo sse
 $ ufo echo
 ```
 
