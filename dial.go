@@ -11,6 +11,8 @@ import (
 	"strings"
 
 	"github.com/ebi-yade/altsvc-go"
+	"github.com/lucas-clemente/quic-go"
+	"github.com/lucas-clemente/quic-go/http3"
 	"github.com/marten-seemann/webtransport-go"
 )
 
@@ -59,7 +61,15 @@ func dial(ctx context.Context, u *url.URL) (*webtransport.Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	var d webtransport.Dialer
+	d := &webtransport.Dialer{
+		RoundTripper: &http3.RoundTripper{
+			EnableDatagrams: true,
+			QuicConfig: &quic.Config{
+				MaxIncomingStreams:    65535,
+				MaxIncomingUniStreams: 65535,
+			},
+		},
+	}
 	up := fmt.Sprintf("https://%s", hp)
 	log.Printf("dialing %s (UDP)", up)
 	_, session, err := d.Dial(ctx, up, nil)
