@@ -15,9 +15,13 @@ import (
 	"github.com/marten-seemann/webtransport-go"
 )
 
-var EnableDatagrams = true
-var MaxIncomingStreams int64 = 1 << 60
-var MaxIncomingUniStreams int64 = 1 << 60
+const EnableDatagrams = true
+
+// 2^60 == 1152921504606846976
+const MaxIncomingStreams int64 = 1 << 60
+
+// 2^60 == 1152921504606846976
+const MaxIncomingUniStreams int64 = 1 << 60
 
 func extractH3(h http.Header) ([]string, bool) {
 	line := h.Get("Alt-Svc")
