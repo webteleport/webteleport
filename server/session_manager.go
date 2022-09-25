@@ -88,7 +88,7 @@ func (sm *sessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tr := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			stream, err := ssn.OpenStreamSync(ctx)
-			return ufo.StreamConn{stream, ssn.LocalAddr(), ssn.RemoteAddr()}, err
+			return &ufo.StreamConn{stream, ssn}, err
 		},
 	}
 	rp := &httputil.ReverseProxy{

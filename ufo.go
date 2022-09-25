@@ -3,7 +3,6 @@ package ufo
 import (
 	"bufio"
 	"context"
-	"io"
 	"log"
 	"net"
 	"net/url"
@@ -12,21 +11,6 @@ import (
 
 	"github.com/marten-seemann/webtransport-go"
 )
-
-type Listener interface {
-	Accept() (net.Conn, error)
-	Close() error
-	Addr() net.Addr
-}
-
-type Conn interface {
-	io.Reader
-	io.Writer
-	io.Closer
-	SetDeadline(time.Time) error
-	SetReadDeadline(time.Time) error
-	SetWriteDeadline(time.Time) error
-}
 
 var _ net.Listener = (*listener)(nil)
 
@@ -82,7 +66,7 @@ func (l *listener) Accept() (net.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	return StreamConn{stream, l.session.LocalAddr(), l.session.RemoteAddr()}, nil
+	return &StreamConn{stream, l.session}, nil
 }
 
 func (l *listener) Close() error {
@@ -104,12 +88,3 @@ func (l *listener) String() string {
 func (l *listener) URL() string {
 	return l.Network() + "://" + l.String()
 }
-
-type StreamConn struct {
-	webtransport.Stream
-	LA net.Addr
-	RA net.Addr
-}
-
-func (sc StreamConn) LocalAddr() net.Addr  { return sc.LA }
-func (sc StreamConn) RemoteAddr() net.Addr { return sc.RA }
