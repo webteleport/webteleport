@@ -56,7 +56,8 @@ $ ufo echo
 
 TODO
 
-- [ ] reverseproxy WebTransport requests
-- [ ] support user specified hostname, requiring netrc authentication
-- [x] support custom root domain, for example `HOST=usesthis.app`
 - [x] support concurrent rw on session manager map
+- [x] support custom root domain, for example `HOST=ufo.dev`
+- [x] support user specified hostname
+- [ ] authentication plugins: netrc, basic auth, environment variable
+- [ ] reverseproxy WebTransport requests

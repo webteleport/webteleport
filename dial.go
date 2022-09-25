@@ -85,7 +85,7 @@ func Dial(ctx context.Context, u *url.URL, hdr http.Header) (*webtransport.Sessi
 		},
 	}
 	// we are dialing an HTTP/3 address, so it is guaranteed to be https://
-	uri := "https://" + addr
+	uri := "https://" + addr + u.Path
 	_, session, err := d.Dial(ctx, uri, hdr)
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (UDP): %w", uri, err)

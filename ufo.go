@@ -3,6 +3,7 @@ package ufo
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -28,6 +29,11 @@ func Serve(u string, handler http.Handler) error {
 }
 
 func Listen(u string) (*listener, error) {
+	// localhost:3000 will be parsed by net/url as URL{Scheme: localhost, Port: 3000}
+	// hence the hack
+	if !strings.Contains(u, "://") {
+		u = "http://" + u
+	}
 	up, err := url.Parse(u)
 	if err != nil {
 		return nil, err
@@ -41,6 +47,7 @@ func Listen(u string) (*listener, error) {
 	if err != nil {
 		return nil, err
 	}
+	errchan := make(chan string)
 	hostchan := make(chan string)
 	// go io.Copy(os.Stdout, stm0)
 	go func() {
@@ -55,6 +62,10 @@ func Listen(u string) (*listener, error) {
 				hostchan <- strings.TrimPrefix(line, "HOST ")
 				continue
 			}
+			if strings.HasPrefix(line, "ERR ") {
+				errchan <- strings.TrimPrefix(line, "ERR ")
+				continue
+			}
 			log.Println("stm0: unknown command:", line)
 		}
 	}()
@@ -63,10 +74,14 @@ func Listen(u string) (*listener, error) {
 		session: session,
 		stm0:    stm0,
 		scheme:  up.Scheme,
-		host:    <-hostchan,
 		port:    getport(up),
 	}
-	return ln, nil
+	select {
+	case emsg := <-errchan:
+		return nil, fmt.Errorf("server: %s", emsg)
+	case ln.host = <-hostchan:
+		return ln, nil
+	}
 }
 
 func getport(u *url.URL) string {

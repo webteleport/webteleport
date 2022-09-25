@@ -14,6 +14,7 @@ import (
 
 	"github.com/btwiuse/ufo"
 	"github.com/marten-seemann/webtransport-go"
+	"golang.org/x/net/idna"
 )
 
 var defaultSessionManager = &sessionManager{
@@ -29,12 +30,14 @@ type sessionManager struct {
 }
 
 func (sm *sessionManager) Del(k string) {
+	k, _ = idna.ToASCII(k)
 	sm.slock.Lock()
 	delete(sm.sessions, k)
 	sm.slock.Unlock()
 }
 
 func (sm *sessionManager) Get(k string) (*webtransport.Session, bool) {
+	k, _ = idna.ToASCII(k)
 	host, _, _ := strings.Cut(k, ":")
 	sm.slock.RLock()
 	ssn, ok := sm.sessions[host]
@@ -42,20 +45,48 @@ func (sm *sessionManager) Get(k string) (*webtransport.Session, bool) {
 	return ssn, ok
 }
 
-func (sm *sessionManager) Add(ssn *webtransport.Session) error {
+func (sm *sessionManager) Add(k string, ssn *webtransport.Session) error {
+	k, _ = idna.ToASCII(k)
+	sm.slock.Lock()
+	sm.counter += 1
+	sm.sessions[k] = ssn
+	sm.slock.Unlock()
+	return nil
+}
+
+func (sm *sessionManager) Lease(ssn *webtransport.Session, domainList []string) error {
 	stm0, err := ssn.OpenStreamSync(context.Background())
 	if err != nil {
 		return err
 	}
-	subhost := fmt.Sprintf("%d.%s", sm.counter, HOST)
-	_, err = io.WriteString(stm0, fmt.Sprintf("HOST %s\n", subhost))
+	allowRandom := len(domainList) == 0
+	var lease string
+	for _, pfx := range domainList {
+		k := fmt.Sprintf("%s.%s", pfx, HOST)
+		if _, exist := sm.Get(k); !exist {
+			lease = k
+			break
+		}
+	}
+	if (lease == "") && !allowRandom {
+		emsg := fmt.Sprintf("ERR %s: %v\n", "none of your requested subdomains are currently available", domainList)
+		_, err = io.WriteString(stm0, emsg)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	if lease == "" {
+		lease = fmt.Sprintf("%d.%s", sm.counter, HOST)
+	}
+	_, err = io.WriteString(stm0, fmt.Sprintf("HOST %s\n", lease))
 	if err != nil {
 		return err
 	}
-	sm.slock.Lock()
-	sm.counter += 1
-	sm.sessions[subhost] = ssn
-	sm.slock.Unlock()
+	err = sm.Add(lease, ssn)
+	if err != nil {
+		return err
+	}
 	go func() {
 		var err error
 		for {
@@ -65,8 +96,9 @@ func (sm *sessionManager) Add(ssn *webtransport.Session) error {
 			}
 			time.Sleep(5 * time.Second)
 		}
-		sm.Del(subhost)
-		log.Println(err, "deleted", subhost)
+		sm.Del(lease)
+		emsg := fmt.Sprintf("%s. Recycled %s", err, lease)
+		log.Println(emsg)
 	}()
 	return nil
 }
