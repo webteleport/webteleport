@@ -23,7 +23,7 @@ func Arg0(args []string, fallback string) string {
 
 func Run(args []string) error {
 	ufo.MaxIncomingStreams = 1 + 1 // one for stm0, another req0
-	ln, err := ufo.Listen(Arg0(args, "https://ufo.k0s.io"))
+	ln, err := ufo.Listen(Arg0(args, "http://localhost:3000"))
 	if err != nil {
 		return err
 	}

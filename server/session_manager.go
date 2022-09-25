@@ -90,12 +90,22 @@ func (sm *sessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	tr := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			// what if there is / should there be a timeout?
-			// ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
+			// when there is a timeout, it still panics before MARK
+			//
+			// ctx, _ = context.WithTimeout(ctx, 3*time.Second)
+			//
+			// turns out the stream is empty so need to check stream == nil
 			stream, err := ssn.OpenStreamSync(ctx)
 			if err != nil {
 				return nil, err
 			}
+			// once ctx got cancelled, err is nil but stream is empty too
+			// add the check to avoid returning empty stream
+			if stream == nil {
+				return nil, fmt.Errorf("stream is empty")
+			}
+			// log.Println(`MARK`, stream)
+			// MARK
 			conn := &ufo.StreamConn{stream, ssn}
 			return conn, nil
 		},
