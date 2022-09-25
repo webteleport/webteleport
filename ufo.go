@@ -33,17 +33,17 @@ var _ net.Listener = (*listener)(nil)
 func Listen(u string) (*listener, error) {
 	up, err := url.Parse(u)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	log.Println("dialing", u)
 	ctx, _ := context.WithTimeout(context.TODO(), 3*time.Second)
 	session, err := dial(ctx, up)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	stm0, err := session.AcceptStream(ctx)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	hostchan := make(chan string)
 	ln := &listener{
