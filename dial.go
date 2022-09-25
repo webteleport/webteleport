@@ -25,7 +25,6 @@ func extractH3(h http.Header) ([]string, bool) {
 		return []string{}, false
 	}
 	results := []string{}
-	log.Println(svcs)
 	for _, svc := range svcs {
 		if svc.ProtocolID == "h3" {
 			results = append(results, svc.AltAuthority.Host+":"+svc.AltAuthority.Port)
@@ -56,19 +55,16 @@ func dial(ctx context.Context, u *url.URL) (*webtransport.Session, error) {
 		return nil, errors.New("HTTP/3 service discovery failed: no Alt-Svc header found")
 	}
 	ep := endpoints[0]
-	log.Println("found H3 endpoints", endpoints)
 	hp, err := setport(u.Host, ep)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
-	log.Println("getting webtransport address", u.Host, "+", ep, "=", hp)
-	ur := fmt.Sprintf("https://%s", hp)
 	var d webtransport.Dialer
-	log.Printf("dialing %s (UDP)", ur)
-	_, session, err := d.Dial(ctx, ur, nil)
+	up := fmt.Sprintf("https://%s", hp)
+	log.Printf("dialing %s (UDP)", up)
+	_, session, err := d.Dial(ctx, up, nil)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
 	return session, err
 }

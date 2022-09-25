@@ -35,8 +35,6 @@ func Listen(u string) (*listener, error) {
 	if err != nil {
 		return nil, nil
 	}
-	log.Println(up.Scheme)
-	log.Println(up.Host)
 	log.Println("dialing", u)
 	ctx, _ := context.WithTimeout(context.TODO(), 3*time.Second)
 	session, err := dial(ctx, up)
@@ -57,10 +55,15 @@ func Listen(u string) (*listener, error) {
 		scanner := bufio.NewScanner(stm0)
 		for scanner.Scan() {
 			line := scanner.Text()
-			log.Println(line)
+			// ignore server pings
+			if line == "PING" {
+				continue
+			}
 			if strings.HasPrefix(line, "HOST ") {
 				hostchan <- strings.TrimPrefix(line, "HOST ")
+				continue
 			}
+			log.Println(line)
 		}
 	}()
 	// go io.Copy(stm0, os.Stdin)
