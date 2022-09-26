@@ -16,7 +16,9 @@ func main() {
 	showIdna("❤️")
 	showIdna("i❤.ws")
 	showIdna("i❤")
+	showIdna("i❤:80")
 	showIdna("sudo")
+	showIdna("https://😂.ufo.k0s.io")
 }
 
 func showIdna(s string) {

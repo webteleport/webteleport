@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/marten-seemann/webtransport-go"
+	"golang.org/x/net/idna"
 )
 
 var _ net.Listener = (*listener)(nil)
@@ -21,7 +22,7 @@ func Serve(u string, handler http.Handler) error {
 	if err != nil {
 		return err
 	}
-	log.Println("listening on", ln.URL())
+	log.Println("🛸 listening on", ln.AutoURL())
 	if handler == nil {
 		handler = http.DefaultServeMux
 	}
@@ -122,12 +123,59 @@ func (l *listener) Network() string {
 	return l.scheme
 }
 
-// String returns the host(:port) address of listener
+// String returns the host(:port) address of listener, forcing ASCII
 func (l *listener) String() string {
+	return ToIdna(l.host) + l.port
+}
+
+// String returns the host(:port) address of listener, Unicode is kept inact
+func (l *listener) Display() string {
 	return l.host + l.port
 }
 
-// URL returns the public accessible address of the listener
-func (l *listener) URL() string {
+// AsciiURL returns the public accessible address of the listener
+func (l *listener) AsciiURL() string {
 	return l.Network() + "://" + l.String()
+}
+
+// HumanURL returns the human readable URL
+func (l *listener) HumanURL() string {
+	return l.Network() + "://" + l.Display()
+}
+
+// AnsiURL returns a clickable url the URL
+func (l *listener) AnsiURL() string {
+	link := l.AsciiURL()
+	text := l.HumanURL()
+	ansi := Hyperlink(text, link)
+	return ansi
+}
+
+// AutoURL returns a clickable url the URL
+//   when link == text, it displays `link[link]`
+//   when link != text, it displays `text ([link](link))`
+func (l *listener) AutoURL() string {
+	link := l.AsciiURL()
+	text := l.HumanURL()
+	if link != text {
+		return fmt.Sprintf("%s (%s)", text, Hyperlink(link, link))
+	}
+	return l.AnsiURL()
+}
+
+// ToIdna converts a string to its idna form at best effort
+func ToIdna(s string) string {
+	ascii, err := idna.ToASCII(s)
+	if err != nil {
+		log.Println(err)
+		return s
+	}
+	return ascii
+}
+
+// Print Hyperlink via OSC 8 ansi sequence.
+// The syntax is: 'OSC 8 ; params ; url ST text OSC 8 ; ; ST'
+// for more info see https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
+func Hyperlink(name, url string) string {
+	return fmt.Sprintf("\u001B]8;%s;%s\u001B\\%s\u001B]8;;\u001B\\", "", url, name)
 }

@@ -13,7 +13,7 @@ func Run([]string) error {
 	if err != nil {
 		return err
 	}
-	log.Println("listening on", ln.URL())
+	log.Println("🛸 listening on", ln.AutoURL())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "Hello, UFO!\n")
 	})

@@ -26,7 +26,7 @@ The programming interface is the almost the same as [net.Listen]
   if err != nil {
           return err
   }
-  log.Println("listening on", ln.URL())
+  log.Println("listening on", ln.AutoURL())
   return http.Serve(ln, http.FileServer(http.Dir(".")))
 ...
 

@@ -40,7 +40,7 @@ func (s *wts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.Next.ServeHTTP(w, r)
 		return
 	}
-	log.Println("[UFO]", r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
+	log.Println("🛸", r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
 	// handle ufo client registration
 	// Host: ufo.k0s.io:300
 	ssn, err := s.Upgrade(w, r)
