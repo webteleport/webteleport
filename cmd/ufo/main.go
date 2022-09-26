@@ -8,6 +8,7 @@ import (
 	"github.com/btwiuse/ufo/echo"
 	"github.com/btwiuse/ufo/gos"
 	"github.com/btwiuse/ufo/hello"
+	"github.com/btwiuse/ufo/hdr"
 	"github.com/btwiuse/ufo/server"
 	"github.com/btwiuse/ufo/sse"
 )
@@ -24,6 +25,7 @@ var cmdRun multicall.RunnerFuncMap = map[string]multicall.RunnerFunc{
 	"hello":  hello.Run,
 	"echo":   echo.Run,
 	"gos":    gos.Run,
+	"hdr":    hdr.Run,
 	"server": server.Run,
 	"sse":    sse.Run,
 }
