@@ -10,6 +10,7 @@ import (
 	"github.com/btwiuse/ufo/hdr"
 	"github.com/btwiuse/ufo/hello"
 	"github.com/btwiuse/ufo/nc"
+	"github.com/btwiuse/ufo/rp"
 	"github.com/btwiuse/ufo/server"
 	"github.com/btwiuse/ufo/sse"
 )
@@ -30,6 +31,7 @@ var cmdRun multicall.RunnerFuncMap = map[string]multicall.RunnerFunc{
 	"nc":     nc.Run,
 	"server": server.Run,
 	"sse":    sse.Run,
+	"rp":     rp.Run,
 }
 
 func Run(args []string) error {

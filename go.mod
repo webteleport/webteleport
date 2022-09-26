@@ -13,6 +13,7 @@ require (
 	github.com/mattn/go-isatty v0.0.12
 	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e
 	k0s.io/pkg/middleware v0.1.6
+	k0s.io/pkg/reverseproxy v0.1.6
 	k0s.io/pkg/wrap v0.1.6
 )
 
