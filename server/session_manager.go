@@ -118,7 +118,7 @@ func (sm *SessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// for webtransport, Proto is "webtransport" instead of "HTTP/1.1"
 		// However, reverseproxy doesn't support webtransport yet
 		// so setting this field currently doesn't have any effect
-		// req.Proto = r.Proto
+		req.Proto = r.Proto
 	}
 	tr := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
