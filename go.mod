@@ -10,6 +10,7 @@ require (
 	github.com/ebi-yade/altsvc-go v0.1.1
 	github.com/lucas-clemente/quic-go v0.29.0
 	github.com/marten-seemann/webtransport-go v0.1.0
+	github.com/mattn/go-isatty v0.0.12
 	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e
 	k0s.io/pkg/middleware v0.1.6
 	k0s.io/pkg/wrap v0.1.6

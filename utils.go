@@ -5,9 +5,11 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/ebi-yade/altsvc-go"
+	"github.com/mattn/go-isatty"
 	"golang.org/x/net/idna"
 )
 
@@ -83,4 +85,12 @@ func Graft(base, alt string) string {
 // for more info see https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
 func Hyperlink(name, url string) string {
 	return fmt.Sprintf("\u001B]8;%s;%s\u001B\\%s\u001B]8;;\u001B\\", "", url, name)
+}
+
+// MaybeHyperlink turns input into ANSI hyperlink when stdin is a tty
+func MaybeHyperlink(l string) string {
+	if isatty.IsTerminal(os.Stdin.Fd()) {
+		return Hyperlink(l, l)
+	}
+	return l
 }

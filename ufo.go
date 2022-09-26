@@ -138,11 +138,9 @@ func (l *listener) HumanURL() string {
 //   when link == text, it displays `link[link]`
 //   when link != text, it displays `text ([link](link))`
 func (l *listener) ClickableURL() string {
-	disp := l.HumanURL()
-	link := l.AsciiURL()
-	clickable := Hyperlink(link, link)
+	disp, link := l.HumanURL(), l.AsciiURL()
 	if disp == link {
-		return clickable
+		return MaybeHyperlink(link)
 	}
-	return fmt.Sprintf("%s ( %s )", disp, clickable)
+	return fmt.Sprintf("%s ( %s )", disp, MaybeHyperlink(link))
 }
