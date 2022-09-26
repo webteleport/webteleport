@@ -141,7 +141,7 @@ func (l *listener) AutoURL() string {
 	link := l.AsciiURL()
 	text := l.HumanURL()
 	if link != text {
-		return fmt.Sprintf("%s (%s)", text, link)
+		return fmt.Sprintf("%s ( %s )", text, link)
 	}
 	return link
 }
