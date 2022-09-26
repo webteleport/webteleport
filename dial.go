@@ -4,64 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
-	"strings"
 
-	"github.com/ebi-yade/altsvc-go"
 	"github.com/lucas-clemente/quic-go"
 	"github.com/lucas-clemente/quic-go/http3"
 	"github.com/marten-seemann/webtransport-go"
 )
 
-const EnableDatagrams = true
-
 // 2^60 == 1152921504606846976
 const MaxIncomingStreams int64 = 1 << 60
-
-// 2^60 == 1152921504606846976
-const MaxIncomingUniStreams int64 = 1 << 60
-
-func extractH3(h http.Header) ([]string, bool) {
-	line := h.Get("Alt-Svc")
-	if line == "" {
-		return []string{}, false
-	}
-	svcs, err := altsvc.Parse(line)
-	if err != nil {
-		log.Println(err)
-		return []string{}, false
-	}
-	results := []string{}
-	for _, svc := range svcs {
-		if svc.ProtocolID == "h3" {
-			results = append(results, svc.AltAuthority.Host+":"+svc.AltAuthority.Port)
-		}
-	}
-	return results, len(results) > 0
-}
-
-// graft returns Host(base):Port(alt)
-//
-// assuming
-// - base is host[:port]
-// - alt is [host]:port
-func graft(base, alt string) string {
-	althost, altport, _ := strings.Cut(alt, ":")
-	if altport == "" {
-		// altport not found
-		// it should never happen
-		return base
-	}
-	if althost != "" {
-		// alt is host:port
-		// it is rare
-		return alt
-	}
-	basehost, _, _ := strings.Cut(base, ":")
-	return basehost + ":" + altport
-}
 
 // Dial is a wrapper around webtransport.Dial with automatic HTTP/3 service discovery
 func Dial(ctx context.Context, u *url.URL, hdr http.Header) (*webtransport.Session, error) {
@@ -69,18 +21,16 @@ func Dial(ctx context.Context, u *url.URL, hdr http.Header) (*webtransport.Sessi
 	if err != nil {
 		return nil, err
 	}
-	endpoints, ok := extractH3(resp.Header)
-	if !ok {
+	endpoints := ExtractAltSvcH3Endpoints(resp.Header)
+	if len(endpoints) == 0 {
 		return nil, errors.New("HTTP/3 service discovery failed: no Alt-Svc header found")
 	}
 	alt := endpoints[0]
-	addr := graft(u.Host, alt)
+	addr := Graft(u.Host, alt)
 	d := &webtransport.Dialer{
 		RoundTripper: &http3.RoundTripper{
-			EnableDatagrams: EnableDatagrams,
 			QuicConfig: &quic.Config{
-				MaxIncomingStreams:    MaxIncomingStreams,
-				MaxIncomingUniStreams: MaxIncomingStreams,
+				MaxIncomingStreams: MaxIncomingStreams,
 			},
 		},
 	}

@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/marten-seemann/webtransport-go"
-	"golang.org/x/net/idna"
 )
 
 var _ net.Listener = (*listener)(nil)
@@ -75,7 +74,7 @@ func Listen(u string) (*listener, error) {
 		session: session,
 		stm0:    stm0,
 		scheme:  up.Scheme,
-		port:    getport(up),
+		port:    ExtractURLPort(up),
 	}
 	select {
 	case emsg := <-errchan:
@@ -83,14 +82,6 @@ func Listen(u string) (*listener, error) {
 	case ln.host = <-hostchan:
 		return ln, nil
 	}
-}
-
-func getport(u *url.URL) string {
-	_, p, ok := strings.Cut(u.Host, ":")
-	if ok {
-		return ":" + p
-	}
-	return ""
 }
 
 type listener struct {
@@ -153,15 +144,4 @@ func (l *listener) AutoURL() string {
 		return fmt.Sprintf("%s (%s)", text, link)
 	}
 	return link
-}
-
-// ToIdna converts a string to its idna form at best effort
-// it should only be used on the hostname part without port
-func ToIdna(s string) string {
-	ascii, err := idna.ToASCII(s)
-	if err != nil {
-		log.Println(err)
-		return s
-	}
-	return ascii
 }

@@ -23,10 +23,10 @@ func Run([]string) error {
 		return err
 	}
 
-	handler := middleware.LoggingMiddleware(middleware.AllowAllCorsMiddleware(defaultSessionManager))
+	handler := middleware.LoggingMiddleware(middleware.AllowAllCorsMiddleware(DefaultSessionManager))
 
 	go func() {
-		wts := webtransportServer(handler)
+		wts := WebtransportServer(handler)
 		log.Println("listening on UDP https://" + HOST + PORT)
 		log.Fatalln(wts.ListenAndServeTLS(CERT, KEY))
 	}()

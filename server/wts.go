@@ -11,32 +11,31 @@ import (
 
 const WebTransportProto = "webtransport"
 
-func webtransportServer(next http.Handler) *webtransport.Server {
+func WebtransportServer(next http.Handler) *webtransport.Server {
 	s := &webtransport.Server{
 		CheckOrigin: func(*http.Request) bool { return true },
 	}
 	s.H3 = http3.Server{
 		Addr:            PORT,
-		Handler:         &wts{s, next},
+		Handler:         &WTS{s, next},
 		EnableDatagrams: true,
 	}
 	return s
 }
 
-// udp server handles
+// WTS is a HTTP/3 server that handles:
 // - UFO client registration (CONNECT HOST)
 // - requests over HTTP/3 (others)
-type wts struct {
+type WTS struct {
 	*webtransport.Server
 	Next http.Handler
 }
 
-func (s *wts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *WTS) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// passthrough normal requests to next:
 	// 1. simple http / websockets (Host: x.localhost)
 	// 2. webtransport (Host: x.localhost:300, not yet supported by reverseproxy)
-	domainList, isUFO := parseUFO(r)
-	if !isUFO {
+	if !IsUFORequest(r) {
 		s.Next.ServeHTTP(w, r)
 		return
 	}
@@ -49,27 +48,30 @@ func (s *wts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
-	// log.Println(domainList)
-	err = defaultSessionManager.Lease(ssn, domainList)
+	candidates := ParseDomainCandidates(r.URL.Path)
+	err = DefaultSessionManager.Lease(ssn, candidates)
 	if err != nil {
 		log.Printf("leasing failed: %s", err)
 	}
 }
 
-func parseUFO(r *http.Request) ([]string, bool) {
+// IsUFORequest tells if the incoming request should be treated as UFO request
+//
+// if true, it will be upgraded into a webtransport session
+// otherwise the request will be handled by DefaultSessionManager
+func IsUFORequest(r *http.Request) bool {
 	host, _, _ := strings.Cut(r.Host, ":")
 	isWebtransport := r.Proto == WebTransportProto
 	isConnect := r.Method == http.MethodConnect
 	isRoot := host == HOST
-	isUFO := isWebtransport && isRoot && isConnect
-	if !isUFO {
-		return nil, false
-	}
-	list := domainList(r.URL.Path)
-	return list, true
+	return isWebtransport && isRoot && isConnect
 }
 
-func domainList(p string) []string {
+// ParseDomainCandidates splits a path string like /a/b/cd/😏
+// into a list of subdomains: [a, b, cd, 😏]
+//
+// when result is empty, a random subdomain will be assigned by the server
+func ParseDomainCandidates(p string) []string {
 	var list []string
 	parts := strings.Split(p, "/")
 	for _, part := range parts {

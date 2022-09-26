@@ -17,26 +17,26 @@ import (
 	"golang.org/x/net/idna"
 )
 
-var defaultSessionManager = &sessionManager{
+var DefaultSessionManager = &SessionManager{
 	counter:  0,
 	sessions: map[string]*webtransport.Session{},
 	slock:    &sync.RWMutex{},
 }
 
-type sessionManager struct {
+type SessionManager struct {
 	counter  int
 	sessions map[string]*webtransport.Session
 	slock    *sync.RWMutex
 }
 
-func (sm *sessionManager) Del(k string) {
+func (sm *SessionManager) Del(k string) {
 	k, _ = idna.ToASCII(k)
 	sm.slock.Lock()
 	delete(sm.sessions, k)
 	sm.slock.Unlock()
 }
 
-func (sm *sessionManager) Get(k string) (*webtransport.Session, bool) {
+func (sm *SessionManager) Get(k string) (*webtransport.Session, bool) {
 	k, _ = idna.ToASCII(k)
 	host, _, _ := strings.Cut(k, ":")
 	sm.slock.RLock()
@@ -45,7 +45,7 @@ func (sm *sessionManager) Get(k string) (*webtransport.Session, bool) {
 	return ssn, ok
 }
 
-func (sm *sessionManager) Add(k string, ssn *webtransport.Session) error {
+func (sm *SessionManager) Add(k string, ssn *webtransport.Session) error {
 	k, _ = idna.ToASCII(k)
 	sm.slock.Lock()
 	sm.counter += 1
@@ -54,7 +54,7 @@ func (sm *sessionManager) Add(k string, ssn *webtransport.Session) error {
 	return nil
 }
 
-func (sm *sessionManager) Lease(ssn *webtransport.Session, domainList []string) error {
+func (sm *SessionManager) Lease(ssn *webtransport.Session, domainList []string) error {
 	stm0, err := ssn.OpenStreamSync(context.Background())
 	if err != nil {
 		return err
@@ -103,7 +103,7 @@ func (sm *sessionManager) Lease(ssn *webtransport.Session, domainList []string) 
 	return nil
 }
 
-func (sm *sessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (sm *SessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ssn, ok := sm.Get(r.Host)
 	if !ok {
 		w.Header().Set("Alt-Svc", ALT_SVC)
