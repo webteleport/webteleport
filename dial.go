@@ -21,7 +21,7 @@ func Dial(ctx context.Context, u *url.URL, hdr http.Header) (*webtransport.Sessi
 	if err != nil {
 		return nil, err
 	}
-	endpoints := ExtractAltSvcH3Endpoints(resp.Header)
+	endpoints := ExtractAltSvcEndpoints(resp.Header, "h3")
 	if len(endpoints) == 0 {
 		return nil, errors.New("HTTP/3 service discovery failed: no Alt-Svc header found")
 	}

@@ -34,7 +34,7 @@ func ToIdna(s string) string {
 
 // ExtractAltSvcH3Endpoints reads Alt-Svc header
 // returns a list of [host]:port endpoints
-func ExtractAltSvcH3Endpoints(h http.Header) []string {
+func ExtractAltSvcEndpoints(h http.Header, protocolId string) []string {
 	line := h.Get("Alt-Svc")
 	if line == "" {
 		return nil
@@ -46,9 +46,12 @@ func ExtractAltSvcH3Endpoints(h http.Header) []string {
 	}
 	results := []string{}
 	for _, svc := range svcs {
-		if svc.ProtocolID == "h3" {
-			results = append(results, svc.AltAuthority.Host+":"+svc.AltAuthority.Port)
+		if svc.ProtocolID != protocolId {
+			continue
 		}
+		// host could be empty, port must not
+		ep := svc.AltAuthority.Host + ":" + svc.AltAuthority.Port
+		results = append(results, ep)
 	}
 	return results
 }
