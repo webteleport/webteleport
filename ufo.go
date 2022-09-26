@@ -143,14 +143,6 @@ func (l *listener) HumanURL() string {
 	return l.Network() + "://" + l.Display()
 }
 
-// AnsiURL returns a clickable url the URL
-func (l *listener) AnsiURL() string {
-	link := l.AsciiURL()
-	text := l.HumanURL()
-	ansi := Hyperlink(text, link)
-	return ansi
-}
-
 // AutoURL returns a clickable url the URL
 //   when link == text, it displays `link[link]`
 //   when link != text, it displays `text ([link](link))`
@@ -158,12 +150,13 @@ func (l *listener) AutoURL() string {
 	link := l.AsciiURL()
 	text := l.HumanURL()
 	if link != text {
-		return fmt.Sprintf("%s (%s)", text, Hyperlink(link, link))
+		return fmt.Sprintf("%s (%s)", text, link)
 	}
-	return l.AnsiURL()
+	return link
 }
 
 // ToIdna converts a string to its idna form at best effort
+// it should only be used on the hostname part without port
 func ToIdna(s string) string {
 	ascii, err := idna.ToASCII(s)
 	if err != nil {
@@ -171,11 +164,4 @@ func ToIdna(s string) string {
 		return s
 	}
 	return ascii
-}
-
-// Print Hyperlink via OSC 8 ansi sequence.
-// The syntax is: 'OSC 8 ; params ; url ST text OSC 8 ; ; ST'
-// for more info see https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
-func Hyperlink(name, url string) string {
-	return fmt.Sprintf("\u001B]8;%s;%s\u001B\\%s\u001B]8;;\u001B\\", "", url, name)
 }

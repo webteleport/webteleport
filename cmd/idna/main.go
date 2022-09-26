@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
 
-	"golang.org/x/net/idna"
+	"github.com/btwiuse/ufo"
 )
 
 func main() {
@@ -22,9 +21,6 @@ func main() {
 }
 
 func showIdna(s string) {
-	ascii, err := idna.ToASCII(s)
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println(ascii, s)
+	t := ufo.ToIdna(s)
+	fmt.Println(s, "~>", t)
 }
