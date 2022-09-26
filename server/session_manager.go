@@ -104,9 +104,9 @@ func (sm *SessionManager) Lease(ssn *webtransport.Session, domainList []string) 
 }
 
 func (sm *SessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Alt-Svc", ALT_SVC)
 	ssn, ok := sm.Get(r.Host)
 	if !ok {
-		w.Header().Set("Alt-Svc", ALT_SVC)
 		http.Error(w, r.Host+" not found", http.StatusNotFound)
 		return
 	}
