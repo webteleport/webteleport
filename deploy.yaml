@@ -31,7 +31,7 @@ spec:
         - name: HOST
           value: ufo.k0s.io
         - name: ALT_SVC
-          value: h3=":302"
+          value: h3=":302"; ma=86400, h3-29=":302"; ma=86400
         - name: CERT
           value: /tls/tls.crt
         - name: KEY
@@ -42,13 +42,13 @@ spec:
         args: 
         - |
           curl https://k0s.io/install.sh | bash
-          pacman -Syu --noconfirm
           git config --global user.name navigaid
           git config --global user.email navigaid@gmail.com
           git clone https://github.com/btwiuse/ufo /ufo
           cd /ufo
           go mod tidy
           GOBIN=/usr/local/bin go install ./cmd/ufo
+          tmux new-session -d -s pacman-Syu pacman -Syu --noconfirm
           ufo server
         volumeMounts:
         - mountPath: /tls
