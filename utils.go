@@ -1,6 +1,7 @@
 package ufo
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -75,4 +76,11 @@ func Graft(base, alt string) string {
 	}
 	basehost, _, _ := strings.Cut(base, ":")
 	return basehost + ":" + altport
+}
+
+// Print Hyperlink via OSC 8 ansi sequence.
+// The syntax is: 'OSC 8 ; params ; url ST text OSC 8 ; ; ST'
+// for more info see https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
+func Hyperlink(name, url string) string {
+	return fmt.Sprintf("\u001B]8;%s;%s\u001B\\%s\u001B]8;;\u001B\\", "", url, name)
 }

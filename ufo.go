@@ -21,7 +21,7 @@ func Serve(u string, handler http.Handler) error {
 	if err != nil {
 		return err
 	}
-	log.Println("🛸 listening on", ln.AutoURL())
+	log.Println("🛸 listening on", ln.ClickableURL())
 	if handler == nil {
 		handler = http.DefaultServeMux
 	}
@@ -137,11 +137,12 @@ func (l *listener) HumanURL() string {
 // AutoURL returns a clickable url the URL
 //   when link == text, it displays `link[link]`
 //   when link != text, it displays `text ([link](link))`
-func (l *listener) AutoURL() string {
+func (l *listener) ClickableURL() string {
+	disp := l.HumanURL()
 	link := l.AsciiURL()
-	text := l.HumanURL()
-	if link != text {
-		return fmt.Sprintf("%s ( %s )", text, link)
+	clickable := Hyperlink(link, link)
+	if disp == link {
+		return clickable
 	}
-	return link
+	return fmt.Sprintf("%s ( %s )", disp, clickable)
 }
