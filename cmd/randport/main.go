@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	for i:=0; ;i++{
+	for i := 0; ; i++ {
 		x(i)
 	}
 }
