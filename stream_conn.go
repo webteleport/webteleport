@@ -1,4 +1,4 @@
-package ufo
+package webteleport
 
 import (
 	"net"
