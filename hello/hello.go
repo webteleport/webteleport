@@ -1,6 +1,7 @@
 package hello
 
 import (
+	"context"
 	"io"
 	"log"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 )
 
 func Run([]string) error {
-	ln, err := ufo.Listen("https://ufo.k0s.io")
+	ln, err := ufo.Listen(context.Background(), "https://ufo.k0s.io")
 	if err != nil {
 		return err
 	}

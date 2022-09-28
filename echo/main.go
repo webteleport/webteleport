@@ -6,6 +6,7 @@
 package echo
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -19,7 +20,7 @@ import (
 )
 
 func Run([]string) error {
-	ln, err := ufo.Listen("https://ufo.k0s.io")
+	ln, err := ufo.Listen(context.Background(), "https://ufo.k0s.io")
 	if err != nil {
 		return err
 	}

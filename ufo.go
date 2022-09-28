@@ -16,8 +16,11 @@ import (
 
 var _ net.Listener = (*listener)(nil)
 
+var DefaultTimeout = 5 * time.Second
+
 func Serve(u string, handler http.Handler) error {
-	ln, err := Listen(u)
+	ctx, _ := context.WithTimeout(context.Background(), DefaultTimeout)
+	ln, err := Listen(ctx, u)
 	if err != nil {
 		return err
 	}
@@ -28,7 +31,7 @@ func Serve(u string, handler http.Handler) error {
 	return http.Serve(ln, handler)
 }
 
-func Listen(u string) (*listener, error) {
+func Listen(ctx context.Context, u string) (*listener, error) {
 	// localhost:3000 will be parsed by net/url as URL{Scheme: localhost, Port: 3000}
 	// hence the hack
 	if !strings.Contains(u, "://") {
@@ -38,7 +41,6 @@ func Listen(u string) (*listener, error) {
 	if err != nil {
 		return nil, err
 	}
-	ctx, _ := context.WithTimeout(context.TODO(), 3*time.Second)
 	session, err := Dial(ctx, up, nil)
 	if err != nil {
 		return nil, err
