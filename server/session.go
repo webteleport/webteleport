@@ -17,10 +17,12 @@ type Session struct {
 // PrecheckAccessToken returns a bool that indicates whether the caller should continue
 func (ssn *Session) PrecheckAccessToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if ssn.SecretCode == "" {
+		hostonly, _, _ := strings.Cut(r.URL.Host, ":")
+		if ssn.SecretCode == "" || strings.HasSuffix(hostonly, "localhost") {
 			next.ServeHTTP(w, r)
+			return
 		}
-		if strings.HasSuffix(r.URL.RawPath, ssn.SecretCode) {
+		if r.URL.Path == fmt.Sprintf("/secretCode=%s", ssn.SecretCode) {
 			cookies := fmt.Sprintf(`WebTeleportSecretCode="%s"; Path=/; Max-Age=2592000; HttpOnly; Domain=%s`, ssn.SecretCode, r.Host)
 			w.Header().Set("Set-Cookie", cookies)
 			http.Redirect(w, r, "/", 302)
