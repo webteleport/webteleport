@@ -12,20 +12,19 @@ import (
 	"sync"
 	"time"
 
-	"github.com/marten-seemann/webtransport-go"
 	ufo "github.com/webteleport/webteleport"
 	"golang.org/x/net/idna"
 )
 
 var DefaultSessionManager = &SessionManager{
 	counter:  0,
-	sessions: map[string]*webtransport.Session{},
+	sessions: map[string]*Session{},
 	slock:    &sync.RWMutex{},
 }
 
 type SessionManager struct {
 	counter  int
-	sessions map[string]*webtransport.Session
+	sessions map[string]*Session
 	slock    *sync.RWMutex
 }
 
@@ -36,7 +35,7 @@ func (sm *SessionManager) Del(k string) {
 	sm.slock.Unlock()
 }
 
-func (sm *SessionManager) Get(k string) (*webtransport.Session, bool) {
+func (sm *SessionManager) Get(k string) (*Session, bool) {
 	k, _ = idna.ToASCII(k)
 	host, _, _ := strings.Cut(k, ":")
 	sm.slock.RLock()
@@ -45,7 +44,7 @@ func (sm *SessionManager) Get(k string) (*webtransport.Session, bool) {
 	return ssn, ok
 }
 
-func (sm *SessionManager) Add(k string, ssn *webtransport.Session) error {
+func (sm *SessionManager) Add(k string, ssn *Session) error {
 	k, _ = idna.ToASCII(k)
 	sm.slock.Lock()
 	sm.counter += 1
@@ -54,14 +53,14 @@ func (sm *SessionManager) Add(k string, ssn *webtransport.Session) error {
 	return nil
 }
 
-func (sm *SessionManager) Lease(ssn *webtransport.Session, domainList []string) error {
+func (sm *SessionManager) Lease(ssn *Session) error {
 	stm0, err := ssn.OpenStreamSync(context.Background())
 	if err != nil {
 		return err
 	}
-	allowRandom := len(domainList) == 0
+	allowRandom := len(ssn.Candidates) == 0
 	var lease string
-	for _, pfx := range domainList {
+	for _, pfx := range ssn.Candidates {
 		k := fmt.Sprintf("%s.%s", pfx, HOST)
 		if _, exist := sm.Get(k); !exist {
 			lease = k
@@ -69,7 +68,7 @@ func (sm *SessionManager) Lease(ssn *webtransport.Session, domainList []string) 
 		}
 	}
 	if (lease == "") && !allowRandom {
-		emsg := fmt.Sprintf("ERR %s: %v\n", "none of your requested subdomains are currently available", domainList)
+		emsg := fmt.Sprintf("ERR %s: %v\n", "none of your requested subdomains are currently available", ssn.Candidates)
 		_, err = io.WriteString(stm0, emsg)
 		if err != nil {
 			return err
@@ -110,6 +109,7 @@ func (sm *SessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, r.Host+" not found", http.StatusNotFound)
 		return
 	}
+
 	dr := func(req *http.Request) {
 		// log.Println("director: rewriting Host", r.URL, r.Host)
 		req.Host = r.Host
@@ -138,7 +138,7 @@ func (sm *SessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			// log.Println(`MARK`, stream)
 			// MARK
-			conn := &ufo.StreamConn{stream, ssn}
+			conn := &ufo.StreamConn{stream, ssn.Session}
 			return conn, nil
 		},
 	}
@@ -146,5 +146,6 @@ func (sm *SessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Director:  dr,
 		Transport: tr,
 	}
-	rp.ServeHTTP(w, r)
+	handler := ssn.PrecheckAccessToken(rp)
+	handler.ServeHTTP(w, r)
 }

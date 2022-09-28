@@ -49,7 +49,9 @@ func (s *WTS) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	candidates := ParseDomainCandidates(r.URL.Path)
-	err = DefaultSessionManager.Lease(ssn, candidates)
+	secretCode := r.URL.Query().Get("secretCode")
+	session := &Session{ssn, candidates, secretCode}
+	err = DefaultSessionManager.Lease(session)
 	if err != nil {
 		log.Printf("leasing failed: %s", err)
 	}
