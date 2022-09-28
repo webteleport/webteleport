@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/marten-seemann/webtransport-go"
-	"github.com/webteleport/ufo"
+	ufo "github.com/webteleport/webteleport"
 	"golang.org/x/net/idna"
 )
 

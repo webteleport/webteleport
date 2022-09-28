@@ -1,4 +1,4 @@
-module github.com/webteleport/ufo
+module github.com/webteleport/webteleport
 
 go 1.19
 

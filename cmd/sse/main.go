@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/webteleport/ufo/sse"
+	"github.com/webteleport/webteleport/sse"
 )
 
 func main() {

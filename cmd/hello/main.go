@@ -9,7 +9,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/webteleport/ufo/hello"
+	"github.com/webteleport/webteleport/hello"
 )
 
 // curl3 https://7.ufo.k0s.io:300 --http3 -H "Host: 7.ufo.k0s.io"

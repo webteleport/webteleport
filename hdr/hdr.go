@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/btwiuse/pretty"
-	"github.com/webteleport/ufo"
+	ufo "github.com/webteleport/webteleport"
 	"k0s.io/pkg/middleware"
 )
 

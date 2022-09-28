@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/btwiuse/sse"
-	"github.com/webteleport/ufo"
+	ufo "github.com/webteleport/webteleport"
 )
 
 func Arg0(args []string, fallback string) string {

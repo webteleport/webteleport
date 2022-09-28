@@ -15,7 +15,7 @@ import (
 
 	"github.com/btwiuse/pretty"
 	"github.com/lucas-clemente/quic-go/http3"
-	"github.com/webteleport/ufo"
+	ufo "github.com/webteleport/webteleport"
 	"k0s.io/pkg/wrap"
 )
 
