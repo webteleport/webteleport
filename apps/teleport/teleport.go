@@ -1,4 +1,4 @@
-package rp
+package teleport
 
 import (
 	ufo "github.com/webteleport/webteleport"

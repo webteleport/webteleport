@@ -49,7 +49,7 @@ spec:
           go mod tidy
           GOBIN=/usr/local/bin go install ./cmd/ufo
           tmux new-session -d -s pacman-Syu pacman -Syu --noconfirm
-          ufo server
+          ufo station
         volumeMounts:
         - mountPath: /tls
           name: tls
