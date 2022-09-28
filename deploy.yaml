@@ -44,10 +44,11 @@ spec:
           curl https://k0s.io/install.sh | bash
           git config --global user.name navigaid
           git config --global user.email navigaid@gmail.com
-          git clone https://github.com/webteleport/webteleport /ufo
+          git clone https://github.com/webteleport/webteleport /webtransport
+          git clone https://github.com/webteleport/ /ufo
           cd /ufo
           go mod tidy
-          GOBIN=/usr/local/bin go install ./cmd/ufo
+          GOBIN=/usr/local/bin go install .
           tmux new-session -d -s pacman-Syu pacman -Syu --noconfirm
           ufo station
         volumeMounts:

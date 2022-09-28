@@ -42,7 +42,7 @@ $ kubectl apply -f https://raw.githubusercontent.com/webteleport/webteleport/mai
 install client:
 
 ```
-$ go install github.com/webteleport/webteleport/cmd/ufo@latest
+$ go install github.com/webteleport/ufo@latest
 ```
 
 example apps:
