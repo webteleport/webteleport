@@ -31,7 +31,7 @@ spec:
         - name: HOST
           value: ufo.k0s.io
         - name: ALT_SVC
-          value: h3=":302"; ma=86400, h3-29=":302"; ma=86400
+          value: webteleport=":302"
         - name: CERT
           value: /tls/tls.crt
         - name: KEY

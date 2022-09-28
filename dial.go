@@ -21,9 +21,9 @@ func Dial(ctx context.Context, u *url.URL, hdr http.Header) (*webtransport.Sessi
 	if err != nil {
 		return nil, err
 	}
-	endpoints := ExtractAltSvcEndpoints(resp.Header, "h3")
+	endpoints := ExtractAltSvcEndpoints(resp.Header, "webteleport")
 	if len(endpoints) == 0 {
-		return nil, errors.New("HTTP/3 service discovery failed: no Alt-Svc header found")
+		return nil, errors.New("webteleport service discovery failed: no endpoint in Alt-Svc header found")
 	}
 	alt := endpoints[0]
 	addr := Graft(u.Host, alt)
