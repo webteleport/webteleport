@@ -36,13 +36,13 @@ The programming interface is the almost the same as [net.Listen]
 deploy server:
 
 ```
-$ kubectl apply -f https://raw.githubusercontent.com/btwiuse/ufo/main/deploy.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/webteleport/ufo/main/deploy.yaml
 ```
 
 install client:
 
 ```
-$ go install github.com/btwiuse/ufo/cmd/ufo@latest
+$ go install github.com/webteleport/ufo/cmd/ufo@latest
 ```
 
 example apps:

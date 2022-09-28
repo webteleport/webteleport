@@ -5,14 +5,14 @@ import (
 	"os"
 
 	"github.com/btwiuse/multicall"
-	"github.com/btwiuse/ufo/echo"
-	"github.com/btwiuse/ufo/gos"
-	"github.com/btwiuse/ufo/hdr"
-	"github.com/btwiuse/ufo/hello"
-	"github.com/btwiuse/ufo/nc"
-	"github.com/btwiuse/ufo/rp"
-	"github.com/btwiuse/ufo/server"
-	"github.com/btwiuse/ufo/sse"
+	"github.com/webteleport/ufo/echo"
+	"github.com/webteleport/ufo/gos"
+	"github.com/webteleport/ufo/hdr"
+	"github.com/webteleport/ufo/hello"
+	"github.com/webteleport/ufo/nc"
+	"github.com/webteleport/ufo/rp"
+	"github.com/webteleport/ufo/server"
+	"github.com/webteleport/ufo/sse"
 )
 
 func main() {

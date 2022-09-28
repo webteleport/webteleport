@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/btwiuse/ufo"
+	"github.com/webteleport/ufo"
 )
 
 func Run([]string) error {

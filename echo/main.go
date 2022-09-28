@@ -14,8 +14,8 @@ import (
 	"strings"
 
 	"github.com/btwiuse/pretty"
-	"github.com/btwiuse/ufo"
 	"github.com/lucas-clemente/quic-go/http3"
+	"github.com/webteleport/ufo"
 	"k0s.io/pkg/wrap"
 )
 

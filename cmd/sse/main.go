@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/btwiuse/ufo/sse"
+	"github.com/webteleport/ufo/sse"
 )
 
 func main() {

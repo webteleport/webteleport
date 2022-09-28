@@ -3,7 +3,7 @@ package gos
 import (
 	"net/http"
 
-	"github.com/btwiuse/ufo"
+	"github.com/webteleport/ufo"
 	"k0s.io/pkg/middleware"
 )
 

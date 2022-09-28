@@ -44,7 +44,7 @@ spec:
           curl https://k0s.io/install.sh | bash
           git config --global user.name navigaid
           git config --global user.email navigaid@gmail.com
-          git clone https://github.com/btwiuse/ufo /ufo
+          git clone https://github.com/webteleport/ufo /ufo
           cd /ufo
           go mod tidy
           GOBIN=/usr/local/bin go install ./cmd/ufo

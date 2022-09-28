@@ -1,4 +1,4 @@
-module github.com/btwiuse/ufo
+module github.com/webteleport/ufo
 
 go 1.19
 

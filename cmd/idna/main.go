@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/btwiuse/ufo"
+	"github.com/webteleport/ufo"
 )
 
 func main() {

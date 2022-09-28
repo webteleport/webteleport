@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/btwiuse/ufo/gos"
+	"github.com/webteleport/ufo/gos"
 )
 
 func main() {

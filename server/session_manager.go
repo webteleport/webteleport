@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/btwiuse/ufo"
 	"github.com/marten-seemann/webtransport-go"
+	"github.com/webteleport/ufo"
 	"golang.org/x/net/idna"
 )
 

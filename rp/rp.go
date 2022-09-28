@@ -1,7 +1,7 @@
 package rp
 
 import (
-	"github.com/btwiuse/ufo"
+	"github.com/webteleport/ufo"
 	"k0s.io/pkg/middleware"
 	"k0s.io/pkg/reverseproxy"
 )
