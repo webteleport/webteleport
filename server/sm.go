@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	ufo "github.com/webteleport/webteleport"
+	"github.com/webteleport/webteleport"
 	"golang.org/x/net/idna"
 )
 
@@ -102,11 +102,16 @@ func (sm *SessionManager) Lease(ssn *Session) error {
 	return nil
 }
 
+func (sm *SessionManager) NotFoundHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	NotFoundHandler().ServeHTTP(w, r)
+}
+
 func (sm *SessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Alt-Svc", ALT_SVC)
 	ssn, ok := sm.Get(r.Host)
 	if !ok {
-		http.Error(w, r.Host+" not found", http.StatusNotFound)
+		sm.NotFoundHandler(w, r)
 		return
 	}
 
@@ -138,7 +143,7 @@ func (sm *SessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			// log.Println(`MARK`, stream)
 			// MARK
-			conn := &ufo.StreamConn{stream, ssn.Session}
+			conn := &webteleport.StreamConn{stream, ssn.Session}
 			return conn, nil
 		},
 	}
