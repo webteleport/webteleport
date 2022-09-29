@@ -14,7 +14,7 @@ var HOST = utils.EnvHost("localhost")
 var CERT = utils.EnvCert("localhost.pem")
 var KEY = utils.EnvKey("localhost-key.pem")
 var PORT = utils.EnvPort(":3000")
-var ALT_SVC = utils.EnvAltSvc(fmt.Sprintf(`h3="%s"`, PORT))
+var ALT_SVC = utils.EnvAltSvc(fmt.Sprintf(`webteleport="%s"`, PORT))
 
 func Run([]string) error {
 	log.Println("listening on TCP http://" + HOST + PORT)
