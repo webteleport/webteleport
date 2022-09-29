@@ -6,30 +6,13 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/marten-seemann/webtransport-go"
 )
 
 var _ net.Listener = (*listener)(nil)
-
-var DefaultTimeout = 5 * time.Second
-
-func Serve(u string, handler http.Handler) error {
-	ctx, _ := context.WithTimeout(context.Background(), DefaultTimeout)
-	ln, err := Listen(ctx, u)
-	if err != nil {
-		return err
-	}
-	log.Println("🛸 listening on", ln.ClickableURL())
-	if handler == nil {
-		handler = http.DefaultServeMux
-	}
-	return http.Serve(ln, handler)
-}
 
 func Listen(ctx context.Context, u string) (*listener, error) {
 	// localhost:3000 will be parsed by net/url as URL{Scheme: localhost, Port: 3000}
