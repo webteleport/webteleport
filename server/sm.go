@@ -146,6 +146,5 @@ func (sm *SessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Director:  dr,
 		Transport: tr,
 	}
-	handler := ssn.PrecheckAccessToken(rp)
-	handler.ServeHTTP(w, r)
+	rp.ServeHTTP(w, r)
 }
