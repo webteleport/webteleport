@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"strings"
@@ -48,12 +49,21 @@ func (s *WTS) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
+	session := &Session{
+		Session: ssn,
+	}
+	err = session.InitController(context.Background())
+	if err != nil {
+		log.Printf("session init failed: %s", err)
+		return
+	}
 	candidates := ParseDomainCandidates(r.URL.Path)
-	session := &Session{ssn, candidates}
-	err = DefaultSessionManager.Lease(session)
+	err = DefaultSessionManager.Lease(session, candidates)
 	if err != nil {
 		log.Printf("leasing failed: %s", err)
+		return
 	}
+	go DefaultSessionManager.Ping(session)
 }
 
 // IsUFORequest tells if the incoming request should be treated as UFO request

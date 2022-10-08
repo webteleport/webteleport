@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/webteleport/webteleport"
 	"golang.org/x/net/idna"
 )
 
@@ -35,6 +34,19 @@ func (sm *SessionManager) Del(k string) {
 	sm.slock.Unlock()
 }
 
+func (sm *SessionManager) DelSession(ssn *Session) {
+	var err error
+	sm.slock.Lock()
+	for k, v := range sm.sessions {
+		if v == ssn {
+			delete(sm.sessions, k)
+			emsg := fmt.Sprintf("%s. Recycled %s", err, k)
+			log.Println(emsg)
+		}
+	}
+	sm.slock.Unlock()
+}
+
 func (sm *SessionManager) Get(k string) (*Session, bool) {
 	k, _ = idna.ToASCII(k)
 	host, _, _ := strings.Cut(k, ":")
@@ -53,14 +65,11 @@ func (sm *SessionManager) Add(k string, ssn *Session) error {
 	return nil
 }
 
-func (sm *SessionManager) Lease(ssn *Session) error {
-	stm0, err := ssn.OpenStreamSync(context.Background())
-	if err != nil {
-		return err
-	}
-	allowRandom := len(ssn.Candidates) == 0
+func (sm *SessionManager) Lease(ssn *Session, candidates []string) error {
+	var err error
+	allowRandom := len(candidates) == 0
 	var lease string
-	for _, pfx := range ssn.Candidates {
+	for _, pfx := range candidates {
 		k := fmt.Sprintf("%s.%s", pfx, HOST)
 		if _, exist := sm.Get(k); !exist {
 			lease = k
@@ -68,8 +77,8 @@ func (sm *SessionManager) Lease(ssn *Session) error {
 		}
 	}
 	if (lease == "") && !allowRandom {
-		emsg := fmt.Sprintf("ERR %s: %v\n", "none of your requested subdomains are currently available", ssn.Candidates)
-		_, err = io.WriteString(stm0, emsg)
+		emsg := fmt.Sprintf("ERR %s: %v\n", "none of your requested subdomains are currently available", candidates)
+		_, err = io.WriteString(ssn.Controller, emsg)
 		if err != nil {
 			return err
 		}
@@ -78,7 +87,7 @@ func (sm *SessionManager) Lease(ssn *Session) error {
 	if lease == "" {
 		lease = fmt.Sprintf("%d.%s", sm.counter, HOST)
 	}
-	_, err = io.WriteString(stm0, fmt.Sprintf("HOST %s\n", lease))
+	_, err = io.WriteString(ssn.Controller, fmt.Sprintf("HOST %s\n", lease))
 	if err != nil {
 		return err
 	}
@@ -86,20 +95,18 @@ func (sm *SessionManager) Lease(ssn *Session) error {
 	if err != nil {
 		return err
 	}
-	go func() {
-		var err error
-		for {
-			_, err = io.WriteString(stm0, fmt.Sprintf("%s\n", "PING"))
-			if err != nil {
-				break
-			}
-			time.Sleep(5 * time.Second)
-		}
-		sm.Del(lease)
-		emsg := fmt.Sprintf("%s. Recycled %s", err, lease)
-		log.Println(emsg)
-	}()
 	return nil
+}
+
+func (sm *SessionManager) Ping(ssn *Session) {
+	for {
+		_, err := io.WriteString(ssn.Controller, fmt.Sprintf("%s\n", "PING"))
+		if err != nil {
+			break
+		}
+		time.Sleep(5 * time.Second)
+	}
+	sm.DelSession(ssn)
 }
 
 func (sm *SessionManager) NotFoundHandler(w http.ResponseWriter, r *http.Request) {
@@ -109,6 +116,9 @@ func (sm *SessionManager) NotFoundHandler(w http.ResponseWriter, r *http.Request
 
 func (sm *SessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Alt-Svc", ALT_SVC)
+	// for HTTP_PROXY r.Method = GET && r.Host = google.com
+	// for HTTPs_PROXY r.Method = GET && r.Host = google.com:443
+	// they are currently not supported and will be handled by the 404 handler
 	ssn, ok := sm.Get(r.Host)
 	if !ok {
 		sm.NotFoundHandler(w, r)
@@ -127,24 +137,7 @@ func (sm *SessionManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	tr := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			// when there is a timeout, it still panics before MARK
-			//
-			// ctx, _ = context.WithTimeout(ctx, 3*time.Second)
-			//
-			// turns out the stream is empty so need to check stream == nil
-			stream, err := ssn.OpenStreamSync(ctx)
-			if err != nil {
-				return nil, err
-			}
-			// once ctx got cancelled, err is nil but stream is empty too
-			// add the check to avoid returning empty stream
-			if stream == nil {
-				return nil, fmt.Errorf("stream is empty")
-			}
-			// log.Println(`MARK`, stream)
-			// MARK
-			conn := &webteleport.StreamConn{stream, ssn.Session}
-			return conn, nil
+			return ssn.OpenConn(ctx)
 		},
 	}
 	rp := &httputil.ReverseProxy{
