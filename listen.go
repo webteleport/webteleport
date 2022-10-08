@@ -12,9 +12,9 @@ import (
 	"github.com/marten-seemann/webtransport-go"
 )
 
-var _ net.Listener = (*listener)(nil)
+var _ net.Listener = (*Listener)(nil)
 
-func Listen(ctx context.Context, u string) (*listener, error) {
+func Listen(ctx context.Context, u string) (*Listener, error) {
 	// localhost:3000 will be parsed by net/url as URL{Scheme: localhost, Port: 3000}
 	// hence the hack
 	if !strings.Contains(u, "://") {
@@ -55,7 +55,7 @@ func Listen(ctx context.Context, u string) (*listener, error) {
 		}
 	}()
 	// go io.Copy(stm0, os.Stdin)
-	ln := &listener{
+	ln := &Listener{
 		session: session,
 		stm0:    stm0,
 		scheme:  up.Scheme,
@@ -69,7 +69,12 @@ func Listen(ctx context.Context, u string) (*listener, error) {
 	}
 }
 
-type listener struct {
+// TODO consider introducing a SubListener API, reusing the same WebTransport connection
+func (ln *Listener) Listen(ctx context.Context, u string) (*Listener, error) {
+	return nil, nil
+}
+
+type Listener struct {
 	session *webtransport.Session
 	stm0    webtransport.Stream
 	scheme  string
@@ -77,7 +82,7 @@ type listener struct {
 	port    string
 }
 
-func (l *listener) Accept() (net.Conn, error) {
+func (l *Listener) Accept() (net.Conn, error) {
 	stream, err := l.session.AcceptStream(context.Background())
 	if err != nil {
 		return nil, err
@@ -85,44 +90,44 @@ func (l *listener) Accept() (net.Conn, error) {
 	return &StreamConn{stream, l.session}, nil
 }
 
-func (l *listener) Close() error {
+func (l *Listener) Close() error {
 	return l.session.Close()
 }
 
-// Addr returns listener itself which is an implementor of net.Addr
-func (l *listener) Addr() net.Addr {
+// Addr returns Listener itself which is an implementor of net.Addr
+func (l *Listener) Addr() net.Addr {
 	return l
 }
 
 // Network returns the protocol scheme, either http or https
-func (l *listener) Network() string {
+func (l *Listener) Network() string {
 	return l.scheme
 }
 
-// String returns the host(:port) address of listener, forcing ASCII
-func (l *listener) String() string {
+// String returns the host(:port) address of Listener, forcing ASCII
+func (l *Listener) String() string {
 	return ToIdna(l.host) + l.port
 }
 
-// String returns the host(:port) address of listener, Unicode is kept inact
-func (l *listener) Display() string {
+// String returns the host(:port) address of Listener, Unicode is kept inact
+func (l *Listener) Display() string {
 	return l.host + l.port
 }
 
-// AsciiURL returns the public accessible address of the listener
-func (l *listener) AsciiURL() string {
+// AsciiURL returns the public accessible address of the Listener
+func (l *Listener) AsciiURL() string {
 	return l.Network() + "://" + l.String()
 }
 
 // HumanURL returns the human readable URL
-func (l *listener) HumanURL() string {
+func (l *Listener) HumanURL() string {
 	return l.Network() + "://" + l.Display()
 }
 
 // AutoURL returns a clickable url the URL
 //   when link == text, it displays `link[link]`
 //   when link != text, it displays `text ([link](link))`
-func (l *listener) ClickableURL() string {
+func (l *Listener) ClickableURL() string {
 	disp, link := l.HumanURL(), l.AsciiURL()
 	if disp == link {
 		return MaybeHyperlink(link)
