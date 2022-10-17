@@ -89,7 +89,7 @@ func Hyperlink(name, url string) string {
 
 // MaybeHyperlink turns input into ANSI hyperlink when stdin is a tty
 func MaybeHyperlink(l string) string {
-	if isatty.IsTerminal(os.Stdin.Fd()) {
+	if isatty.IsTerminal(os.Stdin.Fd()) && isatty.IsTerminal(os.Stdout.Fd()) {
 		return Hyperlink(l, l)
 	}
 	return l

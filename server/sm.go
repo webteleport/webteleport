@@ -27,20 +27,23 @@ type SessionManager struct {
 	slock    *sync.RWMutex
 }
 
-func (sm *SessionManager) Del(k string) {
-	k, _ = idna.ToASCII(k)
+func (sm *SessionManager) Del(k string) error {
+	k, err := idna.ToASCII(k)
+	if err != nil {
+		return err
+	}
 	sm.slock.Lock()
 	delete(sm.sessions, k)
 	sm.slock.Unlock()
+	return nil
 }
 
 func (sm *SessionManager) DelSession(ssn *Session) {
-	var err error
 	sm.slock.Lock()
 	for k, v := range sm.sessions {
 		if v == ssn {
 			delete(sm.sessions, k)
-			emsg := fmt.Sprintf("%s. Recycled %s", err, k)
+			emsg := fmt.Sprintf("Recycled %s", k)
 			log.Println(emsg)
 		}
 	}
@@ -57,7 +60,10 @@ func (sm *SessionManager) Get(k string) (*Session, bool) {
 }
 
 func (sm *SessionManager) Add(k string, ssn *Session) error {
-	k, _ = idna.ToASCII(k)
+	k, err := idna.ToASCII(k)
+	if err != nil {
+		return err
+	}
 	sm.slock.Lock()
 	sm.counter += 1
 	sm.sessions[k] = ssn
@@ -91,10 +97,13 @@ func (sm *SessionManager) Lease(ssn *Session, candidates []string) error {
 	if err != nil {
 		return err
 	}
+	log.Println("leasing", lease)
 	err = sm.Add(lease, ssn)
 	if err != nil {
 		return err
 	}
+	log.Println("leasing", "x"+lease)
+	sm.Add("x"+lease, ssn)
 	return nil
 }
 
