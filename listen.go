@@ -91,7 +91,7 @@ func (l *Listener) Accept() (net.Conn, error) {
 }
 
 func (l *Listener) Close() error {
-	return l.session.Close()
+	return l.session.CloseWithError(1337, "foobar")
 }
 
 // Addr returns Listener itself which is an implementor of net.Addr
