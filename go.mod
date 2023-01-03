@@ -8,7 +8,7 @@ require (
 	github.com/lucas-clemente/quic-go v0.31.1
 	github.com/marten-seemann/webtransport-go v0.4.3
 	github.com/mattn/go-isatty v0.0.12
-	golang.org/x/net v0.0.0-20220722155237-a158d28d115b
+	golang.org/x/net v0.4.0
 	k0s.io/pkg/middleware v0.1.6
 )
 
