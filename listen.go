@@ -15,6 +15,15 @@ import (
 
 var _ net.Listener = (*Listener)(nil)
 
+// Listen calls [Dial] to create a [Listener], which is essentially a wrapper struct
+// around a webtransport session, which in turn is able to spawn arbitrary number of streams
+// that implements [net.Conn]
+//
+// It is modelled after [net.Listen], however it doesn't require the caller to be able to
+// bind to a local port.
+//
+// The returned Listener can be imagined to be bound to a remote [net.Addr], which can be obtained
+// using the [Listener.Addr] method
 func Listen(ctx context.Context, u string) (*Listener, error) {
 	// localhost:3000 will be parsed by net/url as URL{Scheme: localhost, Port: 3000}
 	// hence the hack
@@ -71,10 +80,11 @@ func Listen(ctx context.Context, u string) (*Listener, error) {
 }
 
 // TODO consider introducing a SubListener API, reusing the same WebTransport connection
-func (ln *Listener) Listen(ctx context.Context, u string) (*Listener, error) {
+func (l *Listener) Listen(ctx context.Context, u string) (*Listener, error) {
 	return nil, nil
 }
 
+// Listener implements [net.Listener]
 type Listener struct {
 	session *webtransport.Session
 	stm0    webtransport.Stream
@@ -83,6 +93,7 @@ type Listener struct {
 	port    string
 }
 
+// calling Accept returns a new [net.Conn]
 func (l *Listener) Accept() (net.Conn, error) {
 	stream, err := l.session.AcceptStream(context.Background())
 	if err != nil {
@@ -95,7 +106,7 @@ func (l *Listener) Close() error {
 	return l.session.CloseWithError(1337, "foobar")
 }
 
-// Addr returns Listener itself which is an implementor of net.Addr
+// Addr returns Listener itself which is an implementor of [net.Addr]
 func (l *Listener) Addr() net.Addr {
 	return l
 }
@@ -126,8 +137,9 @@ func (l *Listener) HumanURL() string {
 }
 
 // AutoURL returns a clickable url the URL
-//   when link == text, it displays `link[link]`
-//   when link != text, it displays `text ([link](link))`
+//
+//	when link == text, it displays `link[link]`
+//	when link != text, it displays `text ([link](link))`
 func (l *Listener) ClickableURL() string {
 	disp, link := l.HumanURL(), l.AsciiURL()
 	if disp == link {

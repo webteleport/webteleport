@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/lucas-clemente/quic-go v0.31.1
 	github.com/marten-seemann/webtransport-go v0.4.3
-	github.com/webteleport/utils v0.0.1
+	github.com/webteleport/utils v0.0.3
 )
 
 require (

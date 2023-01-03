@@ -9,6 +9,8 @@ import (
 var _ net.Conn = (*StreamConn)(nil)
 
 // StreamsConn wraps webtransport.Stream into net.Conn
+//
+// TODO this should be part of github.com/webtransport/webtransport
 type StreamConn struct {
 	webtransport.Stream
 	Session *webtransport.Session
