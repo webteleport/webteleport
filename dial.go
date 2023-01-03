@@ -10,6 +10,7 @@ import (
 	"github.com/lucas-clemente/quic-go"
 	"github.com/lucas-clemente/quic-go/http3"
 	"github.com/marten-seemann/webtransport-go"
+	"github.com/webteleport/utils"
 )
 
 // 2^60 == 1152921504606846976
@@ -21,12 +22,12 @@ func Dial(ctx context.Context, u *url.URL, hdr http.Header) (*webtransport.Sessi
 	if err != nil {
 		return nil, err
 	}
-	endpoints := ExtractAltSvcEndpoints(resp.Header, "webteleport")
+	endpoints := utils.ExtractAltSvcEndpoints(resp.Header, "webteleport")
 	if len(endpoints) == 0 {
 		return nil, errors.New("webteleport service discovery failed: no endpoint in Alt-Svc header found")
 	}
 	alt := endpoints[0]
-	addr := Graft(u.Host, alt)
+	addr := utils.Graft(u.Host, alt)
 	d := &webtransport.Dialer{
 		RoundTripper: &http3.RoundTripper{
 			QuicConfig: &quic.Config{

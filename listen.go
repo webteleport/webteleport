@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/marten-seemann/webtransport-go"
+	"github.com/webteleport/utils"
 )
 
 var _ net.Listener = (*Listener)(nil)
@@ -59,7 +60,7 @@ func Listen(ctx context.Context, u string) (*Listener, error) {
 		session: session,
 		stm0:    stm0,
 		scheme:  up.Scheme,
-		port:    ExtractURLPort(up),
+		port:    utils.ExtractURLPort(up),
 	}
 	select {
 	case emsg := <-errchan:
@@ -106,7 +107,7 @@ func (l *Listener) Network() string {
 
 // String returns the host(:port) address of Listener, forcing ASCII
 func (l *Listener) String() string {
-	return ToIdna(l.host) + l.port
+	return utils.ToIdna(l.host) + l.port
 }
 
 // String returns the host(:port) address of Listener, Unicode is kept inact
@@ -130,7 +131,7 @@ func (l *Listener) HumanURL() string {
 func (l *Listener) ClickableURL() string {
 	disp, link := l.HumanURL(), l.AsciiURL()
 	if disp == link {
-		return MaybeHyperlink(link)
+		return utils.MaybeHyperlink(link)
 	}
-	return fmt.Sprintf("%s ( %s )", disp, MaybeHyperlink(link))
+	return fmt.Sprintf("%s ( %s )", disp, utils.MaybeHyperlink(link))
 }
