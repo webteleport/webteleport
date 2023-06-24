@@ -3,6 +3,7 @@ module github.com/webteleport/webteleport
 go 1.19
 
 require (
+	github.com/google/uuid v1.3.0
 	github.com/webteleport/utils v0.0.3
 	github.com/webtransport/quic-go v0.0.0-webtransport
 	github.com/webtransport/webtransport-go v0.0.0-webtransport
