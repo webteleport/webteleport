@@ -1,9 +1,9 @@
 module github.com/webteleport/webteleport
 
-go 1.19
+go 1.20
 
 require (
-	github.com/google/uuid v1.3.0
+	github.com/webteleport/auth v0.0.2
 	github.com/webteleport/utils v0.0.3
 	github.com/webtransport/quic-go v0.0.0-webtransport
 	github.com/webtransport/webtransport-go v0.0.0-webtransport
@@ -14,6 +14,7 @@ require (
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/onsi/ginkgo/v2 v2.2.0 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect

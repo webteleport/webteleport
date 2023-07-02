@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/webteleport/auth"
 	"github.com/webteleport/webteleport"
 )
 
@@ -23,7 +24,7 @@ func Serve(stationURL string, handler http.Handler) error {
 	if err != nil {
 		return nil
 	}
-	lm := &LoginMiddleware{
+	lm := &auth.LoginMiddleware{
 		Password: u.Fragment,
 	}
 
