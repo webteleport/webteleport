@@ -9,8 +9,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/quic-go/webtransport-go"
 	"github.com/webteleport/utils"
-	"github.com/webtransport/webtransport-go"
 )
 
 var _ net.Listener = (*Listener)(nil)

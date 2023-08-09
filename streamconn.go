@@ -3,7 +3,7 @@ package webteleport
 import (
 	"net"
 
-	"github.com/webtransport/webtransport-go"
+	"github.com/quic-go/webtransport-go"
 )
 
 var _ net.Conn = (*StreamConn)(nil)

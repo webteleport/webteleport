@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/webteleport/auth"
@@ -28,7 +29,15 @@ func Serve(stationURL string, handler http.Handler) error {
 		Password: u.Fragment,
 	}
 
-	ln, err := webteleport.Listen(ctx, stationURL)
+	// attach extra info to the query string
+	q := u.Query()
+	q.Add("client", "ufo")
+	for _, arg := range os.Args {
+		q.Add("args", arg)
+	}
+	u.RawQuery = q.Encode()
+
+	ln, err := webteleport.Listen(ctx, u.String())
 	if err != nil {
 		return err
 	}

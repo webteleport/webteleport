@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/quic-go/quic-go"
+	"github.com/quic-go/quic-go/http3"
+	"github.com/quic-go/webtransport-go"
 	"github.com/webteleport/utils"
-	"github.com/webtransport/quic-go"
-	"github.com/webtransport/quic-go/http3"
-	"github.com/webtransport/webtransport-go"
 )
 
 // 2^60 == 1152921504606846976
