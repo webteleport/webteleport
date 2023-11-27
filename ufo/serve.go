@@ -1,54 +1,49 @@
 package ufo
 
 import (
-	"context"
 	"log"
 	"net/http"
-	"net/url"
-	"os"
 	"time"
 
 	"github.com/webteleport/auth"
-	"github.com/webteleport/webteleport"
 )
 
+// DefaultTimeout is the default dialing timeout for the UFO server.
 var DefaultTimeout = 10 * time.Second
 
+// Serve starts a UFO server on the given station URL.
 func Serve(stationURL string, handler http.Handler) error {
-	ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-	defer cancel()
-
-	if handler == nil {
-		handler = http.DefaultServeMux
-	}
-
-	u, err := url.Parse(stationURL)
+	// Create the URL with query parameters
+	u, err := createURLWithQueryParams(stationURL)
 	if err != nil {
 		return err
 	}
-	lm := &auth.LoginMiddleware{
-		Password: u.Fragment,
-	}
 
-	// attach extra info to the query string
-	q := u.Query()
-	q.Add("client", "ufo")
-	for _, arg := range os.Args {
-		q.Add("args", arg)
-	}
-	u.RawQuery = q.Encode()
-
-	ln, err := webteleport.Listen(ctx, u.String())
+	// listen on the station URL with a timeout
+	ln, err := listenWithTimeout(DefaultTimeout, u.String())
 	if err != nil {
 		return err
 	}
 
 	log.Println("🛸 listening on", ln.ClickableURL())
+
+	// use the default serve mux if nil handler is provided
+	if handler == nil {
+		handler = http.DefaultServeMux
+	}
+
+	// configure password authentication middleware
+	lm := &auth.LoginMiddleware{
+		Password: u.Fragment,
+	}
+
+	// wrap the handler with password authentication
 	if lm.IsPasswordRequired() {
 		handler = lm.Wrap(handler)
 		log.Println("🔒 secured by password authentication")
 	} else {
 		log.Println("🔓 publicly accessible without a password")
 	}
+
 	return http.Serve(ln, handler)
 }
