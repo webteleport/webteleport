@@ -26,24 +26,16 @@ func Serve(stationURL string, handler http.Handler) error {
 	}
 
 	log.Println("🛸 listening on", ln.ClickableURL())
+	if u.Fragment == "" {
+		log.Println("🔓 publicly accessible without a password")
+	} else {
+		log.Println("🔒 secured by password authentication")
+	}
 
 	// use the default serve mux if nil handler is provided
 	if handler == nil {
 		handler = http.DefaultServeMux
 	}
 
-	// configure password authentication middleware
-	lm := &auth.LoginMiddleware{
-		Password: u.Fragment,
-	}
-
-	// wrap the handler with password authentication
-	if lm.IsPasswordRequired() {
-		handler = lm.Wrap(handler)
-		log.Println("🔒 secured by password authentication")
-	} else {
-		log.Println("🔓 publicly accessible without a password")
-	}
-
-	return http.Serve(ln, handler)
+	return http.Serve(ln, auth.WithPassword(handler, u.Fragment))
 }
