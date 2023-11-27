@@ -12,10 +12,11 @@ import (
 	"github.com/webteleport/webteleport"
 )
 
-var DefaultTimeout = 5 * time.Second
+var DefaultTimeout = 10 * time.Second
 
 func Serve(stationURL string, handler http.Handler) error {
-	ctx, _ := context.WithTimeout(context.Background(), DefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+	defer cancel()
 
 	if handler == nil {
 		handler = http.DefaultServeMux
@@ -23,7 +24,7 @@ func Serve(stationURL string, handler http.Handler) error {
 
 	u, err := url.Parse(stationURL)
 	if err != nil {
-		return nil
+		return err
 	}
 	lm := &auth.LoginMiddleware{
 		Password: u.Fragment,
