@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/quic-go/quic-go v0.37.5
 	github.com/quic-go/webtransport-go v0.5.3
-	github.com/webteleport/auth v0.0.4
+	github.com/webteleport/auth v0.0.5
 	github.com/webteleport/utils v0.0.3
 )
 
