@@ -1,6 +1,7 @@
 package ufo
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -13,6 +14,9 @@ var DefaultTimeout = 10 * time.Second
 
 // DefaultGcInterval is the default garbage collection interval for the UFO server.
 var DefaultGcInterval = 0 * time.Second
+
+// DefaultGcRetry is the default garbage collection retry limit.
+var DefaultGcRetry int64 = 3
 
 // Serve starts a UFO server on the given station URL.
 func Serve(stationURL string, handler http.Handler) error {
@@ -40,12 +44,19 @@ func Serve(stationURL string, handler http.Handler) error {
 		return err
 	}
 
+	// Parse the 'retry' query parameter
+	retry, err := parseGcRetryParam(u.Query())
+	if err != nil {
+		return err
+	}
+
 	// Serve with the parsed configuration
 	return ServeWithConfig(&ServerConfig{
 		StationURL: u,
 		Handler:    handler,
 		Timeout:    timeout,
 		GcInterval: interval,
+		GcRetry:    retry,
 		Quiet:      quiet,
 	})
 }
@@ -56,6 +67,7 @@ type ServerConfig struct {
 	Handler    http.Handler
 	Timeout    time.Duration
 	GcInterval time.Duration
+	GcRetry    int64
 	Quiet      bool
 }
 
@@ -66,7 +78,7 @@ func ServeWithConfig(config *ServerConfig) error {
 	// listen on the station URL with a timeout
 	ln, err := listenWithTimeout(u.String(), config.Timeout)
 	if err != nil {
-		return err
+		return fmt.Errorf("listen: %w", err)
 	}
 
 	// log the status of the server
@@ -81,8 +93,12 @@ func ServeWithConfig(config *ServerConfig) error {
 
 	// close the listener when the server is unresponsive
 	if config.GcInterval > 0 {
-		go gc(ln, config.GcInterval)
+		go gc(ln, config.GcInterval, config.GcRetry)
 	}
 
-	return http.Serve(ln, auth.WithPassword(config.Handler, u.Fragment))
+	err = http.Serve(ln, auth.WithPassword(config.Handler, u.Fragment))
+	if err != nil {
+		return fmt.Errorf("serve: %w", err)
+	}
+	return nil
 }

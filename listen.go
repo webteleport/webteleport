@@ -36,11 +36,11 @@ func Listen(ctx context.Context, u string) (*Listener, error) {
 	}
 	session, err := Dial(ctx, up, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("dial: %w", err)
 	}
 	stm0, err := session.AcceptStream(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("stm0: %w", err)
 	}
 	errchan := make(chan string)
 	hostchan := make(chan string)
@@ -97,7 +97,7 @@ type Listener struct {
 func (l *Listener) Accept() (net.Conn, error) {
 	stream, err := l.session.AcceptStream(context.Background())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("accept: %w", err)
 	}
 	return &StreamConn{stream, l.session}, nil
 }

@@ -2,6 +2,7 @@ package ufo
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -79,21 +80,44 @@ func parseGcIntervalParam(query url.Values) (time.Duration, error) {
 	return time.ParseDuration(t)
 }
 
+// parseGcRetryParam parses the 'retry' query parameter.
+func parseGcRetryParam(query url.Values) (int64, error) {
+	r := query.Get("retry")
+	// If no retry limit is specified, use the default
+	if r == "" {
+		return DefaultGcRetry, nil
+	}
+	return strconv.ParseInt(r, 10, 64)
+}
+
 // gc probes the remote endpoint status and closes the listener if it's unresponsive.
-func gc(ln *webteleport.Listener, interval time.Duration) {
+func gc(ln *webteleport.Listener, interval time.Duration, limit int64) {
 	endpoint := ln.AsciiURL() + "/.well-known/health"
-	for {
+	client := &http.Client{
+		Timeout: interval,
+	}
+	for retry := limit; retry >= 0; {
 		time.Sleep(interval)
-		resp, err := http.Get(endpoint)
+		resp, err := client.Get(endpoint)
+		// if request isn't successful, decrease retry
 		if err != nil {
-			println("🛸 can't probe remote endpoint status. skipping...")
+			retry -= 1
+			werr := fmt.Errorf("🛸 failed to reach healthcheck endpoint (retry = %d): %w", retry, err)
+			log.Println(werr.Error())
 			continue
 		}
-		// if response is not 200, close the listener
+		// if response stats code is not 200, decrease retry
 		if resp.StatusCode != 200 {
-			println("🛸 closing the listener because the server is unresponsive")
-			ln.Close()
-			break
+			retry -= 1
+			werr := fmt.Errorf("🛸 healthcheck endpoint returns status %d (retry = %d): %w", resp.StatusCode, retry, err)
+			log.Println(werr.Error())
+		} else {
+			// otherwise reset retry to limit
+			retry = limit
 		}
+
+		resp.Body.Close()
 	}
+	log.Println("🛸 closing the listener")
+	ln.Close()
 }
