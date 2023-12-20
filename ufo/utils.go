@@ -2,16 +2,18 @@ package ufo
 
 import (
 	"context"
+	"log"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/webteleport/webteleport"
 )
 
 // listen with a timeout
-func listenWithTimeout(timeout time.Duration, addr string) (*webteleport.Listener, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+func listenWithTimeout(addr string, timeout time.Duration) (*webteleport.Listener, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	return webteleport.Listen(ctx, addr)
 }
@@ -33,4 +35,35 @@ func createURLWithQueryParams(stationURL string) (*url.URL, error) {
 	u.RawQuery = q.Encode()
 
 	return u, nil
+}
+
+// logServerStatus logs the status of the server.
+func logServerStatus(ln Listener, u *url.URL) {
+	log.Println("🛸 listening on", ln.ClickableURL())
+
+	if u.Fragment == "" {
+		log.Println("🔓 publicly accessible without a password")
+	} else {
+		log.Println("🔒 secured by password authentication")
+	}
+}
+
+// parseQuietParam parses the 'quiet' query parameter.
+func parseQuietParam(query url.Values) (bool, error) {
+	q := query.Get("quiet")
+	// If no quiet is specified, be loggy
+	if q == "" {
+		return false, nil
+	}
+	return strconv.ParseBool(q)
+}
+
+// parseTimeoutParam parses the 'timeout' query parameter.
+func parseTimeoutParam(query url.Values) (time.Duration, error) {
+	t := query.Get("timeout")
+	// If no timeout is specified, use the default
+	if t == "" {
+		return DefaultTimeout, nil
+	}
+	return time.ParseDuration(t)
 }
