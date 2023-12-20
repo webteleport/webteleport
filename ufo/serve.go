@@ -13,8 +13,8 @@ var DefaultTimeout = 10 * time.Second
 
 // Serve starts a UFO server on the given station URL.
 func Serve(stationURL string, handler http.Handler) error {
-	// Parse the station URL
-	u, err := url.Parse(stationURL)
+	// Parse the station URL and inject client info
+	u, err := createURLWithQueryParams(stationURL)
 	if err != nil {
 		return err
 	}
