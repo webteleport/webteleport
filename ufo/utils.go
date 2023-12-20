@@ -38,7 +38,7 @@ func createURLWithQueryParams(stationURL string) (*url.URL, error) {
 }
 
 // logServerStatus logs the status of the server.
-func logServerStatus(ln Listener, u *url.URL) {
+func logServerStatus(ln *webteleport.Listener, u *url.URL) {
 	log.Println("🛸 listening on", ln.ClickableURL())
 
 	if u.Fragment == "" {
