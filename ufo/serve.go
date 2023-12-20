@@ -11,6 +11,9 @@ import (
 // DefaultTimeout is the default dialing timeout for the UFO server.
 var DefaultTimeout = 10 * time.Second
 
+// DefaultGcInterval is the default garbage collection interval for the UFO server.
+var DefaultGcInterval = 0 * time.Second
+
 // Serve starts a UFO server on the given station URL.
 func Serve(stationURL string, handler http.Handler) error {
 	// Parse the station URL and inject client info
@@ -31,11 +34,18 @@ func Serve(stationURL string, handler http.Handler) error {
 		return err
 	}
 
+	// Parse the 'gc' query parameter
+	interval, err := parseGcIntervalParam(u.Query())
+	if err != nil {
+		return err
+	}
+
 	// Serve with the parsed configuration
 	return ServeWithConfig(&ServerConfig{
 		StationURL: u,
 		Handler:    handler,
 		Timeout:    timeout,
+		GcInterval: interval,
 		Quiet:      quiet,
 	})
 }
@@ -45,6 +55,7 @@ type ServerConfig struct {
 	StationURL *url.URL
 	Handler    http.Handler
 	Timeout    time.Duration
+	GcInterval time.Duration
 	Quiet      bool
 }
 
@@ -66,6 +77,11 @@ func ServeWithConfig(config *ServerConfig) error {
 	// use the default serve mux if nil handler is provided
 	if config.Handler == nil {
 		config.Handler = http.DefaultServeMux
+	}
+
+	// close the listener when the server is unresponsive
+	if config.GcInterval > 0 {
+		go gc(ln, config.GcInterval)
 	}
 
 	return http.Serve(ln, auth.WithPassword(config.Handler, u.Fragment))

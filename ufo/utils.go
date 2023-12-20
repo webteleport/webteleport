@@ -3,6 +3,7 @@ package ufo
 import (
 	"context"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
@@ -66,4 +67,33 @@ func parseTimeoutParam(query url.Values) (time.Duration, error) {
 		return DefaultTimeout, nil
 	}
 	return time.ParseDuration(t)
+}
+
+// parseGcIntervalParam parses the 'gc' query parameter.
+func parseGcIntervalParam(query url.Values) (time.Duration, error) {
+	t := query.Get("gc")
+	// If no gc interval is specified, use the default
+	if t == "" {
+		return DefaultGcInterval, nil
+	}
+	return time.ParseDuration(t)
+}
+
+// gc probes the remote endpoint status and closes the listener if it's unresponsive.
+func gc(ln *webteleport.Listener, interval time.Duration) {
+	endpoint := ln.AsciiURL() + "/.well-known/health"
+	for {
+		time.Sleep(interval)
+		resp, err := http.Get(endpoint)
+		if err != nil {
+			println("🛸 can't probe remote endpoint status. skipping...")
+			continue
+		}
+		// if response is not 200, close the listener
+		if resp.StatusCode != 200 {
+			println("🛸 closing the listener because the server is unresponsive")
+			ln.Close()
+			break
+		}
+	}
 }
