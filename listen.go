@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"net/url"
 	"strings"
@@ -61,7 +61,7 @@ func Listen(ctx context.Context, u string) (*Listener, error) {
 				errchan <- strings.TrimPrefix(line, "ERR ")
 				continue
 			}
-			log.Println("stm0: unknown command:", line)
+			slog.Warn(fmt.Sprintf("stm0: unknown command: %s", line))
 		}
 	}()
 	// go io.Copy(stm0, os.Stdin)

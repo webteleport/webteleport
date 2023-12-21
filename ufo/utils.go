@@ -3,7 +3,7 @@ package ufo
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -41,12 +41,12 @@ func createURLWithQueryParams(stationURL string) (*url.URL, error) {
 
 // logServerStatus logs the status of the server.
 func logServerStatus(ln *webteleport.Listener, u *url.URL) {
-	log.Println("🛸 listening on", ln.ClickableURL())
+	slog.Info(fmt.Sprintf("🛸 listening on %s", ln.ClickableURL()))
 
 	if u.Fragment == "" {
-		log.Println("🔓 publicly accessible without a password")
+		slog.Info("🔓 publicly accessible without a password")
 	} else {
-		log.Println("🔒 secured by password authentication")
+		slog.Info("🔒 secured by password authentication")
 	}
 }
 
@@ -103,14 +103,14 @@ func gc(ln *webteleport.Listener, interval time.Duration, limit int64) {
 		if err != nil {
 			retry -= 1
 			werr := fmt.Errorf("🛸 failed to reach healthcheck endpoint (retry = %d): %w", retry, err)
-			log.Println(werr.Error())
+			slog.Warn(werr.Error())
 			continue
 		}
 		// if response stats code is not 200, decrease retry
 		if resp.StatusCode != 200 {
 			retry -= 1
 			werr := fmt.Errorf("🛸 healthcheck endpoint returns status %d (retry = %d): %w", resp.StatusCode, retry, err)
-			log.Println(werr.Error())
+			slog.Warn(werr.Error())
 		} else {
 			// otherwise reset retry to limit
 			retry = limit
@@ -118,6 +118,6 @@ func gc(ln *webteleport.Listener, interval time.Duration, limit int64) {
 
 		resp.Body.Close()
 	}
-	log.Println("🛸 closing the listener")
+	slog.Error("🛸 closing the listener")
 	ln.Close()
 }
