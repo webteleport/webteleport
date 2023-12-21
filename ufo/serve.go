@@ -2,6 +2,7 @@ package ufo
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"time"
@@ -19,6 +20,12 @@ var DefaultGcInterval = 0 * time.Second
 var DefaultGcRetry int64 = 3
 
 // Serve starts a UFO server on the given station URL.
+// GC: Automatically close the server when health check fails for the given times
+// - gc: health check interval interval (0 for disable)
+// - retry: Retry the health check for the given times
+// - timeout: Automatically close the client when dial timeouts
+// - quiet: Do not log the status of the server (false for loggy)
+// - persist: Automatically restart the server when it becomes unresponsive (0 for disable)
 func Serve(stationURL string, handler http.Handler) error {
 	// Parse the station URL and inject client info
 	u, err := createURLWithQueryParams(stationURL)
@@ -50,15 +57,38 @@ func Serve(stationURL string, handler http.Handler) error {
 		return err
 	}
 
+	// Parse the 'persist' query parameter
+	persist, err := parsePersistParam(u.Query())
+	if err != nil {
+		return err
+	}
+
+	if !persist {
+		// Serve with the parsed configuration
+		return ServeWithConfig(&ServerConfig{
+			StationURL: u,
+			Handler:    handler,
+			Timeout:    timeout,
+			GcInterval: interval,
+			GcRetry:    retry,
+			Quiet:      quiet,
+		})
+	}
+
 	// Serve with the parsed configuration
-	return ServeWithConfig(&ServerConfig{
-		StationURL: u,
-		Handler:    handler,
-		Timeout:    timeout,
-		GcInterval: interval,
-		GcRetry:    retry,
-		Quiet:      quiet,
-	})
+	for {
+		err = ServeWithConfig(&ServerConfig{
+			StationURL: u,
+			Handler:    handler,
+			Timeout:    timeout,
+			GcInterval: interval,
+			GcRetry:    retry,
+			Quiet:      quiet,
+		})
+		if err != nil {
+			slog.Warn(fmt.Sprintf("serve error: %v", err))
+		}
+	}
 }
 
 // ServerConfig is the configuration for the UFO server.

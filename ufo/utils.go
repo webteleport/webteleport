@@ -90,6 +90,16 @@ func parseGcRetryParam(query url.Values) (int64, error) {
 	return strconv.ParseInt(r, 10, 64)
 }
 
+// parsePersistParam parses the 'persist' query parameter.
+func parsePersistParam(query url.Values) (bool, error) {
+	p := query.Get("persist")
+	// If no persist is specified, be ephemeral
+	if p == "" {
+		return false, nil
+	}
+	return strconv.ParseBool(p)
+}
+
 // gc probes the remote endpoint status and closes the listener if it's unresponsive.
 func gc(ln *webteleport.Listener, interval time.Duration, limit int64) {
 	endpoint := ln.AsciiURL() + "/.well-known/health"
