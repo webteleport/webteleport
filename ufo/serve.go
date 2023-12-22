@@ -88,6 +88,8 @@ func Serve(stationURL string, handler http.Handler) error {
 		if err != nil {
 			slog.Warn(fmt.Sprintf("serve error: %v", err))
 		}
+		// retry indefinitely with 1s interval to avoid DoS
+		time.Sleep(time.Second)
 	}
 }
 
