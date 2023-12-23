@@ -112,14 +112,14 @@ func gc(ln *webteleport.Listener, interval time.Duration, limit int64) {
 		// if request isn't successful, decrease retry
 		if err != nil {
 			retry -= 1
-			werr := fmt.Errorf("🛸 failed to reach healthcheck endpoint (retry = %d): %w", retry, err)
+			werr := fmt.Errorf("🛸 failed to reach healthcheck endpoint (retry = %d): %v", retry, err)
 			slog.Warn(werr.Error())
 			continue
 		}
 		// if response stats code is not 200, decrease retry
 		if resp.StatusCode != 200 {
 			retry -= 1
-			werr := fmt.Errorf("🛸 healthcheck endpoint returns status %d (retry = %d): %w", resp.StatusCode, retry, err)
+			werr := fmt.Errorf("🛸 healthcheck endpoint returns status %d (retry = %d): %v", resp.StatusCode, retry, err)
 			slog.Warn(werr.Error())
 		} else {
 			// otherwise reset retry to limit
