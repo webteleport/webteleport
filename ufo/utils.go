@@ -107,7 +107,6 @@ func gc(ln *webteleport.Listener, interval time.Duration, limit int64) {
 		Timeout: interval,
 	}
 	for retry := limit; retry >= 0; {
-		time.Sleep(interval)
 		resp, err := client.Get(endpoint)
 		// if request isn't successful, decrease retry
 		if err != nil {
@@ -127,6 +126,7 @@ func gc(ln *webteleport.Listener, interval time.Duration, limit int64) {
 		}
 
 		resp.Body.Close()
+		time.Sleep(interval)
 	}
 	slog.Error("🛸 closing the listener")
 	ln.Close()
