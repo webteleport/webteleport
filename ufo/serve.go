@@ -10,11 +10,11 @@ import (
 	"github.com/webteleport/auth"
 )
 
-// DefaultTimeout is the default dialing timeout for the UFO server.
+// DefaultTimeout is the default dialing timeout for the UFO client.
 var DefaultTimeout = 10 * time.Second
 
-// DefaultGcInterval is the default garbage collection interval for the UFO server.
-var DefaultGcInterval = 0 * time.Second
+// DefaultGcInterval is the default garbage collection interval for the UFO client.
+var DefaultGcInterval = 5 * time.Second
 
 // DefaultGcRetry is the default garbage collection retry limit.
 var DefaultGcRetry int64 = 3
