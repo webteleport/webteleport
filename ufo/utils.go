@@ -113,6 +113,7 @@ func gc(ln *webteleport.Listener, interval time.Duration, limit int64) {
 			retry -= 1
 			werr := fmt.Errorf("🛸 failed to reach healthcheck endpoint (retry = %d): %v", retry, err)
 			slog.Warn(werr.Error())
+			time.Sleep(interval)
 			continue
 		}
 		// if response stats code is not 200, decrease retry
