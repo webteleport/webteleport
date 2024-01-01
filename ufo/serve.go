@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/webteleport/auth"
+	"github.com/webteleport/utils"
 )
 
 // DefaultTimeout is the default dialing timeout for the UFO client.
@@ -128,7 +129,12 @@ func ServeWithConfig(config *ServerConfig) error {
 		go gc(ln, config.GcInterval, config.GcRetry)
 	}
 
-	err = http.Serve(ln, auth.WithPassword(config.Handler, u.Fragment))
+	// attach default middlewares
+	var handler = config.Handler
+	handler = auth.WithPassword(handler, u.Fragment)
+	handler = utils.WellKnownHealthMiddleware(handler)
+
+	err = http.Serve(ln, handler)
 	if err != nil {
 		return fmt.Errorf("serve: %w", err)
 	}
