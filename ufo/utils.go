@@ -106,29 +106,44 @@ func gc(ln *webteleport.Listener, interval time.Duration, limit int64) {
 	client := &http.Client{
 		Timeout: interval,
 	}
-	for retry := limit; retry >= 0; {
+
+	// trigger lazy certificate
+	client.Get(endpoint)
+
+	retry := limit
+	for {
+		if retry == 0 {
+			slog.Info("🛸 max retry reached")
+			break
+		}
+		// Wait for either the task to complete or a timeout to occur
+		time.Sleep(interval)
+
 		resp, err := client.Get(endpoint)
 		// if request isn't successful, decrease retry
 		if err != nil {
 			retry -= 1
 			werr := fmt.Errorf("🛸 failed to reach healthcheck endpoint (retry = %d): %v", retry, err)
-			slog.Warn(werr.Error())
-			time.Sleep(interval)
+			slog.Info(werr.Error())
 			continue
 		}
 		// if response stats code is not 200, decrease retry
 		if resp.StatusCode != 200 {
 			retry -= 1
 			werr := fmt.Errorf("🛸 healthcheck endpoint returns status %d (retry = %d): %v", resp.StatusCode, retry, err)
-			slog.Warn(werr.Error())
-		} else {
-			// otherwise reset retry to limit
-			retry = limit
+			slog.Info(werr.Error())
+			continue
 		}
 
+		if retry != limit {
+			slog.Info("🛸 back online")
+		}
+
+		// otherwise reset retry to limit
+		retry = limit
+
 		resp.Body.Close()
-		time.Sleep(interval)
 	}
-	slog.Error("🛸 closing the listener")
+	slog.Info("🛸 closing the listener")
 	ln.Close()
 }
