@@ -21,6 +21,7 @@ type StreamConn struct {
 // - https://pkg.go.dev/github.com/quic-go/webtransport-go#Stream
 func (sc *StreamConn) Close() error {
 	sc.Stream.CancelRead(CancelRead)
+	ConnsClosed.Add(1)
 	return sc.Stream.Close()
 }
 

@@ -99,6 +99,7 @@ func (l *Listener) Accept() (net.Conn, error) {
 	if err != nil {
 		return nil, fmt.Errorf("accept: %w", err)
 	}
+	ConnsAccepted.Add(1)
 	return &StreamConn{stream, l.session}, nil
 }
 
