@@ -6,7 +6,7 @@ require (
 	github.com/quic-go/quic-go v0.40.1
 	github.com/quic-go/webtransport-go v0.6.0
 	github.com/webteleport/auth v0.0.5
-	github.com/webteleport/utils v0.0.9
+	github.com/webteleport/utils v0.1.2
 )
 
 require (
