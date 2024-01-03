@@ -16,6 +16,16 @@ type StreamConn struct {
 	Session *webtransport.Session
 }
 
+// Close calls CancelRead to avoid memory leak, see
+// - https://github.com/quic-go/quic-go/issues/3558
+// - https://pkg.go.dev/github.com/quic-go/webtransport-go#Stream
+func (sc *StreamConn) Close() error {
+	sc.Stream.CancelRead(CancelRead)
+	return sc.Stream.Close()
+}
+
+var CancelRead webtransport.StreamErrorCode = 3558
+
 // LocalAddr is required to impl net.Conn
 func (sc *StreamConn) LocalAddr() net.Addr { return sc.Session.LocalAddr() }
 
