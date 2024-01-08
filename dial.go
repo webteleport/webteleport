@@ -66,6 +66,9 @@ func Dial(ctx context.Context, u *url.URL, hdr http.Header) (*webtransport.Sessi
 	un, _ := url.Parse(u.String())
 	un.Scheme = "https"
 	un.Host = addr
+	params := un.Query()
+	params.Add("x-webteleport-upgrade", "1")
+	un.RawQuery = params.Encode()
 	_, session, err := d.Dial(ctx, un.String(), hdr)
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (UDP): %w", un.String(), err)
