@@ -71,6 +71,7 @@ func Listen(ctx context.Context, u string) (*Listener, error) {
 	}()
 	// go io.Copy(stm0, os.Stdin)
 	// Start a goroutine to gracefully handle close signal
+	// TODO: cancel when server exits
 	go func() {
 		signalChannel := make(chan os.Signal, 1)
 
