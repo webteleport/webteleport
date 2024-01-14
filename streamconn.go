@@ -3,7 +3,7 @@ package webteleport
 import (
 	"net"
 
-	"github.com/quic-go/webtransport-go"
+	"github.com/quic-go/quic-go"
 )
 
 var _ net.Conn = (*StreamConn)(nil)
@@ -12,8 +12,8 @@ var _ net.Conn = (*StreamConn)(nil)
 //
 // TODO this should be part of github.com/webtransport/webtransport
 type StreamConn struct {
-	webtransport.Stream
-	Session *webtransport.Session
+	quic.Stream
+	Session quic.Connection
 }
 
 // Close calls CancelRead to avoid memory leak, see
@@ -25,7 +25,7 @@ func (sc *StreamConn) Close() error {
 	return sc.Stream.Close()
 }
 
-var CancelRead webtransport.StreamErrorCode = 3558
+var CancelRead quic.StreamErrorCode = 3558
 
 // LocalAddr is required to impl net.Conn
 func (sc *StreamConn) LocalAddr() net.Addr { return sc.Session.LocalAddr() }

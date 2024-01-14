@@ -7,14 +7,13 @@ import (
 	"io"
 	"log/slog"
 	"net"
-	"net/url"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
 
-	"github.com/quic-go/webtransport-go"
+	"github.com/quic-go/quic-go"
 	"github.com/webteleport/utils"
 )
 
@@ -30,16 +29,7 @@ var _ net.Listener = (*Listener)(nil)
 // The returned Listener can be imagined to be bound to a remote [net.Addr], which can be obtained
 // using the [Listener.Addr] method
 func Listen(ctx context.Context, u string) (*Listener, error) {
-	// localhost:3000 will be parsed by net/url as URL{Scheme: localhost, Port: 3000}
-	// hence the hack
-	if !strings.Contains(u, "://") {
-		u = "http://" + u
-	}
-	up, err := url.Parse(u)
-	if err != nil {
-		return nil, err
-	}
-	session, err := Dial(ctx, up, nil)
+	session, err := Dial(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("dial: %w", err)
 	}
@@ -95,8 +85,8 @@ func Listen(ctx context.Context, u string) (*Listener, error) {
 	ln := &Listener{
 		session: session,
 		stm0:    stm0,
-		scheme:  up.Scheme,
-		port:    utils.ExtractURLPort(up),
+		// scheme:  up.Scheme,
+		// port:    utils.ExtractURLPort(up),
 	}
 	select {
 	case emsg := <-errchan:
@@ -113,8 +103,8 @@ func (l *Listener) Listen(ctx context.Context, u string) (*Listener, error) {
 
 // Listener implements [net.Listener]
 type Listener struct {
-	session *webtransport.Session
-	stm0    webtransport.Stream
+	session quic.Connection
+	stm0    quic.Stream
 	scheme  string
 	host    string
 	port    string
