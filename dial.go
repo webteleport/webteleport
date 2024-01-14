@@ -4,9 +4,8 @@ import (
 	"context"
 	"crypto/tls"
 	"strings"
-	"time"
 
-	"github.com/quic-go/quic-go"
+	"github.com/webtransport/quic"
 )
 
 // 2^60 == 1152921504606846976
@@ -28,19 +27,18 @@ func altsvcLines(txts []string) []string {
 	return altsvcs
 }
 
-func Dial(ctx context.Context, addr string) (quic.Connection, error) {
-	tlsConf := &tls.Config{
-		InsecureSkipVerify: true,
-		// NextProtos:         []string{"spdy/3", "h2", "hq-29"},
-		// ClientSessionCache: tls.NewLRUClientSessionCache(1),
-	}
+func Dial(ctx context.Context, addr string) (*quic.Conn, error) {
 	quicConf := &quic.Config{
-		MaxIdleTimeout: time.Minute * 10080,
-		// KeepAlive:             true,
-		MaxIncomingStreams:    1000000,
-		MaxIncomingUniStreams: 1000000,
-		// TokenStore:            quicGo.NewLRUTokenStore(1, 1),
+		TLSConfig: &tls.Config{
+			InsecureSkipVerify: true,
+			MinVersion:         tls.VersionTLS13,
+			NextProtos:         []string{"hq-interop"},
+		},
 	}
-	session, err := quic.DialAddr(ctx, addr, tlsConf, quicConf)
+	l, err := quic.Listen("udp", ":0", quicConf)
+	if err != nil {
+		return nil, err
+	}
+	session, err := l.Dial(ctx, "udp", addr)
 	return session, err
 }

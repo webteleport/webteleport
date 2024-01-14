@@ -2,8 +2,9 @@ package webteleport
 
 import (
 	"net"
+	"time"
 
-	"github.com/quic-go/quic-go"
+	"github.com/webtransport/quic"
 )
 
 var _ net.Conn = (*StreamConn)(nil)
@@ -12,23 +13,21 @@ var _ net.Conn = (*StreamConn)(nil)
 //
 // TODO this should be part of github.com/webtransport/webtransport
 type StreamConn struct {
-	quic.Stream
-	Session quic.Connection
+	*quic.Stream
+	Session *quic.Conn
 }
-
-// Close calls CancelRead to avoid memory leak, see
-// - https://github.com/quic-go/quic-go/issues/3558
-// - https://pkg.go.dev/github.com/quic-go/webtransport-go#Stream
-func (sc *StreamConn) Close() error {
-	sc.Stream.CancelRead(CancelRead)
-	ConnsClosed.Add(1)
-	return sc.Stream.Close()
-}
-
-var CancelRead quic.StreamErrorCode = 3558
 
 // LocalAddr is required to impl net.Conn
 func (sc *StreamConn) LocalAddr() net.Addr { return sc.Session.LocalAddr() }
 
 // RemoteAddr is required to impl net.Conn
 func (sc *StreamConn) RemoteAddr() net.Addr { return sc.Session.RemoteAddr() }
+
+// SetDeadline is required to impl net.Conn
+func (sc *StreamConn) SetDeadline(time.Time) error { return nil }
+
+// SetReadDeadline is required to impl net.Conn
+func (sc *StreamConn) SetReadDeadline(time.Time) error { return nil }
+
+// SetWriteDeadline is required to impl net.Conn
+func (sc *StreamConn) SetWriteDeadline(time.Time) error { return nil }

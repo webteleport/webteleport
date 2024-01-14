@@ -13,8 +13,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/quic-go/quic-go"
 	"github.com/webteleport/utils"
+	"github.com/webtransport/quic"
 )
 
 var _ net.Listener = (*Listener)(nil)
@@ -103,8 +103,8 @@ func (l *Listener) Listen(ctx context.Context, u string) (*Listener, error) {
 
 // Listener implements [net.Listener]
 type Listener struct {
-	session quic.Connection
-	stm0    quic.Stream
+	session *quic.Conn
+	stm0    *quic.Stream
 	scheme  string
 	host    string
 	port    string
@@ -121,7 +121,8 @@ func (l *Listener) Accept() (net.Conn, error) {
 }
 
 func (l *Listener) Close() error {
-	return l.session.CloseWithError(1337, "foobar")
+	l.stm0.Close()
+	return l.session.Close()
 }
 
 // Addr returns Listener itself which is an implementor of [net.Addr]
