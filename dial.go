@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -41,7 +42,7 @@ func Dial(ctx context.Context, u *url.URL, hdr http.Header) (*webtransport.Sessi
 	}
 	txts, err := utils.LookupHostTXT(u.Host, "1.1.1.1:53")
 	if err != nil {
-		return nil, err
+		slog.Warn(fmt.Sprintf("dns lookup error: %v", err))
 	}
 	altsvcHeader := resp.Header.Get("Alt-Svc")
 	altsvcs := append(altsvcLines(txts), altsvcHeader)
