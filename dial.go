@@ -4,10 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/quic-go/quic-go"
 	"github.com/quic-go/quic-go/http3"
@@ -18,39 +16,9 @@ import (
 // 2^60 == 1152921504606846976
 const MaxIncomingStreams int64 = 1 << 60
 
-func altsvcLines(txts []string) []string {
-	const prefix = "Alt-Svc: "
-
-	altsvcs := []string{}
-
-	for _, txt := range txts {
-		// Case insensitive prefix match. See Issue 22736.
-		if len(txt) < len(prefix) || !strings.EqualFold(txt[:len(prefix)], prefix) {
-			continue
-		}
-		altsvcs = append(altsvcs, txt[len(prefix):])
-	}
-
-	return altsvcs
-}
-
 // Dial is a wrapper around webtransport.Dial with automatic HTTP/3 service discovery
 func Dial(ctx context.Context, u *url.URL, hdr http.Header) (*webtransport.Session, error) {
-	resp, err := http.Head(u.String())
-	if err != nil {
-		return nil, err
-	}
-	txts, err := utils.LookupHostTXT(u.Host, "1.1.1.1:53")
-	if err != nil {
-		slog.Warn(fmt.Sprintf("dns lookup error: %v", err))
-	}
-	altsvcHeader := resp.Header.Get("Alt-Svc")
-	altsvcs := append(altsvcLines(txts), altsvcHeader)
-	// log.Println(altsvcs)
-	endpoints := []string{}
-	for _, altsvc := range altsvcs {
-		endpoints = append(endpoints, utils.ExtractAltSvcEndpoints(altsvc, "webteleport")...)
-	}
+	endpoints := Resolve(u)
 	if len(endpoints) == 0 {
 		return nil, errors.New("service discovery failed: no webteleport endpoints found in Alt-Svc records / headers")
 	}
