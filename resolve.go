@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/webteleport/utils"
@@ -12,6 +13,7 @@ import (
 
 // Resolve gets all webteleport endpoints from Alt-Svc dns records / headers
 func Resolve(u *url.URL) (endpoints []string) {
+	endpoints = append(endpoints, eps(ENV("ALT_SVC"))...)
 	endpoints = append(endpoints, eps(TXT(u.Host))...)
 	endpoints = append(endpoints, eps(HEAD(u.String()))...)
 	return
@@ -23,6 +25,15 @@ func eps(altsvcs []string) (endpoints []string) {
 		endpoints = append(endpoints, es...)
 	}
 	return
+}
+
+// ENV gets altsvc value from env
+func ENV(s string) []string {
+	v, ok := os.LookupEnv(s)
+	if ok {
+		return []string{v}
+	}
+	return []string{}
 }
 
 // HEAD gets all altsvcs from Alt-Svc header values of given url
