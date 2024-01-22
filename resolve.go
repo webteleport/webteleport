@@ -37,10 +37,11 @@ func ENV(s string) []string {
 }
 
 // HEAD gets all altsvcs from Alt-Svc header values of given url
-func HEAD(s string) []string {
+func HEAD(s string) (v []string) {
 	resp, err := http.Head(s)
 	if err != nil {
 		slog.Warn(fmt.Sprintf("http head error: %v", err))
+		return
 	}
 	return resp.Header.Values("Alt-Svc")
 }
