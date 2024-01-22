@@ -36,9 +36,19 @@ func ENV(s string) []string {
 	return []string{}
 }
 
+// AsURL expands :port and hostname to http://localhost:port & http://hostname respectively
+func AsURL(s string) string {
+	if strings.HasPrefix(s, ":") {
+		s = "http://localhost" + s
+	} else if !strings.HasPrefix(s, "http://") && !strings.HasPrefix(s, "https://") {
+		s = "http://" + s
+	}
+	return s
+}
+
 // HEAD gets all altsvcs from Alt-Svc header values of given url
 func HEAD(s string) (v []string) {
-	resp, err := http.Head(s)
+	resp, err := http.Head(AsURL(s))
 	if err != nil {
 		slog.Warn(fmt.Sprintf("http head error: %v", err))
 		return
