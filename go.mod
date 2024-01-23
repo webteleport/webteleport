@@ -7,7 +7,7 @@ go 1.21.6
 require (
 	github.com/quic-go/quic-go v0.41.0
 	github.com/quic-go/webtransport-go v0.6.0
-	github.com/webteleport/utils v0.2.2
+	github.com/webteleport/utils v0.2.4
 )
 
 require (
