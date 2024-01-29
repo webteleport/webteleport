@@ -136,40 +136,44 @@ func (l *Listener) Close() error {
 
 // Addr returns Listener itself which is an implementor of [net.Addr]
 func (l *Listener) Addr() net.Addr {
-	return l
+	return &Addr{l}
+}
+
+type Addr struct {
+	*Listener
 }
 
 // Network returns the protocol scheme, either http or https
-func (l *Listener) Network() string {
-	return l.scheme
+func (addr *Addr) Network() string {
+	return addr.Listener.scheme
 }
 
 // String returns the host(:port) address of Listener, forcing ASCII
-func (l *Listener) String() string {
-	return utils.ToIdna(l.host) + l.port
+func (addr *Addr) String() string {
+	return utils.ToIdna(addr.Listener.host) + addr.Listener.port
 }
 
 // String returns the host(:port) address of Listener, Unicode is kept inact
-func (l *Listener) Display() string {
+func Display(l *Listener) string {
 	return l.host + l.port
 }
 
 // AsciiURL returns the public accessible address of the Listener
-func (l *Listener) AsciiURL() string {
-	return l.Network() + "://" + l.String()
+func AsciiURL(l *Listener) string {
+	return l.Addr().Network() + "://" + l.Addr().String()
 }
 
 // HumanURL returns the human readable URL
-func (l *Listener) HumanURL() string {
-	return l.Network() + "://" + l.Display()
+func HumanURL(l *Listener) string {
+	return l.Addr().Network() + "://" + Display(l)
 }
 
 // AutoURL returns a clickable url the URL
 //
 //	when link == text, it displays `link[link]`
 //	when link != text, it displays `text ([link](link))`
-func (l *Listener) ClickableURL() string {
-	disp, link := l.HumanURL(), l.AsciiURL()
+func ClickableURL(l *Listener) string {
+	disp, link := HumanURL(l), AsciiURL(l)
 	if disp == link {
 		return utils.MaybeHyperlink(link)
 	}
