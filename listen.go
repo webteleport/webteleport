@@ -106,11 +106,6 @@ func Listen(ctx context.Context, u string) (*Listener, error) {
 	}
 }
 
-// TODO consider introducing a SubListener API, reusing the same WebTransport connection
-func (l *Listener) Listen(ctx context.Context, u string) (*Listener, error) {
-	return nil, nil
-}
-
 // Listener implements [net.Listener]
 type Listener struct {
 	session *webtransport.Session
