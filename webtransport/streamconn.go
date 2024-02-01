@@ -9,11 +9,14 @@ import (
 var _ net.Conn = (*StreamConn)(nil)
 
 // StreamsConn wraps webtransport.Stream into net.Conn
-//
-// TODO this should be part of github.com/webtransport/webtransport
 type StreamConn struct {
 	webtransport.Stream
 	Session *webtransport.Session
+}
+
+func NewConn(s webtransport.Stream, ssn *webtransport.Session) net.Conn {
+	WebtransportConnsOpened.Add(1)
+	return &StreamConn{s, ssn}
 }
 
 // Close calls CancelRead to avoid memory leak, see
