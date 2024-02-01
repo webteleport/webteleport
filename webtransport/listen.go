@@ -18,16 +18,6 @@ import (
 	"github.com/webteleport/utils"
 )
 
-// Listen calls [Dial] to create a [Listener], which is essentially a wrapper struct
-// around a webtransport session, which in turn is able to spawn arbitrary number of streams
-// that implements [net.Conn]
-//
-// It is modelled after [net.Listen], however it doesn't require the caller to be able to
-// bind to a local port.
-//
-// The returned Listener can be imagined to be bound to a remote [net.Addr], which can be obtained
-// using the [Listener.Addr] method
-
 var _ net.Listener = (*WebtransportListener)(nil)
 
 func Listen(ctx context.Context, ep string, relayURL *url.URL) (*WebtransportListener, error) {
@@ -114,8 +104,8 @@ type Stream interface {
 
 // WebtransportListener implements [net.Listener]
 type WebtransportListener struct {
-	session *webtransport.Session // Session // webtransportSession,
-	stm0    webtransport.Stream   // Stream  // webtransport.Stream
+	session *webtransport.Session
+	stm0    webtransport.Stream
 	scheme  string
 	host    string
 	port    string
@@ -131,7 +121,8 @@ func (l *WebtransportListener) Accept() (net.Conn, error) {
 }
 
 func (l *WebtransportListener) Close() error {
-	return l.session.CloseWithError(1337, "foobar")
+	l.session.CloseWithError(1337, "foobar")
+	return http.ErrServerClosed
 }
 
 // Addr returns Listener itself which is an implementor of [net.Addr]
@@ -153,7 +144,7 @@ func (addr *WebtransportAddr) String() string {
 	return utils.ToIdna(addr.WebtransportListener.host) + addr.WebtransportListener.port
 }
 
-// String returns the host(:port) address of Listener, Unicode is kept inact
+// Display returns the host(:port) address of Listener, Unicode is kept inact
 func Display(l *WebtransportListener) string {
 	return l.host + l.port
 }
@@ -168,7 +159,7 @@ func HumanURL(l *WebtransportListener) string {
 	return l.Addr().Network() + "://" + Display(l)
 }
 
-// AutoURL returns a clickable url the URL
+// ClickableURL returns a clickable url the URL
 //
 //	when link == text, it displays `link[link]`
 //	when link != text, it displays `text ([link](link))`
