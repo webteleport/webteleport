@@ -109,8 +109,8 @@ type Stream interface {
 
 // WebsocketListener implements [net.Listener]
 type WebsocketListener struct {
-	session *yamux.Session // Session // webtransportSession,
-	stm0    *yamux.Stream  // Stream  // webtransport.Stream
+	session *yamux.Session
+	stm0    *yamux.Stream
 	scheme  string
 	host    string
 	port    string
@@ -122,8 +122,7 @@ func (l *WebsocketListener) Accept() (net.Conn, error) {
 	if err != nil {
 		return nil, fmt.Errorf("accept: %w", err)
 	}
-	WebsocketConnsAccepted.Add(1)
-	return &StreamConn{stream}, nil
+	return NewAcceptedConn(stream), nil
 }
 
 func (l *WebsocketListener) Close() error {

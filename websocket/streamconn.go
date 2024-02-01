@@ -13,7 +13,12 @@ type StreamConn struct {
 	*yamux.Stream
 }
 
-func NewConn(s *yamux.Stream) net.Conn {
+func NewAcceptedConn(s *yamux.Stream) net.Conn {
+	WebsocketConnsAccepted.Add(1)
+	return &StreamConn{s}
+}
+
+func NewOpenedConn(s *yamux.Stream) net.Conn {
 	WebsocketConnsOpened.Add(1)
 	return &StreamConn{s}
 }

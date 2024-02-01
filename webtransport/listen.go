@@ -127,8 +127,7 @@ func (l *WebtransportListener) Accept() (net.Conn, error) {
 	if err != nil {
 		return nil, fmt.Errorf("accept: %w", err)
 	}
-	WebtransportConnsAccepted.Add(1)
-	return &StreamConn{stream, l.session}, nil
+	return NewAcceptedConn(stream, l.session), nil
 }
 
 func (l *WebtransportListener) Close() error {

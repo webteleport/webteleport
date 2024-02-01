@@ -14,7 +14,12 @@ type StreamConn struct {
 	Session *webtransport.Session
 }
 
-func NewConn(s webtransport.Stream, ssn *webtransport.Session) net.Conn {
+func NewAcceptedConn(s webtransport.Stream, ssn *webtransport.Session) net.Conn {
+	WebtransportConnsAccepted.Add(1)
+	return &StreamConn{s, ssn}
+}
+
+func NewOpenedConn(s webtransport.Stream, ssn *webtransport.Session) net.Conn {
 	WebtransportConnsOpened.Add(1)
 	return &StreamConn{s, ssn}
 }
