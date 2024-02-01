@@ -4,11 +4,13 @@ import (
 	// "bufio"
 	"context"
 	"errors"
+
 	// "fmt"
 	"io"
 	// "log/slog"
 	"net"
 	"net/url"
+
 	// "os"
 	// "os/signal"
 	// "strings"
@@ -30,7 +32,7 @@ import (
 // The returned Listener can be imagined to be bound to a remote [net.Addr], which can be obtained
 // using the [Listener.Addr] method
 func Listen(ctx context.Context, u string) (net.Listener, error) {
-	URL, _:= url.Parse(u)
+	URL, _ := url.Parse(u)
 	endpoints := Resolve(URL)
 	if len(endpoints) == 0 {
 		return nil, errors.New("service discovery failed: no webteleport endpoints found in Alt-Svc records / headers")

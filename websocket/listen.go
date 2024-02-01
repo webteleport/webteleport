@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/quic-go/webtransport-go"
+	"github.com/hashicorp/yamux"
 	"github.com/webteleport/utils"
 )
 
@@ -44,7 +44,7 @@ func ListenWebsocket(ctx context.Context, u string) (*WebsocketListener, error) 
 	if err != nil {
 		return nil, fmt.Errorf("dial: %w", err)
 	}
-	stm0, err := session.AcceptStream(ctx)
+	stm0, err := session.AcceptStream()
 	if err != nil {
 		return nil, fmt.Errorf("stm0: %w", err)
 	}
@@ -118,8 +118,8 @@ type Stream interface {
 
 // WebsocketListener implements [net.Listener]
 type WebsocketListener struct {
-	session *webtransport.Session // Session // webtransportSession,
-	stm0    webtransport.Stream   // Stream  // webtransport.Stream
+	session *yamux.Session // Session // webtransportSession,
+	stm0    *yamux.Stream  // Stream  // webtransport.Stream
 	scheme  string
 	host    string
 	port    string
@@ -127,16 +127,16 @@ type WebsocketListener struct {
 
 // calling Accept returns a new [net.Conn]
 func (l *WebsocketListener) Accept() (net.Conn, error) {
-	stream, err := l.session.AcceptStream(context.Background())
+	stream, err := l.session.AcceptStream()
 	if err != nil {
 		return nil, fmt.Errorf("accept: %w", err)
 	}
 	WebsocketConnsAccepted.Add(1)
-	return &StreamConn{stream, l.session}, nil
+	return &StreamConn{stream}, nil
 }
 
 func (l *WebsocketListener) Close() error {
-	return l.session.CloseWithError(1337, "foobar")
+	return l.session.Close()
 }
 
 // Addr returns Listener itself which is an implementor of [net.Addr]
