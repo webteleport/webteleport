@@ -19,6 +19,7 @@ import (
 
 	// "github.com/quic-go/webtransport-go"
 	"github.com/webteleport/utils"
+	"github.com/webteleport/webteleport/websocket"
 	"github.com/webteleport/webteleport/webtransport"
 )
 
@@ -39,7 +40,9 @@ func Listen(ctx context.Context, u string) (net.Listener, error) {
 	}
 	alt := endpoints[0]
 	addr := utils.Graft(URL.Host, alt)
-	return webtransport.ListenWebtransport(ctx, addr)
+	return webtransport.Listen(ctx, addr)
+	// TODO: select the appropriate transport based on availability
+	return websocket.Listen(ctx, addr)
 }
 
 type Session interface {

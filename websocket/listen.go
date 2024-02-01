@@ -30,7 +30,7 @@ import (
 
 var _ net.Listener = (*WebsocketListener)(nil)
 
-func ListenWebsocket(ctx context.Context, u string) (*WebsocketListener, error) {
+func Listen(ctx context.Context, u string) (*WebsocketListener, error) {
 	// localhost:3000 will be parsed by net/url as URL{Scheme: localhost, Port: 3000}
 	// hence the hack
 	if !strings.Contains(u, "://") {
