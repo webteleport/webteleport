@@ -31,6 +31,7 @@ import (
 var _ net.Listener = (*WebtransportListener)(nil)
 
 func Listen(ctx context.Context, u string) (*WebtransportListener, error) {
+	slog.Info(u)
 	// localhost:3000 will be parsed by net/url as URL{Scheme: localhost, Port: 3000}
 	// hence the hack
 	if !strings.Contains(u, "://") {
