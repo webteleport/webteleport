@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/ebi-yade/altsvc-go"
 	"github.com/webteleport/utils"
@@ -68,7 +69,15 @@ func ENV(s string) []string {
 
 // HEAD gets all altsvcs from Alt-Svc header values of given url
 func HEAD(s string) (v []string) {
-	resp, err := http.Head(utils.AsURL(s))
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+	req, err := http.NewRequest(http.MethodHead, utils.AsURL(s), nil)
+	if err != nil {
+		slog.Warn(fmt.Sprintf("http req error: %v", err))
+		return
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		slog.Warn(fmt.Sprintf("http head error: %v", err))
 		return
