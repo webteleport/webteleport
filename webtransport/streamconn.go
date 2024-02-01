@@ -1,4 +1,4 @@
-package webteleport
+package webtransport
 
 import (
 	"net"
@@ -9,11 +9,19 @@ import (
 var _ net.Conn = (*StreamConn)(nil)
 
 // StreamsConn wraps webtransport.Stream into net.Conn
-//
-// TODO this should be part of github.com/webtransport/webtransport
 type StreamConn struct {
 	webtransport.Stream
 	Session *webtransport.Session
+}
+
+func NewAcceptedConn(s webtransport.Stream, ssn *webtransport.Session) net.Conn {
+	WebtransportConnsAccepted.Add(1)
+	return &StreamConn{s, ssn}
+}
+
+func NewOpenedConn(s webtransport.Stream, ssn *webtransport.Session) net.Conn {
+	WebtransportConnsOpened.Add(1)
+	return &StreamConn{s, ssn}
 }
 
 // Close calls CancelRead to avoid memory leak, see
@@ -21,7 +29,7 @@ type StreamConn struct {
 // - https://pkg.go.dev/github.com/quic-go/webtransport-go#Stream
 func (sc *StreamConn) Close() error {
 	sc.Stream.CancelRead(CancelRead)
-	ConnsClosed.Add(1)
+	WebtransportConnsClosed.Add(1)
 	return sc.Stream.Close()
 }
 
