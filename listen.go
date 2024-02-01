@@ -1,24 +1,12 @@
 package webteleport
 
 import (
-	// "bufio"
 	"context"
 	"errors"
-
-	// "fmt"
-	"io"
-	// "log/slog"
 	"net"
 	"net/url"
 
-	// "os"
-	// "os/signal"
-	// "strings"
-	// "syscall"
-	// "time"
-
-	// "github.com/quic-go/webtransport-go"
-	// "github.com/webteleport/utils"
+	"github.com/webteleport/webteleport/endpoint"
 	"github.com/webteleport/webteleport/websocket"
 	"github.com/webteleport/webteleport/webtransport"
 )
@@ -34,7 +22,7 @@ import (
 // using the [Listener.Addr] method
 func Listen(ctx context.Context, u string) (net.Listener, error) {
 	URL, _ := url.Parse(u)
-	endpoints := Resolve(URL)
+	endpoints := endpoint.Resolve(URL)
 	if len(endpoints) == 0 {
 		return nil, errors.New("service discovery failed: no webteleport endpoints found in Alt-Svc records / headers")
 	}
@@ -47,13 +35,4 @@ func Listen(ctx context.Context, u string) (net.Listener, error) {
 	default:
 		return webtransport.Listen(ctx, ep.Addr)
 	}
-}
-
-type Session interface {
-	AcceptStream(context.Context) (Stream, error)
-}
-
-type Stream interface {
-	io.Reader
-	io.Writer
 }
