@@ -18,7 +18,7 @@ import (
 	// "time"
 
 	// "github.com/quic-go/webtransport-go"
-	"github.com/webteleport/utils"
+	// "github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/websocket"
 	"github.com/webteleport/webteleport/webtransport"
 )
@@ -38,11 +38,15 @@ func Listen(ctx context.Context, u string) (net.Listener, error) {
 	if len(endpoints) == 0 {
 		return nil, errors.New("service discovery failed: no webteleport endpoints found in Alt-Svc records / headers")
 	}
-	alt := endpoints[0]
-	addr := utils.Graft(URL.Host, alt)
-	return webtransport.Listen(ctx, addr)
-	// TODO: select the appropriate transport based on availability
-	return websocket.Listen(ctx, addr)
+	ep := endpoints[0]
+	switch ep.Protocol {
+	case "websocket":
+		return websocket.Listen(ctx, ep.Addr)
+	case "webtransport":
+		return webtransport.Listen(ctx, ep.Addr)
+	default:
+		return webtransport.Listen(ctx, ep.Addr)
+	}
 }
 
 type Session interface {

@@ -8,20 +8,48 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ebi-yade/altsvc-go"
 	"github.com/webteleport/utils"
 )
 
-// Resolve gets all webteleport endpoints from Alt-Svc dns records / headers
-func Resolve(u *url.URL) (endpoints []string) {
-	endpoints = append(endpoints, eps(ENV("ALT_SVC"))...)
-	endpoints = append(endpoints, eps(TXT(u.Host))...)
-	endpoints = append(endpoints, eps(HEAD(u.String()))...)
+type Endpoint struct {
+	Protocol string // "websocket" or "webtransport"
+	Addr     string // host:port
+}
+
+// ExtractAltSvcH3Endpoints reads Alt-Svc value
+// returns a list of [host]:port endpoints
+func ExtractAltSvcEndpoints(hostname, line, protocolId string) (endpoints []Endpoint) {
+	svcs, err := altsvc.Parse(line)
+	if err != nil {
+		return
+	}
+	for _, svc := range svcs {
+		if svc.ProtocolID != protocolId {
+			continue
+		}
+		// host could be empty, port must not
+		addr := svc.AltAuthority.Host + ":" + svc.AltAuthority.Port
+		ep := Endpoint{
+			Protocol: "webtransport",
+			Addr:     utils.Graft(hostname, addr),
+		}
+		endpoints = append(endpoints, ep)
+	}
 	return
 }
 
-func eps(altsvcs []string) (endpoints []string) {
+// Resolve gets all webteleport endpoints from Alt-Svc dns records / headers
+func Resolve(u *url.URL) (endpoints []Endpoint) {
+	endpoints = append(endpoints, eps(u.Hostname(), ENV("ALT_SVC"))...)
+	endpoints = append(endpoints, eps(u.Hostname(), TXT(u.Host))...)
+	endpoints = append(endpoints, eps(u.Hostname(), HEAD(u.String()))...)
+	return
+}
+
+func eps(hostname string, altsvcs []string) (endpoints []Endpoint) {
 	for _, v := range altsvcs {
-		es := utils.ExtractAltSvcEndpoints(v, "webteleport")
+		es := ExtractAltSvcEndpoints(hostname, v, "webteleport")
 		endpoints = append(endpoints, es...)
 	}
 	return

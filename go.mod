@@ -5,6 +5,7 @@ go 1.21.6
 // replace github.com/webteleport/utils => ../utils
 
 require (
+	github.com/ebi-yade/altsvc-go v0.1.1
 	github.com/hashicorp/yamux v0.1.1
 	github.com/quic-go/quic-go v0.41.0
 	github.com/quic-go/webtransport-go v0.6.0
@@ -13,7 +14,6 @@ require (
 )
 
 require (
-	github.com/ebi-yade/altsvc-go v0.1.1 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/pprof v0.0.0-20230821062121-407c9e7a662f // indirect
