@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"context"
-	// "errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -11,11 +10,17 @@ import (
 	"k0s.io/pkg/dial"
 )
 
-func DialWebsocket(_ctx context.Context, addr string, hdr http.Header) (*yamux.Session, error) {
-	un, _ := url.Parse(addr)
+func DialWebsocket(_ctx context.Context, addr string, up *url.URL, hdr http.Header) (*yamux.Session, error) {
+	un, err := url.Parse(addr)
+	if err != nil {
+		return nil, err
+	}
 	// we are dialing an HTTP/3 address, so it is guaranteed to be https
-	un.Scheme = "https"
-	params := un.Query()
+	un.Host = up.Host
+	un.Scheme = up.Scheme
+	un.Path = up.Path
+	un.RawPath = up.RawPath
+	params := up.Query()
 	params.Add("x-websocket-upgrade", "1")
 	un.RawQuery = params.Encode()
 	conn, err := dial.Dial(un)

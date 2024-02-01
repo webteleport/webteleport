@@ -2,9 +2,9 @@ package webteleport
 
 import (
 	"context"
-	"errors"
 	"net"
 	"net/url"
+	"os"
 
 	"github.com/webteleport/webteleport/endpoint"
 	"github.com/webteleport/webteleport/websocket"
@@ -20,20 +20,27 @@ import (
 //
 // The returned Listener can be imagined to be bound to a remote [net.Addr], which can be obtained
 // using the [Listener.Addr] method
-func Listen(ctx context.Context, u string) (net.Listener, error) {
-	URL, _ := url.Parse(u)
-	endpoints := endpoint.Resolve(URL)
-	if len(endpoints) == 0 {
-		return nil, errors.New("service discovery failed: no webteleport endpoints found in Alt-Svc records / headers")
+func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
+	relayURL, err := url.Parse(relayAddr)
+	if err != nil {
+		return nil, err
 	}
+
+	// try to find ALT_SVC records in ENV/DNS/HEAD, see endpoint.Resolve
+	endpoints := endpoint.Resolve(relayURL)
+
+	// use websocket transport when no ALT_SVC records found, or env WEBSOCKET is set
+	if len(endpoints) == 0 || os.Getenv("WEBSOCKET") != "" {
+		return websocket.Listen(ctx, relayURL.Hostname(), relayURL)
+	}
+
+	// otherwise use whatever protocol specified in the first endpoint
 	ep := endpoints[0]
-	switch ep.Protocol {
-	case "websocket":
-		return websocket.Listen(ctx, ep.Addr)
-	case "webtransport":
-		return webtransport.Listen(ctx, ep.Addr)
+	switch {
+	case ep.Protocol == "websocket":
+		return websocket.Listen(ctx, ep.Addr, relayURL)
 	default:
-		return webtransport.Listen(ctx, ep.Addr)
+		return webtransport.Listen(ctx, ep.Addr, relayURL)
 	}
 }
 

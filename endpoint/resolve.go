@@ -31,6 +31,8 @@ func ExtractAltSvcEndpoints(hostname, line, protocolId string) (endpoints []Endp
 		// host could be empty, port must not
 		addr := svc.AltAuthority.Host + ":" + svc.AltAuthority.Port
 		ep := Endpoint{
+			// TODO: support ALT_SVC keys like "webteleport-ws" for specifying ws endpoints on non-bootstrap ports
+			// Protocol: "websocket",
 			Protocol: "webtransport",
 			Addr:     utils.Graft(hostname, addr),
 		}

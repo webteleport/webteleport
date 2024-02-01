@@ -30,18 +30,13 @@ import (
 
 var _ net.Listener = (*WebtransportListener)(nil)
 
-func Listen(ctx context.Context, u string) (*WebtransportListener, error) {
-	slog.Info(u)
+func Listen(ctx context.Context, ep string, relayURL *url.URL) (*WebtransportListener, error) {
 	// localhost:3000 will be parsed by net/url as URL{Scheme: localhost, Port: 3000}
 	// hence the hack
-	if !strings.Contains(u, "://") {
-		u = "http://" + u
+	if !strings.Contains(ep, "://") {
+		ep = "http://" + ep
 	}
-	up, err := url.Parse(u)
-	if err != nil {
-		return nil, err
-	}
-	session, err := DialWebtransport(ctx, u, nil)
+	session, err := DialWebtransport(ctx, ep, relayURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("dial: %w", err)
 	}
@@ -97,8 +92,8 @@ func Listen(ctx context.Context, u string) (*WebtransportListener, error) {
 	ln := &WebtransportListener{
 		session: session,
 		stm0:    stm0,
-		scheme:  up.Scheme,
-		port:    utils.ExtractURLPort(up),
+		scheme:  relayURL.Scheme,
+		port:    utils.ExtractURLPort(relayURL),
 	}
 	select {
 	case emsg := <-errchan:

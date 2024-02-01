@@ -2,7 +2,6 @@ package webtransport
 
 import (
 	"context"
-	// "errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -10,13 +9,12 @@ import (
 	"github.com/quic-go/quic-go"
 	"github.com/quic-go/quic-go/http3"
 	"github.com/quic-go/webtransport-go"
-	// "github.com/webteleport/utils"
 )
 
 // 2^60 == 1152921504606846976
 const MaxIncomingStreams int64 = 1 << 60
 
-func DialWebtransport(ctx context.Context, addr string, hdr http.Header) (*webtransport.Session, error) {
+func DialWebtransport(ctx context.Context, addr string, relayURL *url.URL, hdr http.Header) (*webtransport.Session, error) {
 	d := &webtransport.Dialer{
 		RoundTripper: &http3.RoundTripper{
 			QuicConfig: &quic.Config{
@@ -24,15 +22,20 @@ func DialWebtransport(ctx context.Context, addr string, hdr http.Header) (*webtr
 			},
 		},
 	}
-	un, _ := url.Parse(addr)
-	// we are dialing an HTTP/3 address, so it is guaranteed to be https
-	un.Scheme = "https"
-	params := un.Query()
-	params.Add("x-webteleport-upgrade", "1")
-	un.RawQuery = params.Encode()
-	_, session, err := d.Dial(ctx, un.String(), hdr)
+	u, err := url.Parse(addr)
 	if err != nil {
-		return nil, fmt.Errorf("error dialing %s (UDP): %w", un.String(), err)
+		return nil, err
+	}
+	// we are dialing an HTTP/3 address, so it is guaranteed to be https
+	u.Scheme = "https"
+	u.Path = relayURL.Path
+	u.RawPath = relayURL.RawPath
+	params := u.Query()
+	params.Add("x-webteleport-upgrade", "1")
+	u.RawQuery = params.Encode()
+	_, session, err := d.Dial(ctx, u.String(), hdr)
+	if err != nil {
+		return nil, fmt.Errorf("error dialing %s (UDP): %w", u.String(), err)
 	}
 	return session, nil
 	// return &webtransportSession{session}, nil
