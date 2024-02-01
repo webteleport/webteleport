@@ -4,6 +4,8 @@ import (
 	"expvar"
 )
 
-var ConnsAccepted = expvar.NewInt("connsAccepted")
-var ConnsOpened = expvar.NewInt("connsOpened")
-var ConnsClosed = expvar.NewInt("connsClosed")
+var (
+	WebtransportConnsAccepted = expvar.NewInt("webtransport_conns_accepted")
+	WebtransportConnsOpened   = expvar.NewInt("webtransport_conns_opened")
+	WebtransportConnsClosed   = expvar.NewInt("webtransport_conns_closed")
+)

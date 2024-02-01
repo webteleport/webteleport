@@ -118,8 +118,8 @@ type Stream interface {
 
 // WebtransportListener implements [net.Listener]
 type WebtransportListener struct {
-	session *webtransport.Session // Session // webtransportSession, 
-	stm0    webtransport.Stream // Stream  // webtransport.Stream
+	session *webtransport.Session // Session // webtransportSession,
+	stm0    webtransport.Stream   // Stream  // webtransport.Stream
 	scheme  string
 	host    string
 	port    string
@@ -131,7 +131,7 @@ func (l *WebtransportListener) Accept() (net.Conn, error) {
 	if err != nil {
 		return nil, fmt.Errorf("accept: %w", err)
 	}
-	ConnsAccepted.Add(1)
+	WebtransportConnsAccepted.Add(1)
 	return &StreamConn{stream, l.session}, nil
 }
 
