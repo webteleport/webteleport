@@ -46,7 +46,7 @@ func ExtractAltSvcEndpoints(hostname, line, protocolId string) (endpoints []Endp
 func Resolve(u *url.URL) (endpoints []Endpoint) {
 	endpoints = append(endpoints, eps(u.Hostname(), ENV("ALT_SVC"))...)
 	endpoints = append(endpoints, eps(u.Hostname(), TXT(u.Host))...)
-	endpoints = append(endpoints, eps(u.Hostname(), HEAD(u.String()))...)
+	endpoints = append(endpoints, eps(u.Hostname(), HEAD(u.Hostname()))...)
 	return
 }
 

@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/yamux v0.1.1
 	github.com/quic-go/quic-go v0.41.0
 	github.com/quic-go/webtransport-go v0.6.0
-	github.com/webteleport/utils v0.2.5
+	github.com/webteleport/utils v0.2.6
 	k0s.io/pkg/dial v0.1.12
 )
 

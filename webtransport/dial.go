@@ -37,7 +37,7 @@ func DialWebtransport(ctx context.Context, addr string, relayURL *url.URL, hdr h
 	u.RawQuery = params.Encode()
 	_, session, err := d.Dial(ctx, u.String(), hdr)
 	if err != nil {
-		return nil, fmt.Errorf("error dialing %s (UDP): %w", u.String(), err)
+		return nil, fmt.Errorf("error dialing %s (UDP): %w", u.Hostname(), utils.UnwrapInnermost(err))
 	}
 	return session, nil
 	// return &webtransportSession{session}, nil

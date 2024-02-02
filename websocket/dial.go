@@ -26,11 +26,11 @@ func DialWebsocket(_ctx context.Context, addr string, relayURL *url.URL, hdr htt
 	u.RawQuery = params.Encode()
 	conn, err := dial.Dial(u)
 	if err != nil {
-		return nil, fmt.Errorf("error dialing %s (WS): %w", u.String(), err)
+		return nil, fmt.Errorf("error dialing %s (WS): %w", u.Hostname(), utils.UnwrapInnermost(err))
 	}
 	session, err := yamux.Client(conn, nil)
 	if err != nil {
-		return nil, fmt.Errorf("error creating yamux.Client session: %w", err)
+		return nil, fmt.Errorf("error creating yamux.Client session: %w", utils.UnwrapInnermost(err))
 	}
 	return session, nil
 	// return &webtransportSession{session}, nil
