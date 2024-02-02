@@ -7,11 +7,12 @@ import (
 	"net/url"
 
 	"github.com/hashicorp/yamux"
+	"github.com/webteleport/utils"
 	"k0s.io/pkg/dial"
 )
 
 func DialWebsocket(_ctx context.Context, addr string, relayURL *url.URL, hdr http.Header) (*yamux.Session, error) {
-	u, err := url.Parse(addr)
+	u, err := url.Parse(utils.AsURL(addr))
 	if err != nil {
 		return nil, err
 	}

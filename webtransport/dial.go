@@ -9,6 +9,7 @@ import (
 	"github.com/quic-go/quic-go"
 	"github.com/quic-go/quic-go/http3"
 	"github.com/quic-go/webtransport-go"
+	"github.com/webteleport/utils"
 )
 
 // 2^60 == 1152921504606846976
@@ -22,12 +23,13 @@ func DialWebtransport(ctx context.Context, addr string, relayURL *url.URL, hdr h
 			},
 		},
 	}
-	u, err := url.Parse(addr)
+	u, err := url.Parse(utils.AsURL(addr))
 	if err != nil {
 		return nil, err
 	}
 	// we are dialing an HTTP/3 address, so it is guaranteed to be https
 	u.Scheme = "https"
+	// u.Host = relayURL.Host
 	u.Path = relayURL.Path
 	u.RawPath = relayURL.RawPath
 	params := relayURL.Query()

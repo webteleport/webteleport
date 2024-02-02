@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/endpoint"
 	"github.com/webteleport/webteleport/websocket"
 	"github.com/webteleport/webteleport/webtransport"
@@ -21,7 +22,7 @@ import (
 // The returned Listener can be imagined to be bound to a remote [net.Addr], which can be obtained
 // using the [Listener.Addr] method
 func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
-	relayURL, err := url.Parse(relayAddr)
+	relayURL, err := url.Parse(utils.AsURL(relayAddr))
 	if err != nil {
 		return nil, err
 	}
