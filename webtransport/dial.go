@@ -31,7 +31,7 @@ func DialWebtransport(ctx context.Context, addr string, relayURL *url.URL, hdr h
 	u.Path = relayURL.Path
 	u.RawPath = relayURL.RawPath
 	params := u.Query()
-	params.Add("x-webteleport-upgrade", "1")
+	params.Add("x-webtransport-upgrade", "1")
 	u.RawQuery = params.Encode()
 	_, session, err := d.Dial(ctx, u.String(), hdr)
 	if err != nil {
