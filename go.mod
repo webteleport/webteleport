@@ -8,7 +8,7 @@ toolchain go1.21.6
 
 require (
 	github.com/webteleport/utils v0.1.8
-	github.com/webtransport/quic v0.1.0
+	github.com/webtransport/quic v0.1.1
 )
 
 require (
