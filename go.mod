@@ -1,4 +1,4 @@
-module github.com/webteleport/quic
+module github.com/webteleport/webteleport-quic
 
 go 1.21.5
 
