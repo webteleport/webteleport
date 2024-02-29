@@ -8,7 +8,7 @@ toolchain go1.21.6
 
 require (
 	github.com/webteleport/utils v0.1.8
-	github.com/webtransport/quic v0.1.1
+	golang.org/x/net v0.21.1-0.20240227232114-3dfd003ad338
 )
 
 require (
@@ -17,11 +17,10 @@ require (
 	github.com/gorilla/handlers v1.5.2 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/miekg/dns v1.1.57 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 )

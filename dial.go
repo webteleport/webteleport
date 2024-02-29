@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"strings"
 
-	"github.com/webtransport/quic"
+	"golang.org/x/net/quic"
 )
 
 // 2^60 == 1152921504606846976
@@ -39,6 +39,6 @@ func Dial(ctx context.Context, addr string) (*quic.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	session, err := l.Dial(ctx, "udp", addr)
+	session, err := l.Dial(ctx, "udp", addr, quicConf)
 	return session, err
 }

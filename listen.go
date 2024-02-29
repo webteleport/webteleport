@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/webteleport/utils"
-	"github.com/webtransport/quic"
+	"golang.org/x/net/quic"
 )
 
 var _ net.Listener = (*Listener)(nil)
