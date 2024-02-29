@@ -4,7 +4,7 @@ import (
 	"net"
 	"time"
 
-	"golang.org/x/net/quic"
+	"github.com/webtransport/quic"
 )
 
 var _ net.Conn = (*StreamConn)(nil)

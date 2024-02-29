@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"strings"
 
-	"golang.org/x/net/quic"
+	"github.com/webtransport/quic"
 )
 
 // 2^60 == 1152921504606846976
