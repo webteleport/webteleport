@@ -1,6 +1,6 @@
 module github.com/webteleport/webteleport
 
-go 1.21.6
+go 1.22.1
 
 // replace github.com/webteleport/utils => ../utils
 
@@ -9,8 +9,8 @@ require (
 	github.com/hashicorp/yamux v0.1.1
 	github.com/quic-go/quic-go v0.41.0
 	github.com/quic-go/webtransport-go v0.6.0
-	github.com/webteleport/utils v0.2.6
-	k0s.io/pkg/dial v0.1.12
+	github.com/webteleport/utils v0.2.7
+	k0s.io/pkg/dial v0.1.15
 )
 
 require (
