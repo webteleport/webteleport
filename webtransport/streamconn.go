@@ -34,9 +34,20 @@ func (sc *StreamConn) Close() error {
 }
 
 var CancelRead webtransport.StreamErrorCode = 3558
+var CancelWrite webtransport.StreamErrorCode = 3559
 
 // LocalAddr is required to impl net.Conn
 func (sc *StreamConn) LocalAddr() net.Addr { return sc.Session.LocalAddr() }
 
 // RemoteAddr is required to impl net.Conn
 func (sc *StreamConn) RemoteAddr() net.Addr { return sc.Session.RemoteAddr() }
+
+func (sc *StreamConn) CloseRead() error {
+	sc.Stream.CancelRead(CancelRead)
+	return nil
+}
+
+func (sc *StreamConn) CloseWrite() error {
+	sc.Stream.CancelWrite(CancelWrite)
+	return nil
+}

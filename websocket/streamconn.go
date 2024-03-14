@@ -27,3 +27,11 @@ func (sc *StreamConn) Close() error {
 	WebsocketConnsClosed.Add(1)
 	return sc.Stream.Close()
 }
+
+func (sc *StreamConn) CloseRead() error {
+	return nil
+}
+
+func (sc *StreamConn) CloseWrite() error {
+	return nil
+}
