@@ -16,7 +16,6 @@ func DialWebsocket(_ctx context.Context, addr string, relayURL *url.URL, hdr htt
 	if err != nil {
 		return nil, err
 	}
-	// we are dialing an HTTP/3 address, so it is guaranteed to be https
 	u.Host = relayURL.Host
 	u.Scheme = relayURL.Scheme
 	u.Path = relayURL.Path

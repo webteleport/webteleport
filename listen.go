@@ -4,7 +4,6 @@ import (
 	"context"
 	"net"
 	"net/url"
-	"os"
 
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/endpoint"
@@ -28,20 +27,13 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 	}
 
 	// try to find ALT_SVC records in ENV/DNS/HEAD, see endpoint.Resolve
-	endpoints := endpoint.Resolve(relayURL)
+	ep := endpoint.Resolve(relayURL)[0]
 
-	// use websocket transport when no ALT_SVC records found, or env WEBSOCKET is set
-	if len(endpoints) == 0 || os.Getenv("WEBSOCKET") != "" {
-		return websocket.Listen(ctx, relayURL.Hostname(), relayURL)
-	}
-
-	// otherwise use whatever protocol specified in the first endpoint
-	ep := endpoints[0]
-	switch {
-	case ep.Protocol == "websocket":
-		return websocket.Listen(ctx, ep.Addr, relayURL)
-	default:
+	switch ep.Protocol {
+	case "webtransport":
 		return webtransport.Listen(ctx, ep.Addr, relayURL)
+	default:
+		return websocket.Listen(ctx, ep.Addr, relayURL)
 	}
 }
 

@@ -33,6 +33,7 @@ func ExtractAltSvcEndpoints(hostname, line, protocolId string) (endpoints []Endp
 		addr := svc.AltAuthority.Host + ":" + svc.AltAuthority.Port
 		ep := Endpoint{
 			// TODO: support ALT_SVC keys like "webteleport-ws" for specifying ws endpoints on non-bootstrap ports
+			// Until then, we assume that all endpoints are websockets by default
 			// Protocol: "websocket",
 			Protocol: "webtransport",
 			Addr:     utils.Graft(hostname, addr),
@@ -43,10 +44,17 @@ func ExtractAltSvcEndpoints(hostname, line, protocolId string) (endpoints []Endp
 }
 
 // Resolve gets all webteleport endpoints from Alt-Svc dns records / headers
+// fallback to websocket so that resolve always returns at least one endpoint
 func Resolve(u *url.URL) (endpoints []Endpoint) {
 	endpoints = append(endpoints, eps(u.Hostname(), ENV("ALT_SVC"))...)
 	endpoints = append(endpoints, eps(u.Hostname(), TXT(u.Host))...)
 	endpoints = append(endpoints, eps(u.Hostname(), HEAD(u.Hostname()))...)
+	if len(endpoints) == 0 {
+		endpoints = append(endpoints, Endpoint{
+			Protocol: "websocket",
+			Addr:     u.Hostname(),
+		})
+	}
 	return
 }
 
