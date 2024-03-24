@@ -7,8 +7,8 @@ go 1.22.1
 require (
 	github.com/ebi-yade/altsvc-go v0.1.1
 	github.com/hashicorp/yamux v0.1.1
-	github.com/quic-go/quic-go v0.41.0
-	github.com/quic-go/webtransport-go v0.6.0
+	github.com/quic-go/quic-go v0.42.0
+	github.com/quic-go/webtransport-go v0.7.0
 	github.com/webteleport/utils v0.2.10
 	k0s.io/pkg/dial v0.1.15
 )
@@ -24,7 +24,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.12.0 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/rs/cors v1.10.1 // indirect
-	go.uber.org/mock v0.3.0 // indirect
+	go.uber.org/mock v0.4.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
 	golang.org/x/mod v0.15.0 // indirect
