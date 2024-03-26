@@ -11,7 +11,7 @@ import (
 	"k0s.io/pkg/dial"
 )
 
-func Merge(addr string, relayURL *url.URL) (string, error) {
+func DialAddr(addr string, relayURL *url.URL) (string, error) {
 	u, err := url.Parse(utils.AsURL(addr))
 	if err != nil {
 		return "", err

@@ -15,7 +15,7 @@ import (
 // 2^60 == 1152921504606846976
 const MaxIncomingStreams int64 = 1 << 60
 
-func Merge(addr string, relayURL *url.URL) (string, error) {
+func DialAddr(addr string, relayURL *url.URL) (string, error) {
 	u, err := url.Parse(utils.AsURL(addr))
 	if err != nil {
 		return "", err

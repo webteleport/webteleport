@@ -7,8 +7,9 @@ import (
 
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/endpoint"
-	"github.com/webteleport/webteleport/websocket"
-	"github.com/webteleport/webteleport/webtransport"
+	"github.com/webteleport/webteleport/transport"
+	"github.com/webteleport/webteleport/transport/websocket"
+	"github.com/webteleport/webteleport/transport/webtransport"
 )
 
 // Listen calls [Dial] to create a [Listener], which is essentially a wrapper struct
@@ -29,22 +30,26 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 	// try to find ALT_SVC records in ENV/DNS/HEAD, see endpoint.Resolve
 	ep := endpoint.Resolve(relayURL)[0]
 
+	var (
+		dialAddr string
+		tr       transport.Transport
+	)
+
 	switch ep.Protocol {
 	case "webtransport":
-		addr, err := webtransport.Merge(ep.Addr, relayURL)
+		dialAddr, err = webtransport.DialAddr(ep.Addr, relayURL)
 		if err != nil {
 			return nil, err
 		}
-		tr := webtransport.NewTransport()
-		return tr.Listen(ctx, addr)
+		tr = webtransport.NewTransport()
 	default:
-		addr, err := websocket.Merge(ep.Addr, relayURL)
+		dialAddr, err = websocket.DialAddr(ep.Addr, relayURL)
 		if err != nil {
 			return nil, err
 		}
-		tr := websocket.NewTransport()
-		return tr.Listen(ctx, addr)
+		tr = websocket.NewTransport()
 	}
+	return tr.Listen(ctx, dialAddr)
 }
 
 // String returns the host(:port) address of Listener, Unicode is kept inact
