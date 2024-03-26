@@ -13,10 +13,9 @@ type Transport interface {
 
 type Session interface {
 	AcceptStream(context.Context) (Stream, error)
-	io.ReadWriteCloser
+	io.Closer
 }
 
 type Stream interface {
-	io.Reader
-	io.Writer
+	net.Conn
 }

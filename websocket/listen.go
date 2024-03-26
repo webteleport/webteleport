@@ -15,8 +15,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/hashicorp/yamux"
 	"github.com/webteleport/utils"
+	"github.com/webteleport/webteleport/transport"
 )
 
 var _ net.Listener = (*WebsocketListener)(nil)
@@ -30,7 +30,7 @@ func Listen(ctx context.Context, addr string) (net.Listener, error) {
 	if err != nil {
 		return nil, fmt.Errorf("dial: %w", err)
 	}
-	stm0, err := session.AcceptStream()
+	stm0, err := session.AcceptStream(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("stm0: %w", err)
 	}
@@ -95,8 +95,8 @@ func Listen(ctx context.Context, addr string) (net.Listener, error) {
 
 // WebsocketListener implements [net.Listener]
 type WebsocketListener struct {
-	session *yamux.Session
-	stm0    *yamux.Stream
+	session transport.Session
+	stm0    transport.Stream
 	scheme  string
 	host    string
 	port    string
@@ -104,11 +104,11 @@ type WebsocketListener struct {
 
 // calling Accept returns a new [net.Conn]
 func (l *WebsocketListener) Accept() (net.Conn, error) {
-	stream, err := l.session.AcceptStream()
+	streamConn, err := l.session.AcceptStream(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("accept: %w", err)
 	}
-	return NewAcceptedConn(stream), nil
+	return streamConn, nil
 }
 
 func (l *WebsocketListener) Close() error {

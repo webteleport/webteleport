@@ -26,7 +26,7 @@ func Merge(addr string, relayURL *url.URL) (string, error) {
 	return u.String(), nil
 }
 
-func DialWebsocket(_ctx context.Context, addr string, hdr http.Header) (*yamux.Session, error) {
+func DialWebsocket(_ctx context.Context, addr string, hdr http.Header) (*WebsocketSession, error) {
 	u, err := url.Parse(addr)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
@@ -39,6 +39,5 @@ func DialWebsocket(_ctx context.Context, addr string, hdr http.Header) (*yamux.S
 	if err != nil {
 		return nil, fmt.Errorf("error creating yamux.Client session: %w", utils.UnwrapInnermost(err))
 	}
-	return session, nil
-	// return &webtransportSession{session}, nil
+	return &WebsocketSession{session}, nil
 }

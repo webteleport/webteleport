@@ -4,9 +4,12 @@ import (
 	"net"
 
 	"github.com/hashicorp/yamux"
+	"github.com/webteleport/webteleport/transport"
 )
 
 var _ net.Conn = (*StreamConn)(nil)
+
+var _ transport.Stream = (*StreamConn)(nil)
 
 // StreamsConn wraps *yamux.Stream into net.Conn
 type StreamConn struct {
