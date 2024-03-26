@@ -31,13 +31,13 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 
 	switch ep.Protocol {
 	case "webtransport":
-		addr, err := webtransport.Merge(ep, relayURL)
+		addr, err := webtransport.Merge(ep.Addr, relayURL)
 		if err != nil {
 			return nil, err
 		}
 		return webtransport.Listen(ctx, addr)
 	default:
-		addr, err := websocket.Merge(ep, relayURL)
+		addr, err := websocket.Merge(ep.Addr, relayURL)
 		if err != nil {
 			return nil, err
 		}
