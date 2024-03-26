@@ -7,7 +7,6 @@ import (
 	"io"
 	"log/slog"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
@@ -112,8 +111,7 @@ func (l *WebsocketListener) Accept() (net.Conn, error) {
 }
 
 func (l *WebsocketListener) Close() error {
-	l.session.Close()
-	return http.ErrServerClosed
+	return l.session.Close()
 }
 
 // Addr returns Listener itself which is an implementor of [net.Addr]
