@@ -31,7 +31,7 @@ func Merge(addr string, relayURL *url.URL) (string, error) {
 	return u.String(), nil
 }
 
-func DialWebtransport(ctx context.Context, addr string, hdr http.Header) (*webtransport.Session, error) {
+func DialWebtransport(ctx context.Context, addr string, hdr http.Header) (*WebtransportSession, error) {
 	u, err := url.Parse(addr)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
@@ -47,6 +47,5 @@ func DialWebtransport(ctx context.Context, addr string, hdr http.Header) (*webtr
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (UDP): %w", u.Hostname(), utils.UnwrapInnermost(err))
 	}
-	return session, nil
-	// return &webtransportSession{session}, nil
+	return &WebtransportSession{session}, nil
 }

@@ -7,7 +7,6 @@ import (
 	"io"
 	"log/slog"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
@@ -15,8 +14,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/quic-go/webtransport-go"
 	"github.com/webteleport/utils"
+	"github.com/webteleport/webteleport/transport"
 )
 
 var _ net.Listener = (*WebtransportListener)(nil)
@@ -95,8 +94,8 @@ func Listen(ctx context.Context, addr string) (*WebtransportListener, error) {
 
 // WebtransportListener implements [net.Listener]
 type WebtransportListener struct {
-	session *webtransport.Session
-	stm0    webtransport.Stream
+	session transport.Session
+	stm0    transport.Stream
 	scheme  string
 	host    string
 	port    string
@@ -104,16 +103,15 @@ type WebtransportListener struct {
 
 // calling Accept returns a new [net.Conn]
 func (l *WebtransportListener) Accept() (net.Conn, error) {
-	stream, err := l.session.AcceptStream(context.Background())
+	streamConn, err := l.session.AcceptStream(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("accept: %w", err)
 	}
-	return NewAcceptedConn(stream, l.session), nil
+	return streamConn, nil
 }
 
 func (l *WebtransportListener) Close() error {
-	l.session.CloseWithError(1337, "foobar")
-	return http.ErrServerClosed
+	return l.session.Close()
 }
 
 // Addr returns Listener itself which is an implementor of [net.Addr]

@@ -4,9 +4,12 @@ import (
 	"net"
 
 	"github.com/quic-go/webtransport-go"
+	"github.com/webteleport/webteleport/transport"
 )
 
 var _ net.Conn = (*StreamConn)(nil)
+
+var _ transport.Stream = (*StreamConn)(nil)
 
 // StreamsConn wraps webtransport.Stream into net.Conn
 type StreamConn struct {
