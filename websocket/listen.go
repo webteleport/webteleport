@@ -89,15 +89,6 @@ func Listen(ctx context.Context, ep string, relayURL *url.URL) (*WebsocketListen
 	}
 }
 
-type Session interface {
-	AcceptStream(context.Context) (Stream, error)
-}
-
-type Stream interface {
-	io.Reader
-	io.Writer
-}
-
 // WebsocketListener implements [net.Listener]
 type WebsocketListener struct {
 	session *yamux.Session

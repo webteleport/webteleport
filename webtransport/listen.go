@@ -89,15 +89,6 @@ func Listen(ctx context.Context, ep string, relayURL *url.URL) (*WebtransportLis
 	}
 }
 
-type Session interface {
-	AcceptStream(context.Context) (Stream, error)
-}
-
-type Stream interface {
-	io.Reader
-	io.Writer
-}
-
 // WebtransportListener implements [net.Listener]
 type WebtransportListener struct {
 	session *webtransport.Session
