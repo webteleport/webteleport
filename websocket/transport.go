@@ -26,7 +26,5 @@ func (t *WebsocketTransport) Dial(ctx context.Context, addr string) (transport.S
 }
 
 func (t *WebsocketTransport) Listen(ctx context.Context, addr string) (net.Listener, error) {
-	_ = ctx
-	_ = addr
-	return nil, nil
+	return Listen(ctx, addr)
 }
