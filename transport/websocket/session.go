@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/hashicorp/yamux"
@@ -17,6 +18,7 @@ func (s *WebsocketSession) AcceptStream(context.Context) (transport.Stream, erro
 	if err != nil {
 		return nil, err
 	}
+	WebsocketConnsAccepted.Add(1)
 	return &StreamConn{stm}, nil
 }
 
@@ -25,6 +27,12 @@ func (s *WebsocketSession) OpenStream(context.Context) (transport.Stream, error)
 	if err != nil {
 		return nil, err
 	}
+	// once ctx got cancelled, err is nil but stream is empty too
+	// add the check to avoid returning empty stream
+	if stm == nil {
+		return nil, fmt.Errorf("stream is empty")
+	}
+	WebsocketConnsOpened.Add(1)
 	return &StreamConn{stm}, nil
 }
 

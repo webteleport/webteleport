@@ -17,16 +17,6 @@ type StreamConn struct {
 	Session *webtransport.Session
 }
 
-func NewAcceptedConn(s webtransport.Stream, ssn *webtransport.Session) net.Conn {
-	WebtransportConnsAccepted.Add(1)
-	return &StreamConn{s, ssn}
-}
-
-func NewOpenedConn(s webtransport.Stream, ssn *webtransport.Session) net.Conn {
-	WebtransportConnsOpened.Add(1)
-	return &StreamConn{s, ssn}
-}
-
 // Close calls CancelRead to avoid memory leak, see
 // - https://github.com/quic-go/quic-go/issues/3558
 // - https://pkg.go.dev/github.com/quic-go/webtransport-go#Stream
