@@ -2,13 +2,15 @@ package websocket
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 
 	"github.com/hashicorp/yamux"
 	"github.com/webteleport/utils"
-	"k0s.io/pkg/dial"
+	"nhooyr.io/websocket"
 )
 
 func DialAddr(addr string, relayURL *url.URL) (string, error) {
@@ -31,7 +33,7 @@ func DialWebsocket(_ctx context.Context, addr string, hdr http.Header) (*Websock
 	if err != nil {
 		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
 	}
-	conn, err := dial.Dial(u)
+	conn, err := Dial(addr, hdr)
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (WS): %w", u.Hostname(), utils.UnwrapInnermost(err))
 	}
@@ -40,4 +42,27 @@ func DialWebsocket(_ctx context.Context, addr string, hdr http.Header) (*Websock
 		return nil, fmt.Errorf("error creating yamux.Client session: %w", utils.UnwrapInnermost(err))
 	}
 	return &WebsocketSession{session}, nil
+}
+
+func Dial(addr string, hdr http.Header) (conn net.Conn, err error) {
+	wsconn, _, err := websocket.Dial(
+		context.Background(),
+		addr,
+		&websocket.DialOptions{
+			HTTPClient: &http.Client{
+				Transport: &http.Transport{
+					Proxy: http.ProxyFromEnvironment,
+					TLSClientConfig: &tls.Config{
+						InsecureSkipVerify: true,
+					},
+				},
+			},
+			HTTPHeader: hdr,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return websocket.NetConn(context.Background(), wsconn, websocket.MessageBinary), nil
 }
