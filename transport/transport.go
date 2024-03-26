@@ -13,6 +13,7 @@ type Transport interface {
 
 type Session interface {
 	AcceptStream(context.Context) (Stream, error)
+	OpenStream(context.Context) (Stream, error)
 	io.Closer
 }
 
