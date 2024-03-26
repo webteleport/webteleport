@@ -29,7 +29,7 @@ func Listen(ctx context.Context, addr string) (*WebtransportListener, error) {
 	if err != nil {
 		return nil, fmt.Errorf("dial: %w", err)
 	}
-	stm0, err := session.AcceptStream(ctx)
+	stm0, err := session.AcceptStream(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("stm0: %w", err)
 	}

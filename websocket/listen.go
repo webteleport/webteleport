@@ -21,7 +21,7 @@ import (
 
 var _ net.Listener = (*WebsocketListener)(nil)
 
-func Listen(ctx context.Context, addr string) (net.Listener, error) {
+func Listen(ctx context.Context, addr string) (*WebsocketListener, error) {
 	u, err := url.Parse(addr)
 	if err != nil {
 		return nil, fmt.Errorf("parse: %w", err)
