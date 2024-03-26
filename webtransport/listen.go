@@ -21,8 +21,12 @@ import (
 
 var _ net.Listener = (*WebtransportListener)(nil)
 
-func Listen(ctx context.Context, ep string, relayURL *url.URL) (*WebtransportListener, error) {
-	session, err := DialWebtransport(ctx, ep, relayURL, nil)
+func Listen(ctx context.Context, addr string) (*WebtransportListener, error) {
+	u, err := url.Parse(addr)
+	if err != nil {
+		return nil, fmt.Errorf("parse: %w", err)
+	}
+	session, err := DialWebtransport(ctx, addr, nil)
 	if err != nil {
 		return nil, fmt.Errorf("dial: %w", err)
 	}
@@ -78,8 +82,8 @@ func Listen(ctx context.Context, ep string, relayURL *url.URL) (*WebtransportLis
 	ln := &WebtransportListener{
 		session: session,
 		stm0:    stm0,
-		scheme:  relayURL.Scheme,
-		port:    utils.ExtractURLPort(relayURL),
+		scheme:  u.Scheme,
+		port:    utils.ExtractURLPort(u),
 	}
 	select {
 	case emsg := <-errchan:

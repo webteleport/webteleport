@@ -15,17 +15,10 @@ import (
 // 2^60 == 1152921504606846976
 const MaxIncomingStreams int64 = 1 << 60
 
-func DialWebtransport(ctx context.Context, addr string, relayURL *url.URL, hdr http.Header) (*webtransport.Session, error) {
-	d := &webtransport.Dialer{
-		RoundTripper: &http3.RoundTripper{
-			QuicConfig: &quic.Config{
-				MaxIncomingStreams: MaxIncomingStreams,
-			},
-		},
-	}
+func Merge(addr string, relayURL *url.URL) (string, error) {
 	u, err := url.Parse(utils.AsURL(addr))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	// we are dialing an HTTP/3 address, so it is guaranteed to be https
 	u.Scheme = "https"
@@ -35,7 +28,22 @@ func DialWebtransport(ctx context.Context, addr string, relayURL *url.URL, hdr h
 	params := relayURL.Query()
 	params.Add("x-webtransport-upgrade", "1")
 	u.RawQuery = params.Encode()
-	_, session, err := d.Dial(ctx, u.String(), hdr)
+	return u.String(), nil
+}
+
+func DialWebtransport(ctx context.Context, addr string, hdr http.Header) (*webtransport.Session, error) {
+	u, err := url.Parse(addr)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
+	}
+	dialer := &webtransport.Dialer{
+		RoundTripper: &http3.RoundTripper{
+			QuicConfig: &quic.Config{
+				MaxIncomingStreams: MaxIncomingStreams,
+			},
+		},
+	}
+	_, session, err := dialer.Dial(ctx, addr, hdr)
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (UDP): %w", u.Hostname(), utils.UnwrapInnermost(err))
 	}

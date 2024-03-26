@@ -11,10 +11,10 @@ import (
 	"k0s.io/pkg/dial"
 )
 
-func DialWebsocket(_ctx context.Context, addr string, relayURL *url.URL, hdr http.Header) (*yamux.Session, error) {
+func Merge(addr string, relayURL *url.URL) (string, error) {
 	u, err := url.Parse(utils.AsURL(addr))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	u.Host = relayURL.Host
 	u.Scheme = relayURL.Scheme
@@ -23,6 +23,14 @@ func DialWebsocket(_ctx context.Context, addr string, relayURL *url.URL, hdr htt
 	params := relayURL.Query()
 	params.Add("x-websocket-upgrade", "1")
 	u.RawQuery = params.Encode()
+	return u.String(), nil
+}
+
+func DialWebsocket(_ctx context.Context, addr string, hdr http.Header) (*yamux.Session, error) {
+	u, err := url.Parse(addr)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
+	}
 	conn, err := dial.Dial(u)
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (WS): %w", u.Hostname(), utils.UnwrapInnermost(err))
