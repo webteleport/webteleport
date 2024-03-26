@@ -1,4 +1,4 @@
-package webtransport
+package websocket
 
 import (
 	"bufio"
@@ -7,7 +7,6 @@ import (
 	"io"
 	"log/slog"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
@@ -15,18 +14,22 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/quic-go/webtransport-go"
 	"github.com/webteleport/utils"
+	"github.com/webteleport/webteleport/transport"
 )
 
-var _ net.Listener = (*WebtransportListener)(nil)
+var _ net.Listener = (*WebsocketListener)(nil)
 
-func Listen(ctx context.Context, ep string, relayURL *url.URL) (*WebtransportListener, error) {
-	session, err := DialWebtransport(ctx, ep, relayURL, nil)
+func Listen(ctx context.Context, addr string) (*WebsocketListener, error) {
+	u, err := url.Parse(addr)
+	if err != nil {
+		return nil, fmt.Errorf("parse: %w", err)
+	}
+	session, err := DialWebsocket(ctx, addr, nil)
 	if err != nil {
 		return nil, fmt.Errorf("dial: %w", err)
 	}
-	stm0, err := session.AcceptStream(ctx)
+	stm0, err := session.AcceptStream(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("stm0: %w", err)
 	}
@@ -75,11 +78,11 @@ func Listen(ctx context.Context, ep string, relayURL *url.URL) (*WebtransportLis
 		os.Exit(0)
 	}()
 
-	ln := &WebtransportListener{
+	ln := &WebsocketListener{
 		session: session,
 		stm0:    stm0,
-		scheme:  relayURL.Scheme,
-		port:    utils.ExtractURLPort(relayURL),
+		scheme:  u.Scheme,
+		port:    utils.ExtractURLPort(u),
 	}
 	select {
 	case emsg := <-errchan:
@@ -89,69 +92,59 @@ func Listen(ctx context.Context, ep string, relayURL *url.URL) (*WebtransportLis
 	}
 }
 
-type Session interface {
-	AcceptStream(context.Context) (Stream, error)
-}
-
-type Stream interface {
-	io.Reader
-	io.Writer
-}
-
-// WebtransportListener implements [net.Listener]
-type WebtransportListener struct {
-	session *webtransport.Session
-	stm0    webtransport.Stream
+// WebsocketListener implements [net.Listener]
+type WebsocketListener struct {
+	session transport.Session
+	stm0    transport.Stream
 	scheme  string
 	host    string
 	port    string
 }
 
 // calling Accept returns a new [net.Conn]
-func (l *WebtransportListener) Accept() (net.Conn, error) {
-	stream, err := l.session.AcceptStream(context.Background())
+func (l *WebsocketListener) Accept() (net.Conn, error) {
+	streamConn, err := l.session.AcceptStream(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("accept: %w", err)
 	}
-	return NewAcceptedConn(stream, l.session), nil
+	return streamConn, nil
 }
 
-func (l *WebtransportListener) Close() error {
-	l.session.CloseWithError(1337, "foobar")
-	return http.ErrServerClosed
+func (l *WebsocketListener) Close() error {
+	return l.session.Close()
 }
 
 // Addr returns Listener itself which is an implementor of [net.Addr]
-func (l *WebtransportListener) Addr() net.Addr {
-	return &WebtransportAddr{l}
+func (l *WebsocketListener) Addr() net.Addr {
+	return &WebsocketAddr{l}
 }
 
-type WebtransportAddr struct {
-	*WebtransportListener
+type WebsocketAddr struct {
+	*WebsocketListener
 }
 
 // Network returns the protocol scheme, either http or https
-func (addr *WebtransportAddr) Network() string {
-	return addr.WebtransportListener.scheme
+func (addr *WebsocketAddr) Network() string {
+	return addr.WebsocketListener.scheme
 }
 
 // String returns the host(:port) address of Listener, forcing ASCII
-func (addr *WebtransportAddr) String() string {
-	return utils.ToIdna(addr.WebtransportListener.host) + addr.WebtransportListener.port
+func (addr *WebsocketAddr) String() string {
+	return utils.ToIdna(addr.WebsocketListener.host) + addr.WebsocketListener.port
 }
 
 // Display returns the host(:port) address of Listener, Unicode is kept inact
-func Display(l *WebtransportListener) string {
+func Display(l *WebsocketListener) string {
 	return l.host + l.port
 }
 
 // AsciiURL returns the public accessible address of the Listener
-func AsciiURL(l *WebtransportListener) string {
+func AsciiURL(l *WebsocketListener) string {
 	return l.Addr().Network() + "://" + l.Addr().String()
 }
 
 // HumanURL returns the human readable URL
-func HumanURL(l *WebtransportListener) string {
+func HumanURL(l *WebsocketListener) string {
 	return l.Addr().Network() + "://" + Display(l)
 }
 
@@ -159,7 +152,7 @@ func HumanURL(l *WebtransportListener) string {
 //
 //	when link == text, it displays `link[link]`
 //	when link != text, it displays `text ([link](link))`
-func ClickableURL(l *WebtransportListener) string {
+func ClickableURL(l *WebsocketListener) string {
 	disp, link := HumanURL(l), AsciiURL(l)
 	if disp == link {
 		return utils.MaybeHyperlink(link)
