@@ -11,7 +11,7 @@ import (
 type WebsocketTransport struct {
 }
 
-func New() transport.Transport {
+func NewTransport() transport.Transport {
 	return &WebsocketTransport{}
 }
 

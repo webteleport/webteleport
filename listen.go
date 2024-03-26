@@ -35,13 +35,15 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 		if err != nil {
 			return nil, err
 		}
-		return webtransport.Listen(ctx, addr)
+		tr := webtransport.NewTransport()
+		return tr.Listen(ctx, addr)
 	default:
 		addr, err := websocket.Merge(ep.Addr, relayURL)
 		if err != nil {
 			return nil, err
 		}
-		return websocket.Listen(ctx, addr)
+		tr := websocket.NewTransport()
+		return tr.Listen(ctx, addr)
 	}
 }
 

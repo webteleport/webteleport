@@ -11,7 +11,7 @@ import (
 type WebtransportTransport struct {
 }
 
-func New() transport.Transport {
+func NewTransport() transport.Transport {
 	return &WebtransportTransport{}
 }
 
