@@ -28,12 +28,12 @@ func DialAddr(addr string, relayURL *url.URL) (string, error) {
 	return u.String(), nil
 }
 
-func DialWebsocket(_ctx context.Context, addr string, hdr http.Header) (*WebsocketSession, error) {
+func DialWebsocket(ctx context.Context, addr string, hdr http.Header) (*WebsocketSession, error) {
 	u, err := url.Parse(addr)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
 	}
-	conn, err := Dial(addr, hdr)
+	conn, err := Dial(ctx, addr, hdr)
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (WS): %w", u.Hostname(), utils.UnwrapInnermost(err))
 	}
@@ -44,9 +44,9 @@ func DialWebsocket(_ctx context.Context, addr string, hdr http.Header) (*Websock
 	return &WebsocketSession{session}, nil
 }
 
-func Dial(addr string, hdr http.Header) (conn net.Conn, err error) {
+func Dial(ctx context.Context, addr string, hdr http.Header) (conn net.Conn, err error) {
 	wsconn, _, err := websocket.Dial(
-		context.Background(),
+		ctx,
 		addr,
 		&websocket.DialOptions{
 			HTTPClient: &http.Client{
