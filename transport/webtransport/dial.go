@@ -39,6 +39,7 @@ func DialWebtransport(ctx context.Context, addr string, hdr http.Header) (*Webtr
 	dialer := &webtransport.Dialer{
 		RoundTripper: &http3.RoundTripper{
 			QuicConfig: &quic.Config{
+				EnableDatagrams:    true,
 				MaxIncomingStreams: MaxIncomingStreams,
 			},
 		},
