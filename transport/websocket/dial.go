@@ -37,9 +37,10 @@ func DialWebsocket(ctx context.Context, addr string, hdr http.Header) (*Websocke
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (WS): %w", u.Hostname(), utils.UnwrapInnermost(err))
 	}
-	session, err := yamux.Client(conn, nil)
+	hdr.Set("Yamux", "server")
+	session, err := yamux.Server(conn, nil)
 	if err != nil {
-		return nil, fmt.Errorf("error creating yamux.Client session: %w", utils.UnwrapInnermost(err))
+		return nil, fmt.Errorf("error creating yamux server session: %w", utils.UnwrapInnermost(err))
 	}
 	return &WebsocketSession{session}, nil
 }
