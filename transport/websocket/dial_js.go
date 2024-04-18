@@ -3,9 +3,6 @@
 package websocket
 
 import (
-
-	// "crypto/tls"
-
 	"net/http"
 
 	"nhooyr.io/websocket"
