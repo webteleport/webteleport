@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -28,6 +29,12 @@ func DialAddr(addr string, relayURL *url.URL) (string, error) {
 	return u.String(), nil
 }
 
+func YamuxConfig(w io.Writer) *yamux.Config {
+	c := yamux.DefaultConfig()
+	c.LogOutput = w
+	return c
+}
+
 func DialWebsocket(ctx context.Context, addr string, hdr http.Header) (*WebsocketSession, error) {
 	u, err := url.Parse(addr)
 	if err != nil {
@@ -41,7 +48,8 @@ func DialWebsocket(ctx context.Context, addr string, hdr http.Header) (*Websocke
 		hdr = http.Header{}
 	}
 	hdr.Set("Yamux", "server")
-	session, err := yamux.Server(conn, nil)
+	config := YamuxConfig(io.Discard)
+	session, err := yamux.Server(conn, config)
 	if err != nil {
 		return nil, fmt.Errorf("error creating yamux server session: %w", utils.UnwrapInnermost(err))
 	}
