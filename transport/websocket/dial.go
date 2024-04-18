@@ -2,7 +2,7 @@ package websocket
 
 import (
 	"context"
-	"crypto/tls"
+	// "crypto/tls"
 	"fmt"
 	"io"
 	"net"
@@ -60,17 +60,7 @@ func Dial(ctx context.Context, addr string, hdr http.Header) (conn net.Conn, err
 	wsconn, _, err := websocket.Dial(
 		ctx,
 		addr,
-		&websocket.DialOptions{
-			HTTPClient: &http.Client{
-				Transport: &http.Transport{
-					Proxy: http.ProxyFromEnvironment,
-					TLSClientConfig: &tls.Config{
-						InsecureSkipVerify: true,
-					},
-				},
-			},
-			HTTPHeader: hdr,
-		},
+		dialOptions(hdr),
 	)
 	if err != nil {
 		return nil, err
