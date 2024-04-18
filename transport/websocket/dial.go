@@ -2,12 +2,12 @@ package websocket
 
 import (
 	"context"
-	// "crypto/tls"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/hashicorp/yamux"
 	"github.com/webteleport/utils"
@@ -29,9 +29,11 @@ func DialAddr(addr string, relayURL *url.URL) (string, error) {
 	return u.String(), nil
 }
 
-func YamuxConfig(w io.Writer) *yamux.Config {
+func YamuxConfig() *yamux.Config {
 	c := yamux.DefaultConfig()
-	c.LogOutput = w
+	if os.Getenv("YAMUX_LOG") == "" {
+		c.LogOutput = io.Discard
+	}
 	return c
 }
 
@@ -48,7 +50,7 @@ func DialWebsocket(ctx context.Context, addr string, hdr http.Header) (*Websocke
 		hdr = http.Header{}
 	}
 	hdr.Set("Yamux", "server")
-	config := YamuxConfig(io.Discard)
+	config := YamuxConfig()
 	session, err := yamux.Server(conn, config)
 	if err != nil {
 		return nil, fmt.Errorf("error creating yamux server session: %w", utils.UnwrapInnermost(err))
