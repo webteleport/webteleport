@@ -10,7 +10,7 @@ require (
 	github.com/quic-go/quic-go v0.42.0
 	github.com/quic-go/webtransport-go v0.7.0
 	github.com/webteleport/utils v0.2.10
-	nhooyr.io/websocket v1.8.10
+	nhooyr.io/websocket v1.8.11
 )
 
 require (
