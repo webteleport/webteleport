@@ -4,15 +4,10 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"io"
 	"log/slog"
 	"net"
 	"net/url"
-	"os"
-	"os/signal"
 	"strings"
-	"syscall"
-	"time"
 
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/transport"
@@ -54,28 +49,6 @@ func Listen(ctx context.Context, addr string) (*WebtransportListener, error) {
 			}
 			slog.Warn(fmt.Sprintf("stm0: unknown command: %s", line))
 		}
-	}()
-	// go io.Copy(stm0, os.Stdin)
-	// Start a goroutine to gracefully handle close signal
-	// TODO: cancel when server exits
-	go func() {
-		signalChannel := make(chan os.Signal, 1)
-
-		// Notify the channel for specific signals
-		signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
-
-		// Wait for the signal
-		<-signalChannel
-
-		// Print "bye" when the program exits
-		_, err := io.WriteString(stm0, "CLOSE\n")
-		if err != nil {
-			slog.Warn(fmt.Sprintf("close error: %v", err))
-		}
-		slog.Info("terminating in 1 second")
-		time.Sleep(time.Second)
-
-		os.Exit(0)
 	}()
 
 	ln := &WebtransportListener{
