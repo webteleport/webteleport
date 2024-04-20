@@ -41,7 +41,7 @@ func Listen(ctx context.Context, addr string) (*WebtransportListener, error) {
 		for scanner.Scan() {
 			line := scanner.Text()
 			// ignore server pings
-			if line == "PING" {
+			if line == "" || line == "PING" {
 				continue
 			}
 			if strings.HasPrefix(line, "HOST ") {
