@@ -38,18 +38,10 @@ func YamuxConfig() *yamux.Config {
 }
 
 func YamuxReverseGender(conn io.ReadWriteCloser, r *http.Request) (string, *yamux.Session, error) {
+	// default gender of new clients is "server", so reverse it to "client"
 	config := YamuxConfig()
-	// for compatibility with old clients
-	// by default, assume opposite side is client
-	// TODO over time, we will drop this compatibility
-	// and assume opposite side is always server
-	if r.Header.Get("Yamux") == "" && r.URL.Query().Get("yamux") == "" {
-		ssn, err := yamux.Server(conn, config)
-		return "server", ssn, err
-	}
-	// default gender of new clients is server
-	ssn, err := yamux.Client(conn, config)
-	return "client", ssn, err
+	session, err := yamux.Client(conn, config)
+	return "client", session, err
 }
 
 func Dial(ctx context.Context, addr string, hdr http.Header) (*WebsocketSession, error) {
@@ -57,11 +49,6 @@ func Dial(ctx context.Context, addr string, hdr http.Header) (*WebsocketSession,
 	if err != nil {
 		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
 	}
-
-	if hdr == nil {
-		hdr = http.Header{}
-	}
-	hdr.Set("Yamux", "server")
 
 	conn, err := DialConn(ctx, addr, hdr)
 	if err != nil {
