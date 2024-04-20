@@ -47,8 +47,8 @@ func ExtractAltSvcEndpoints(hostname, line, protocolId string) (endpoints []Endp
 // fallback to websocket so that resolve always returns at least one endpoint
 func Resolve(u *url.URL) (endpoints []Endpoint) {
 	endpoints = append(endpoints, eps(u.Hostname(), ENV("ALT_SVC"))...)
-	endpoints = append(endpoints, eps(u.Hostname(), TXT(u.Host))...)
-	endpoints = append(endpoints, eps(u.Hostname(), HEAD(u.Hostname()))...)
+	endpoints = append(endpoints, eps(u.Hostname(), TXT(u.Hostname()))...)
+	endpoints = append(endpoints, eps(u.Hostname(), HEAD(u.Host))...)
 	if len(endpoints) == 0 {
 		endpoints = append(endpoints, Endpoint{
 			Protocol: "websocket",
@@ -95,9 +95,14 @@ func HEAD(s string) (v []string) {
 
 // TXT gets all altsvcs from TXT records of given host
 func TXT(h string) []string {
+	// skip common local addresses
+	switch h {
+	case "localhost", "127.0.0.1", "::1":
+		return []string{}
+	}
 	txts, err := utils.LookupHostTXT(h, "1.1.1.1:53")
 	if err != nil {
-		slog.Warn(fmt.Sprintf("dns lookup error: %v", err))
+		slog.Warn(fmt.Sprintf("dns lookup error: %s: %v", h, err))
 	}
 	return altsvcLines(txts)
 }
