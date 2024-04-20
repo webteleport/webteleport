@@ -31,7 +31,7 @@ func DialAddr(addr string, relayURL *url.URL) (string, error) {
 	return u.String(), nil
 }
 
-func DialWebtransport(ctx context.Context, addr string, hdr http.Header) (*WebtransportSession, error) {
+func Dial(ctx context.Context, addr string, hdr http.Header) (*WebtransportSession, error) {
 	u, err := url.Parse(addr)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing %s: %w", addr, err)

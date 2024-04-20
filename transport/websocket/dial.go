@@ -52,7 +52,7 @@ func YamuxReverseGender(conn io.ReadWriteCloser, r *http.Request) (string, *yamu
 	return "client", ssn, err
 }
 
-func DialWebsocket(ctx context.Context, addr string, hdr http.Header) (*WebsocketSession, error) {
+func Dial(ctx context.Context, addr string, hdr http.Header) (*WebsocketSession, error) {
 	u, err := url.Parse(addr)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
@@ -63,7 +63,7 @@ func DialWebsocket(ctx context.Context, addr string, hdr http.Header) (*Websocke
 	}
 	hdr.Set("Yamux", "server")
 
-	conn, err := Dial(ctx, addr, hdr)
+	conn, err := DialConn(ctx, addr, hdr)
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (WS): %w", u.Hostname(), utils.UnwrapInnermost(err))
 	}
@@ -77,7 +77,7 @@ func DialWebsocket(ctx context.Context, addr string, hdr http.Header) (*Websocke
 	return &WebsocketSession{session}, nil
 }
 
-func Dial(ctx context.Context, addr string, hdr http.Header) (conn net.Conn, err error) {
+func DialConn(ctx context.Context, addr string, hdr http.Header) (conn net.Conn, err error) {
 	wsconn, _, err := websocket.Dial(
 		ctx,
 		addr,
