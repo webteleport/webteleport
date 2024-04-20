@@ -7,24 +7,18 @@ import (
 	"github.com/webteleport/webteleport/transport"
 )
 
-// WebtransportTransport is a transport that uses Webtransport.
-type WebtransportTransport struct {
-}
+type Transport struct{}
 
-func NewTransport() transport.Transport {
-	return &WebtransportTransport{}
-}
+var _ transport.Transport = (*Transport)(nil)
 
-var _ transport.Transport = &WebtransportTransport{}
-
-func (t *WebtransportTransport) Dial(ctx context.Context, addr string) (transport.Session, error) {
-	webtransportSession, err := DialWebtransport(ctx, addr, nil)
+func (t *Transport) Dial(ctx context.Context, addr string) (transport.Session, error) {
+	tssn, err := DialWebtransport(ctx, addr, nil)
 	if err != nil {
 		return nil, err
 	}
-	return webtransportSession, nil
+	return tssn, nil
 }
 
-func (t *WebtransportTransport) Listen(ctx context.Context, addr string) (net.Listener, error) {
+func (t *Transport) Listen(ctx context.Context, addr string) (net.Listener, error) {
 	return Listen(ctx, addr)
 }

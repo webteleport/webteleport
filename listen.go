@@ -30,6 +30,7 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 	// try to find ALT_SVC records in ENV/DNS/HEAD, see endpoint.Resolve
 	ep := endpoint.Resolve(relayURL)[0]
 
+	// TODO: compute dialAddr in Endpoint.Resolve
 	var (
 		dialAddr string
 		tr       transport.Transport
@@ -41,13 +42,13 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 		if err != nil {
 			return nil, err
 		}
-		tr = webtransport.NewTransport()
+		tr = &webtransport.Transport{}
 	default:
 		dialAddr, err = websocket.DialAddr(ep.Addr, relayURL)
 		if err != nil {
 			return nil, err
 		}
-		tr = websocket.NewTransport()
+		tr = &websocket.Transport{}
 	}
 	return tr.Listen(ctx, dialAddr)
 }

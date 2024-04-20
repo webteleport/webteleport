@@ -30,7 +30,6 @@ func Listen(ctx context.Context, addr string) (*WebsocketListener, error) {
 	}
 	errchan := make(chan string)
 	hostchan := make(chan string)
-	// go io.Copy(os.Stdout, stm0)
 	go func() {
 		scanner := bufio.NewScanner(stm0)
 		for scanner.Scan() {
@@ -53,22 +52,26 @@ func Listen(ctx context.Context, addr string) (*WebsocketListener, error) {
 
 	ln := &WebsocketListener{
 		session: session,
-		stm0:    stm0,
 		scheme:  u.Scheme,
-		port:    utils.ExtractURLPort(u),
 	}
 	select {
 	case emsg := <-errchan:
 		return nil, fmt.Errorf("server: %s", emsg)
-	case ln.host = <-hostchan:
-		return ln, nil
+	case hostport := <-hostchan:
+		// TODO handle host + port + path
+		if host, port, err := net.SplitHostPort(hostport); err == nil {
+			ln.host = host
+			ln.port = port
+		} else {
+			ln.host = hostport
+		}
 	}
+	return ln, nil
 }
 
 // WebsocketListener implements [net.Listener]
 type WebsocketListener struct {
 	session transport.Session
-	stm0    transport.Stream
 	scheme  string
 	host    string
 	port    string
