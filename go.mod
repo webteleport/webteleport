@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/yamux v0.1.1
 	github.com/quic-go/quic-go v0.42.0
 	github.com/quic-go/webtransport-go v0.7.0
-	github.com/webteleport/utils v0.2.13
+	github.com/webteleport/utils v0.2.14
 	nhooyr.io/websocket v1.8.11
 )
 
