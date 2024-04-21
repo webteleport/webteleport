@@ -4,7 +4,7 @@ import (
 	"context"
 	"net"
 
-	"github.com/webteleport/webteleport/transport"
+	"github.com/webteleport/transport"
 )
 
 type Transport struct{}

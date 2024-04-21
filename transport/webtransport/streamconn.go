@@ -4,7 +4,7 @@ import (
 	"net"
 
 	"github.com/quic-go/webtransport-go"
-	"github.com/webteleport/webteleport/transport"
+	"github.com/webteleport/transport"
 )
 
 var _ net.Conn = (*StreamConn)(nil)

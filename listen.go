@@ -5,9 +5,9 @@ import (
 	"net"
 	"net/url"
 
+	"github.com/webteleport/transport"
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/endpoint"
-	"github.com/webteleport/webteleport/transport"
 	"github.com/webteleport/webteleport/transport/websocket"
 	"github.com/webteleport/webteleport/transport/webtransport"
 )

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/quic-go/webtransport-go"
-	"github.com/webteleport/webteleport/transport"
+	"github.com/webteleport/transport"
 )
 
 type WebtransportSession struct {

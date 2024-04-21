@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/yamux"
-	"github.com/webteleport/webteleport/transport"
+	"github.com/webteleport/transport"
 )
 
 type WebsocketSession struct {

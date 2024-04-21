@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/webteleport/webteleport/transport"
+	"github.com/webteleport/transport"
 )
 
 var _ net.Addr = (*Listener)(nil)

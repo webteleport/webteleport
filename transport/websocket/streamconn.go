@@ -4,7 +4,7 @@ import (
 	"net"
 
 	"github.com/hashicorp/yamux"
-	"github.com/webteleport/webteleport/transport"
+	"github.com/webteleport/transport"
 )
 
 var _ net.Conn = (*StreamConn)(nil)
