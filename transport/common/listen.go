@@ -20,7 +20,7 @@ type Listener struct {
 
 // calling Accept returns a new [net.Conn]
 func (l *Listener) Accept() (net.Conn, error) {
-	streamConn, err := l.Session.AcceptStream(context.Background())
+	streamConn, err := l.Session.Accept(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("accept: %w", err)
 	}

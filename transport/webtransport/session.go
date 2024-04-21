@@ -13,7 +13,7 @@ type WebtransportSession struct {
 	*webtransport.Session
 }
 
-func (s *WebtransportSession) AcceptStream(ctx context.Context) (transport.Stream, error) {
+func (s *WebtransportSession) Accept(ctx context.Context) (transport.Stream, error) {
 	stm, err := s.Session.AcceptStream(ctx)
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func (s *WebtransportSession) AcceptStream(ctx context.Context) (transport.Strea
 	return &StreamConn{stm, s.Session}, nil
 }
 
-func (s *WebtransportSession) OpenStream(ctx context.Context) (transport.Stream, error) {
+func (s *WebtransportSession) Open(ctx context.Context) (transport.Stream, error) {
 	stm, err := s.Session.OpenStreamSync(ctx)
 	if err != nil {
 		return nil, err
