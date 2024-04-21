@@ -12,11 +12,7 @@ type Transport struct{}
 var _ transport.Transport = (*Transport)(nil)
 
 func (t *Transport) Dial(ctx context.Context, addr string) (transport.Session, error) {
-	tssn, err := Dial(ctx, addr, nil)
-	if err != nil {
-		return nil, err
-	}
-	return tssn, nil
+	return Dial(ctx, addr, nil)
 }
 
 func (t *Transport) Listen(ctx context.Context, addr string) (net.Listener, error) {

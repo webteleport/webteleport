@@ -1,9 +1,11 @@
-package transport
+package common
 
 import (
 	"context"
 	"fmt"
 	"net"
+
+	"github.com/webteleport/webteleport/transport"
 )
 
 var _ net.Addr = (*Listener)(nil)
@@ -11,7 +13,7 @@ var _ net.Listener = (*Listener)(nil)
 
 // Listener implements [net.Listener]
 type Listener struct {
-	Session Session
+	Session transport.Session
 	Scheme  string
 	Address string // host[:port][/path/]
 }

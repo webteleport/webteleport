@@ -8,10 +8,10 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/webteleport/webteleport/transport"
+	"github.com/webteleport/webteleport/transport/common"
 )
 
-func Listen(ctx context.Context, addr string) (*transport.Listener, error) {
+func Listen(ctx context.Context, addr string) (*common.Listener, error) {
 	u, err := url.Parse(addr)
 	if err != nil {
 		return nil, fmt.Errorf("parse: %w", err)
@@ -46,7 +46,7 @@ func Listen(ctx context.Context, addr string) (*transport.Listener, error) {
 		}
 	}()
 
-	ln := &transport.Listener{
+	ln := &common.Listener{
 		Session: session,
 		Scheme:  u.Scheme,
 	}

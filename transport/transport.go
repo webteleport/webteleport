@@ -6,9 +6,17 @@ import (
 	"net"
 )
 
-type Transport interface {
+type Dialer interface {
 	Dial(ctx context.Context, addr string) (Session, error)
+}
+
+type Listener interface {
 	Listen(ctx context.Context, addr string) (net.Listener, error)
+}
+
+type Transport interface {
+	Dialer
+	Listener
 }
 
 type Session interface {
