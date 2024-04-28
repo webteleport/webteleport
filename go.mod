@@ -7,8 +7,8 @@ go 1.22.2
 require (
 	github.com/ebi-yade/altsvc-go v0.1.1
 	github.com/hashicorp/yamux v0.1.1
-	github.com/quic-go/quic-go v0.42.0
-	github.com/quic-go/webtransport-go v0.7.0
+	github.com/quic-go/quic-go v0.43.0
+	github.com/quic-go/webtransport-go v0.8.0
 	github.com/webteleport/transport v0.0.0
 	github.com/webteleport/utils v0.2.14
 	nhooyr.io/websocket v1.8.11

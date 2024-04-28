@@ -7,7 +7,6 @@ import (
 	"net/url"
 
 	"github.com/quic-go/quic-go"
-	"github.com/quic-go/quic-go/http3"
 	"github.com/quic-go/webtransport-go"
 	"github.com/webteleport/utils"
 )
@@ -36,13 +35,12 @@ func Dial(ctx context.Context, addr string, hdr http.Header) (*WebtransportSessi
 	if err != nil {
 		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
 	}
+	quicConfig := &quic.Config{
+		EnableDatagrams:    true,
+		MaxIncomingStreams: MaxIncomingStreams,
+	}
 	dialer := &webtransport.Dialer{
-		RoundTripper: &http3.RoundTripper{
-			QuicConfig: &quic.Config{
-				EnableDatagrams:    true,
-				MaxIncomingStreams: MaxIncomingStreams,
-			},
-		},
+		QUICConfig: quicConfig,
 	}
 	_, session, err := dialer.Dial(ctx, addr, hdr)
 	if err != nil {
