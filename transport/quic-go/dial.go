@@ -3,7 +3,7 @@ package quic
 import (
 	"context"
 	"crypto/tls"
-	"time"
+	"fmt"
 
 	"github.com/quic-go/quic-go"
 )
@@ -16,10 +16,12 @@ func Dial(ctx context.Context, addr string) (*QuicSession, error) {
 		InsecureSkipVerify: true,
 	}
 	quicConf := &quic.Config{
-		MaxIdleTimeout:        time.Minute * 10080,
-		MaxIncomingStreams:    1000000,
-		MaxIncomingUniStreams: 1000000,
+		EnableDatagrams:    true,
+		MaxIncomingStreams: MaxIncomingStreams,
 	}
 	session, err := quic.DialAddr(ctx, addr, tlsConf, quicConf)
-	return &QuicSession{session}, err
+	if err != nil {
+		return nil, fmt.Errorf("error dialing %s (quic-go): %w", addr, err)
+	}
+	return &QuicSession{session}, nil
 }
