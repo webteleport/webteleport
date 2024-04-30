@@ -13,6 +13,7 @@ var MaxBidiRemoteStreams int64 = 1 << 60
 
 var TLSConfig = &tls.Config{
 	InsecureSkipVerify: true,
+	MinVersion:         tls.VersionTLS13,
 }
 
 var QUICConfig = &quic.Config{
