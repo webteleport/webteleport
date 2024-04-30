@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log/slog"
+	"os"
 
 	"github.com/webtransport/quic"
 )
@@ -19,6 +21,10 @@ var TLSConfig = &tls.Config{
 var QUICConfig = &quic.Config{
 	TLSConfig:            TLSConfig,
 	MaxBidiRemoteStreams: MaxBidiRemoteStreams,
+	QLogLogger: slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     quic.QLogLevelFrame,
+	})),
 }
 
 func Dial(ctx context.Context, addr string) (*QuicSession, error) {
