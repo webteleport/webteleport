@@ -3,14 +3,12 @@ package websocket
 import (
 	"context"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"net/url"
-	"os"
 
-	"github.com/hashicorp/yamux"
 	"github.com/webteleport/utils"
+	"github.com/webteleport/webteleport/transport/common"
 	"nhooyr.io/websocket"
 )
 
@@ -29,21 +27,6 @@ func DialAddr(addr string, relayURL *url.URL) (string, error) {
 	return u.String(), nil
 }
 
-func YamuxConfig() *yamux.Config {
-	c := yamux.DefaultConfig()
-	if os.Getenv("YAMUX_LOG") == "" {
-		c.LogOutput = io.Discard
-	}
-	return c
-}
-
-func YamuxReverseGender(conn io.ReadWriteCloser, r *http.Request) (string, *yamux.Session, error) {
-	// default gender of new clients is "server", so reverse it to "client"
-	config := YamuxConfig()
-	session, err := yamux.Client(conn, config)
-	return "client", session, err
-}
-
 func Dial(ctx context.Context, addr string, hdr http.Header) (*WebsocketSession, error) {
 	u, err := url.Parse(addr)
 	if err != nil {
@@ -55,8 +38,7 @@ func Dial(ctx context.Context, addr string, hdr http.Header) (*WebsocketSession,
 		return nil, fmt.Errorf("error dialing %s (WS): %w", u.Hostname(), utils.UnwrapInnermost(err))
 	}
 
-	config := YamuxConfig()
-	session, err := yamux.Server(conn, config)
+	session, err := common.YamuxServer(conn)
 	if err != nil {
 		return nil, fmt.Errorf("error creating yamux server session: %w", utils.UnwrapInnermost(err))
 	}

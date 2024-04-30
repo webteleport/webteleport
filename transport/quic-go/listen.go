@@ -4,19 +4,21 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/url"
 	"strings"
 
+	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/transport/common"
 )
 
 func Listen(ctx context.Context, addr string) (*common.Listener, error) {
-	u, err := url.Parse(addr)
+	u, err := url.Parse(utils.AsURL(addr))
 	if err != nil {
 		return nil, fmt.Errorf("parse: %w", err)
 	}
-	session, err := Dial(ctx, addr)
+	session, err := Dial(ctx, u.Host)
 	if err != nil {
 		return nil, fmt.Errorf("dial: %w", err)
 	}
@@ -24,6 +26,7 @@ func Listen(ctx context.Context, addr string) (*common.Listener, error) {
 	if err != nil {
 		return nil, fmt.Errorf("stm0: %w", err)
 	}
+	io.WriteString(stm0, fmt.Sprintf("%s\n", u.RequestURI()))
 	errchan := make(chan string)
 	hostchan := make(chan string)
 	go func() {

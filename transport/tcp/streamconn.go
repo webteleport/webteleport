@@ -1,0 +1,30 @@
+package tcp
+
+import (
+	"net"
+
+	"github.com/hashicorp/yamux"
+	"github.com/webteleport/transport"
+)
+
+var _ net.Conn = (*StreamConn)(nil)
+
+var _ transport.Stream = (*StreamConn)(nil)
+
+// StreamsConn wraps *yamux.Stream into net.Conn
+type StreamConn struct {
+	*yamux.Stream
+}
+
+func (sc *StreamConn) Close() error {
+	TcpConnsClosed.Add(1)
+	return sc.Stream.Close()
+}
+
+func (sc *StreamConn) CloseRead() error {
+	return nil
+}
+
+func (sc *StreamConn) CloseWrite() error {
+	return nil
+}
