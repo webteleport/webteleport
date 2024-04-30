@@ -9,21 +9,23 @@ import (
 )
 
 // 2^60 == 1152921504606846976
-const MaxIncomingStreams int64 = 1 << 60
+var MaxBidiRemoteStreams int64 = 1 << 60
+
+var TLSConfig = &tls.Config{
+	InsecureSkipVerify: true,
+}
+
+var QUICConfig = &quic.Config{
+	TLSConfig:            TLSConfig,
+	MaxBidiRemoteStreams: MaxBidiRemoteStreams,
+}
 
 func Dial(ctx context.Context, addr string) (*QuicSession, error) {
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true,
-	}
-	quicConf := &quic.Config{
-		TLSConfig:            tlsConfig,
-		MaxBidiRemoteStreams: MaxIncomingStreams,
-	}
-	l, err := quic.Listen("udp", ":0", quicConf)
+	l, err := quic.Listen("udp", ":0", QUICConfig)
 	if err != nil {
 		return nil, err
 	}
-	session, err := l.Dial(ctx, "udp", addr, quicConf)
+	session, err := l.Dial(ctx, "udp", addr, QUICConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (go-quic): %w", addr, err)
 	}

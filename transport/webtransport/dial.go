@@ -12,7 +12,12 @@ import (
 )
 
 // 2^60 == 1152921504606846976
-const MaxIncomingStreams int64 = 1 << 60
+var MaxIncomingStreams int64 = 1 << 60
+
+var QUICConfig = &quic.Config{
+	EnableDatagrams:    true,
+	MaxIncomingStreams: MaxIncomingStreams,
+}
 
 func DialAddr(addr string, relayURL *url.URL) (string, error) {
 	u, err := url.Parse(utils.AsURL(addr))
@@ -35,12 +40,8 @@ func Dial(ctx context.Context, addr string, hdr http.Header) (*WebtransportSessi
 	if err != nil {
 		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
 	}
-	quicConfig := &quic.Config{
-		EnableDatagrams:    true,
-		MaxIncomingStreams: MaxIncomingStreams,
-	}
 	dialer := &webtransport.Dialer{
-		QUICConfig: quicConfig,
+		QUICConfig: QUICConfig,
 	}
 	_, session, err := dialer.Dial(ctx, addr, hdr)
 	if err != nil {
