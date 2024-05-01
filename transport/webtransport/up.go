@@ -12,19 +12,19 @@ import (
 	"github.com/webteleport/webteleport/spec"
 )
 
-var _ spec.HTTPUpgrader = (*WebtransportUpgrader)(nil)
+var _ spec.HTTPUpgrader = (*Upgrader)(nil)
 
-type WebtransportUpgrader struct {
+type Upgrader struct {
 	HOST string
 	reqc chan *spec.Request
 	*wt.Server
 }
 
-func (s *WebtransportUpgrader) Root() string {
+func (s *Upgrader) Root() string {
 	return s.HOST
 }
 
-func (s *WebtransportUpgrader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *Upgrader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ssn, err := s.Server.Upgrade(w, r)
 	if err != nil {
 		slog.Warn(fmt.Errorf("webtransport upgrade failed: %w", err).Error())
@@ -46,7 +46,7 @@ func (s *WebtransportUpgrader) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	s.reqc <- R
 }
 
-func (s *WebtransportUpgrader) Upgrade() (*spec.Request, error) {
+func (s *Upgrader) Upgrade() (*spec.Request, error) {
 	if s.reqc == nil {
 		s.reqc = make(chan *spec.Request, 10)
 	}

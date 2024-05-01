@@ -11,18 +11,18 @@ import (
 	"github.com/webtransport/quic"
 )
 
-var _ spec.Upgrader = (*GoQuicUpgrader)(nil)
+var _ spec.Upgrader = (*Upgrader)(nil)
 
-type GoQuicUpgrader struct {
+type Upgrader struct {
 	Listener *quic.Endpoint
 	HOST     string
 }
 
-func (s *GoQuicUpgrader) Root() string {
+func (s *Upgrader) Root() string {
 	return s.HOST
 }
 
-func (s *GoQuicUpgrader) Upgrade() (*spec.Request, error) {
+func (s *Upgrader) Upgrade() (*spec.Request, error) {
 	conn, err := s.Listener.Accept(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("accept error: %w", err)

@@ -11,18 +11,18 @@ import (
 	"github.com/webteleport/webteleport/transport/common"
 )
 
-var _ spec.Upgrader = (*QuicGoUpgrader)(nil)
+var _ spec.Upgrader = (*Upgrader)(nil)
 
-type QuicGoUpgrader struct {
+type Upgrader struct {
 	*quic.Listener
 	HOST string
 }
 
-func (s *QuicGoUpgrader) Root() string {
+func (s *Upgrader) Root() string {
 	return s.HOST
 }
 
-func (s *QuicGoUpgrader) Upgrade() (*spec.Request, error) {
+func (s *Upgrader) Upgrade() (*spec.Request, error) {
 	conn, err := s.Listener.Accept(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("accept error: %w", err)

@@ -11,18 +11,18 @@ import (
 	"github.com/webteleport/webteleport/transport/common"
 )
 
-var _ spec.Upgrader = (*TcpUpgrader)(nil)
+var _ spec.Upgrader = (*Upgrader)(nil)
 
-type TcpUpgrader struct {
+type Upgrader struct {
 	net.Listener
 	HOST string
 }
 
-func (s *TcpUpgrader) Root() string {
+func (s *Upgrader) Root() string {
 	return s.HOST
 }
 
-func (s *TcpUpgrader) Upgrade() (*spec.Request, error) {
+func (s *Upgrader) Upgrade() (*spec.Request, error) {
 	conn, err := s.Listener.Accept()
 	if err != nil {
 		return nil, err
