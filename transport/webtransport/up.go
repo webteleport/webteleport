@@ -15,13 +15,13 @@ import (
 var _ spec.HTTPUpgrader = (*WebtransportUpgrader)(nil)
 
 type WebtransportUpgrader struct {
-	root string
+	HOST string
 	reqc chan *spec.Request
 	*wt.Server
 }
 
 func (s *WebtransportUpgrader) Root() string {
-	return s.root
+	return s.HOST
 }
 
 func (s *WebtransportUpgrader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +47,9 @@ func (s *WebtransportUpgrader) ServeHTTP(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *WebtransportUpgrader) Upgrade() (*spec.Request, error) {
+	if s.reqc == nil {
+		s.reqc = make(chan *spec.Request, 10)
+	}
 	r, ok := <-s.reqc
 	if !ok {
 		return nil, io.EOF
