@@ -7,11 +7,11 @@ import (
 	"net/url"
 
 	"github.com/webteleport/utils"
-	"github.com/webteleport/webteleport/spec"
+	"github.com/webteleport/webteleport/edge"
 	"github.com/webteleport/webteleport/transport/common"
 )
 
-var _ spec.Upgrader = (*Upgrader)(nil)
+var _ edge.Upgrader = (*Upgrader)(nil)
 
 type Upgrader struct {
 	net.Listener
@@ -22,7 +22,7 @@ func (s *Upgrader) Root() string {
 	return s.HOST
 }
 
-func (s *Upgrader) Upgrade() (*spec.Edge, error) {
+func (s *Upgrader) Upgrade() (*edge.Edge, error) {
 	conn, err := s.Listener.Accept()
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (s *Upgrader) Upgrade() (*spec.Edge, error) {
 		return nil, fmt.Errorf("parse request uri error: %w", err)
 	}
 
-	R := &spec.Edge{
+	R := &edge.Edge{
 		Session: tssn,
 		Stream:  stm0,
 		Path:    u.Path,

@@ -9,14 +9,14 @@ import (
 
 	wt "github.com/quic-go/webtransport-go"
 	"github.com/webteleport/utils"
-	"github.com/webteleport/webteleport/spec"
+	"github.com/webteleport/webteleport/edge"
 )
 
-var _ spec.HTTPUpgrader = (*Upgrader)(nil)
+var _ edge.HTTPUpgrader = (*Upgrader)(nil)
 
 type Upgrader struct {
 	HOST string
-	reqc chan *spec.Edge
+	reqc chan *edge.Edge
 	*wt.Server
 }
 
@@ -36,7 +36,7 @@ func (s *Upgrader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		slog.Warn(fmt.Errorf("webtransport stm0 init failed: %w", err).Error())
 	}
 
-	R := &spec.Edge{
+	R := &edge.Edge{
 		Session: tssn,
 		Stream:  tstm,
 		Path:    r.URL.Path,
@@ -46,9 +46,9 @@ func (s *Upgrader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.reqc <- R
 }
 
-func (s *Upgrader) Upgrade() (*spec.Edge, error) {
+func (s *Upgrader) Upgrade() (*edge.Edge, error) {
 	if s.reqc == nil {
-		s.reqc = make(chan *spec.Edge, 10)
+		s.reqc = make(chan *edge.Edge, 10)
 	}
 	r, ok := <-s.reqc
 	if !ok {
