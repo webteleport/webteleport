@@ -4,13 +4,13 @@ import (
 	"net"
 	"time"
 
-	"github.com/webteleport/transport"
+	"github.com/webteleport/webteleport/tunnel"
 	"github.com/webtransport/quic"
 )
 
 var _ net.Conn = (*StreamConn)(nil)
 
-var _ transport.Stream = (*StreamConn)(nil)
+var _ tunnel.Stream = (*StreamConn)(nil)
 
 // StreamsConn wraps quic.Stream into net.Conn
 type StreamConn struct {

@@ -4,14 +4,14 @@ import (
 	"context"
 	"net"
 
-	"github.com/webteleport/transport"
+	"github.com/webteleport/webteleport/tunnel"
 )
 
 type Transport struct{}
 
-var _ transport.Transport = (*Transport)(nil)
+var _ tunnel.Transport = (*Transport)(nil)
 
-func (t *Transport) Dial(ctx context.Context, addr string) (transport.Session, error) {
+func (t *Transport) Dial(ctx context.Context, addr string) (tunnel.Session, error) {
 	return Dial(ctx, addr, nil)
 }
 

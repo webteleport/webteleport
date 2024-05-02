@@ -4,13 +4,13 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/webteleport/transport"
+	"github.com/webteleport/webteleport/tunnel"
 )
 
 // Edge is a transport agnostic edge object
 type Edge struct {
-	Session transport.Session
-	Stream  transport.Stream
+	Session tunnel.Session
+	Stream  tunnel.Stream
 	Path    string
 	Values  url.Values
 	Header  http.Header

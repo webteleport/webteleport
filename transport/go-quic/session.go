@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/webteleport/transport"
+	"github.com/webteleport/webteleport/tunnel"
 	"github.com/webtransport/quic"
 )
 
@@ -12,7 +12,7 @@ type QuicSession struct {
 	Session *quic.Conn
 }
 
-func (s *QuicSession) Accept(ctx context.Context) (transport.Stream, error) {
+func (s *QuicSession) Accept(ctx context.Context) (tunnel.Stream, error) {
 	stm, err := s.Session.AcceptStream(ctx)
 	if err != nil {
 		return nil, err
@@ -21,7 +21,7 @@ func (s *QuicSession) Accept(ctx context.Context) (transport.Stream, error) {
 	return &StreamConn{stm, s.Session}, nil
 }
 
-func (s *QuicSession) Open(ctx context.Context) (transport.Stream, error) {
+func (s *QuicSession) Open(ctx context.Context) (tunnel.Stream, error) {
 	stm, err := s.Session.NewStream(ctx)
 	if err != nil {
 		return nil, err

@@ -5,11 +5,11 @@ import (
 	"net"
 	"net/url"
 
-	"github.com/webteleport/transport"
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/endpoint"
 	"github.com/webteleport/webteleport/transport/websocket"
 	"github.com/webteleport/webteleport/transport/webtransport"
+	"github.com/webteleport/webteleport/tunnel"
 )
 
 // Listen calls [Dial] to create a [Listener], which is essentially a wrapper struct
@@ -33,7 +33,7 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 	// TODO: compute dialAddr in Endpoint.Resolve
 	var (
 		dialAddr string
-		tr       transport.Transport
+		tr       tunnel.Transport
 	)
 
 	switch ep.Protocol {

@@ -6,14 +6,14 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/yamux"
-	"github.com/webteleport/transport"
+	"github.com/webteleport/webteleport/tunnel"
 )
 
 type TcpSession struct {
 	*yamux.Session
 }
 
-func (s *TcpSession) Accept(context.Context) (transport.Stream, error) {
+func (s *TcpSession) Accept(context.Context) (tunnel.Stream, error) {
 	stm, err := s.Session.AcceptStream()
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func (s *TcpSession) Accept(context.Context) (transport.Stream, error) {
 	return &StreamConn{stm}, nil
 }
 
-func (s *TcpSession) Open(context.Context) (transport.Stream, error) {
+func (s *TcpSession) Open(context.Context) (tunnel.Stream, error) {
 	stm, err := s.Session.OpenStream()
 	if err != nil {
 		return nil, err

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/webteleport/transport"
+	"github.com/webteleport/webteleport/tunnel"
 )
 
 var _ net.Addr = (*Listener)(nil)
@@ -13,7 +13,7 @@ var _ net.Listener = (*Listener)(nil)
 
 // Listener implements [net.Listener]
 type Listener struct {
-	Session transport.Session
+	Session tunnel.Session
 	Scheme  string
 	Address string // host[:port][/path/]
 }
