@@ -7,8 +7,8 @@ import (
 	"github.com/webteleport/transport"
 )
 
-// Request is a transport agnostic request object
-type Request struct {
+// Edge is a transport agnostic edge object
+type Edge struct {
 	Session transport.Session
 	Stream  transport.Stream
 	Path    string
@@ -17,16 +17,16 @@ type Request struct {
 	RealIP  string
 }
 
-// Upgrade incoming requests via HTTP
+// Upgrade incoming edge requests via HTTP
 type HTTPUpgrader interface {
 	Upgrader
 	http.Handler
 }
 
-// Upgrade incoming requests
+// Upgrade incoming edge requests
 type Upgrader interface {
 	Root() string
-	Upgrade() (*Request, error)
+	Upgrade() (*Edge, error)
 }
 
 // Subscribe to incoming requests

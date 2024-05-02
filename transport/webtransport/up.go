@@ -16,7 +16,7 @@ var _ spec.HTTPUpgrader = (*Upgrader)(nil)
 
 type Upgrader struct {
 	HOST string
-	reqc chan *spec.Request
+	reqc chan *spec.Edge
 	*wt.Server
 }
 
@@ -36,7 +36,7 @@ func (s *Upgrader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		slog.Warn(fmt.Errorf("webtransport stm0 init failed: %w", err).Error())
 	}
 
-	R := &spec.Request{
+	R := &spec.Edge{
 		Session: tssn,
 		Stream:  tstm,
 		Path:    r.URL.Path,
@@ -46,9 +46,9 @@ func (s *Upgrader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.reqc <- R
 }
 
-func (s *Upgrader) Upgrade() (*spec.Request, error) {
+func (s *Upgrader) Upgrade() (*spec.Edge, error) {
 	if s.reqc == nil {
-		s.reqc = make(chan *spec.Request, 10)
+		s.reqc = make(chan *spec.Edge, 10)
 	}
 	r, ok := <-s.reqc
 	if !ok {

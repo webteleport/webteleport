@@ -22,7 +22,7 @@ func (s *Upgrader) Root() string {
 	return s.HOST
 }
 
-func (s *Upgrader) Upgrade() (*spec.Request, error) {
+func (s *Upgrader) Upgrade() (*spec.Edge, error) {
 	conn, err := s.Listener.Accept(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("accept error: %w", err)
@@ -45,7 +45,7 @@ func (s *Upgrader) Upgrade() (*spec.Request, error) {
 		return nil, fmt.Errorf("parse request uri error: %w", err)
 	}
 
-	R := &spec.Request{
+	R := &spec.Edge{
 		Session: tssn,
 		Stream:  stm0,
 		Path:    u.Path,
