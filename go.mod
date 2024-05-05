@@ -5,7 +5,7 @@ go 1.22.2
 // replace github.com/webteleport/utils => ../utils
 
 require (
-	github.com/btwiuse/wsconn v0.0.1
+	github.com/btwiuse/wsconn v0.0.2
 	github.com/ebi-yade/altsvc-go v0.1.1
 	github.com/hashicorp/yamux v0.1.1
 	github.com/quic-go/quic-go v0.43.0
