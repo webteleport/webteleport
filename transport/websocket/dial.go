@@ -33,7 +33,7 @@ func Dial(ctx context.Context, addr string, hdr http.Header) (*WebsocketSession,
 		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
 	}
 
-	conn, err := DialConn(ctx, addr, hdr)
+	conn, err := DialConn(ctx, addr, ModifyHeader(hdr))
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (WS): %w", u.Hostname(), utils.UnwrapInnermost(err))
 	}
@@ -44,6 +44,13 @@ func Dial(ctx context.Context, addr string, hdr http.Header) (*WebsocketSession,
 	}
 
 	return &WebsocketSession{session}, nil
+}
+
+func ModifyHeader(hdr http.Header) http.Header {
+	if hdr == nil {
+		hdr = make(http.Header)
+	}
+	hdr.Set(UpgradeHeader, "1")
 }
 
 func DialConn(ctx context.Context, addr string, hdr http.Header) (conn net.Conn, err error) {
