@@ -43,6 +43,10 @@ func Dial(ctx context.Context, addr string, hdr http.Header) (*WebtransportSessi
 	dialer := &webtransport.Dialer{
 		QUICConfig: QUICConfig,
 	}
+	if hdr == nil {
+		hdr = make(http.Header)
+	}
+	hdr.Set(UpgradeHeader, "1")
 	_, session, err := dialer.Dial(ctx, addr, hdr)
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (UDP): %w", u.Hostname(), utils.UnwrapInnermost(err))

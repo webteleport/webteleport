@@ -10,6 +10,10 @@ import (
 )
 
 func dialOptions(hdr http.Header) *websocket.DialOptions {
+	if hdr == nil {
+		hdr = make(http.Header)
+	}
+	hdr.Set(UpgradeHeader, "1")
 	return &websocket.DialOptions{
 		HTTPClient: &http.Client{
 			Transport: &http.Transport{

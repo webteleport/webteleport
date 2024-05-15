@@ -12,6 +12,11 @@ import (
 	"github.com/webteleport/webteleport/edge"
 )
 
+var (
+	UpgradeQuery  = "x-webtransport-upgrade"
+	UpgradeHeader = http.CanonicalHeaderKey(UpgradeQuery)
+)
+
 var _ edge.HTTPUpgrader = (*Upgrader)(nil)
 
 type Upgrader struct {

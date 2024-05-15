@@ -22,7 +22,7 @@ func DialAddr(addr string, relayURL *url.URL) (string, error) {
 	u.Path = relayURL.Path
 	u.RawPath = relayURL.RawPath
 	params := relayURL.Query()
-	params.Add("x-websocket-upgrade", "1")
+	params.Add(UpgradeQuery, "1")
 	u.RawQuery = params.Encode()
 	return u.String(), nil
 }
