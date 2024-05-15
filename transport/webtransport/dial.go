@@ -55,4 +55,5 @@ func ModifyHeader(hdr http.Header) http.Header {
 		hdr = make(http.Header)
 	}
 	hdr.Set(UpgradeHeader, "1")
+	return hdr
 }

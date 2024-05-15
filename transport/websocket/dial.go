@@ -51,6 +51,7 @@ func ModifyHeader(hdr http.Header) http.Header {
 		hdr = make(http.Header)
 	}
 	hdr.Set(UpgradeHeader, "1")
+	return hdr
 }
 
 func DialConn(ctx context.Context, addr string, hdr http.Header) (conn net.Conn, err error) {
