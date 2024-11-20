@@ -12,6 +12,7 @@ func YamuxConfig() *yamux.Config {
 	if os.Getenv("YAMUX_LOG") == "" {
 		c.LogOutput = io.Discard
 	}
+	c.EnableKeepAlive = false
 	return c
 }
 
