@@ -12,6 +12,6 @@ type HTTPUpgrader interface {
 
 // Upgrade incoming edge requests
 type Upgrader interface {
-	Root() string
+	IsRoot(string) bool
 	Upgrade() (*Edge, error)
 }

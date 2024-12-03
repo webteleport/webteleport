@@ -15,11 +15,7 @@ var _ edge.Upgrader = (*Upgrader)(nil)
 
 type Upgrader struct {
 	Listener *quic.Endpoint
-	HOST     string
-}
-
-func (s *Upgrader) Root() string {
-	return s.HOST
+	common.RootPatterns
 }
 
 func (s *Upgrader) Upgrade() (*edge.Edge, error) {

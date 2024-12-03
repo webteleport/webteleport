@@ -21,12 +21,8 @@ var (
 var _ edge.HTTPUpgrader = (*Upgrader)(nil)
 
 type Upgrader struct {
-	HOST string
 	reqc chan *edge.Edge
-}
-
-func (s *Upgrader) Root() string {
-	return s.HOST
+	common.RootPatterns
 }
 
 func (s *Upgrader) ServeHTTP(w http.ResponseWriter, r *http.Request) {

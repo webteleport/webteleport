@@ -10,6 +10,7 @@ import (
 	wt "github.com/quic-go/webtransport-go"
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/edge"
+	"github.com/webteleport/webteleport/transport/common"
 )
 
 var (
@@ -20,13 +21,9 @@ var (
 var _ edge.HTTPUpgrader = (*Upgrader)(nil)
 
 type Upgrader struct {
-	HOST string
 	reqc chan *edge.Edge
 	*wt.Server
-}
-
-func (s *Upgrader) Root() string {
-	return s.HOST
+	common.RootPatterns
 }
 
 func (s *Upgrader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
