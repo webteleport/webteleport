@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/webtransport/quic"
+	"golang.org/x/net/quic"
 )
 
 // 2^60 == 1152921504606846976

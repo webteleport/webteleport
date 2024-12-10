@@ -8,7 +8,7 @@ import (
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/edge"
 	"github.com/webteleport/webteleport/transport/common"
-	"github.com/webtransport/quic"
+	"golang.org/x/net/quic"
 )
 
 var _ edge.Upgrader = (*Upgrader)(nil)

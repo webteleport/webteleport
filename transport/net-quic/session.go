@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/webteleport/webteleport/tunnel"
-	"github.com/webtransport/quic"
+	"golang.org/x/net/quic"
 )
 
 type QuicSession struct {

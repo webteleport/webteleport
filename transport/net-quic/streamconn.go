@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/webteleport/webteleport/tunnel"
-	"github.com/webtransport/quic"
+	"golang.org/x/net/quic"
 )
 
 var _ net.Conn = (*StreamConn)(nil)
@@ -19,10 +19,20 @@ type StreamConn struct {
 }
 
 // LocalAddr is required to impl net.Conn
-func (sc *StreamConn) LocalAddr() net.Addr { return sc.Session.LocalAddr() }
+func (sc *StreamConn) LocalAddr() net.Addr {
+	return &netAddr{
+		network:  "udp",
+		hostport: sc.Session.LocalAddr().String(),
+	}
+}
 
 // RemoteAddr is required to impl net.Conn
-func (sc *StreamConn) RemoteAddr() net.Addr { return sc.Session.RemoteAddr() }
+func (sc *StreamConn) RemoteAddr() net.Addr {
+	return &netAddr{
+		network:  "udp",
+		hostport: sc.Session.RemoteAddr().String(),
+	}
+}
 
 // SetDeadline is required to impl net.Conn
 func (sc *StreamConn) SetDeadline(time.Time) error { return nil }
@@ -32,3 +42,18 @@ func (sc *StreamConn) SetReadDeadline(time.Time) error { return nil }
 
 // SetWriteDeadline is required to impl net.Conn
 func (sc *StreamConn) SetWriteDeadline(time.Time) error { return nil }
+
+var _ net.Addr = (*netAddr)(nil)
+
+type netAddr struct {
+	network  string
+	hostport string
+}
+
+func (n *netAddr) Network() string {
+	return n.network
+}
+
+func (n *netAddr) String() string {
+	return n.hostport
+}
