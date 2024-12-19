@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/btwiuse/version"
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/transport/common"
 	"nhooyr.io/websocket"
@@ -51,6 +52,8 @@ func ModifyHeader(hdr http.Header) http.Header {
 		hdr = make(http.Header)
 	}
 	hdr.Set(UpgradeHeader, "1")
+	ua := fmt.Sprintf("webteleport/%s (%s)", version.GitVersionString, version.GitCommitString)
+	hdr.Set("User-Agent", ua)
 	return hdr
 }
 

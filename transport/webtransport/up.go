@@ -42,6 +42,7 @@ func (s *Upgrader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Session: tssn,
 		Stream:  tstm,
 		Path:    r.URL.Path,
+		Header:  r.Header,
 		Values:  r.URL.Query(),
 		RealIP:  utils.RealIP(r),
 	}

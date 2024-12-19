@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/btwiuse/version"
 	"github.com/quic-go/quic-go"
 	"github.com/quic-go/webtransport-go"
 	"github.com/webteleport/utils"
@@ -55,5 +56,7 @@ func ModifyHeader(hdr http.Header) http.Header {
 		hdr = make(http.Header)
 	}
 	hdr.Set(UpgradeHeader, "1")
+	ua := fmt.Sprintf("webteleport/%s (%s)", version.GitVersionString, version.GitCommitString)
+	hdr.Set("User-Agent", ua)
 	return hdr
 }
