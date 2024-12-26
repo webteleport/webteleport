@@ -8,6 +8,8 @@ import (
 	"golang.org/x/net/quic"
 )
 
+var _ tunnel.Session = (*QuicSession)(nil)
+
 type QuicSession struct {
 	Session *quic.Conn
 }

@@ -9,6 +9,8 @@ import (
 	"github.com/webteleport/webteleport/tunnel"
 )
 
+var _ tunnel.Session = (*WebtransportSession)(nil)
+
 type WebtransportSession struct {
 	*webtransport.Session
 }

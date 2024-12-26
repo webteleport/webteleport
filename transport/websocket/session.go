@@ -9,6 +9,8 @@ import (
 	"github.com/webteleport/webteleport/tunnel"
 )
 
+var _ tunnel.Session = (*WebsocketSession)(nil)
+
 type WebsocketSession struct {
 	*yamux.Session
 }

@@ -9,6 +9,8 @@ import (
 	"github.com/webteleport/webteleport/tunnel"
 )
 
+var _ tunnel.Session = (*QuicSession)(nil)
+
 type QuicSession struct {
 	Session quic.Connection
 }
