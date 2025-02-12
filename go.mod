@@ -1,6 +1,6 @@
 module github.com/webteleport/webteleport
 
-go 1.23.2
+go 1.24
 
 // replace github.com/webteleport/utils => ../utils
 
@@ -11,8 +11,8 @@ require (
 	github.com/hashicorp/yamux v0.1.2
 	github.com/quic-go/quic-go v0.49.0
 	github.com/quic-go/webtransport-go v0.8.1-0.20241018022711-4ac2c9250e66
-	github.com/webteleport/utils v0.2.18
-	golang.org/x/net v0.34.0
+	github.com/webteleport/utils v0.2.19-alpha.1
+	golang.org/x/net v0.35.0
 	nhooyr.io/websocket v1.8.17
 )
 
@@ -28,12 +28,12 @@ require (
 	github.com/quic-go/qpack v0.5.1 // indirect
 	github.com/rs/cors v1.11.1 // indirect
 	go.uber.org/mock v0.5.0 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 // indirect
-	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
-	golang.org/x/tools v0.29.0 // indirect
+	golang.org/x/crypto v0.33.0 // indirect
+	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac // indirect
+	golang.org/x/mod v0.23.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/tools v0.30.0 // indirect
 	k8s.io/apimachinery v0.29.2 // indirect
 )
