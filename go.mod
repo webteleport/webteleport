@@ -9,7 +9,7 @@ require (
 	github.com/btwiuse/wsconn v0.0.3
 	github.com/ebi-yade/altsvc-go v0.1.1
 	github.com/hashicorp/yamux v0.1.2
-	github.com/quic-go/quic-go v0.49.0
+	github.com/quic-go/quic-go v0.50.0
 	github.com/quic-go/webtransport-go v0.8.1-0.20241018022711-4ac2c9250e66
 	github.com/webteleport/utils v0.2.19-alpha.1
 	golang.org/x/net v0.35.0
