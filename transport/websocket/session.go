@@ -42,3 +42,7 @@ func (s *WebsocketSession) Close() error {
 	s.Session.Close()
 	return http.ErrServerClosed
 }
+
+func (s *WebsocketSession) Context() context.Context {
+	return context.TODO()
+}

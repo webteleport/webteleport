@@ -40,3 +40,7 @@ func (s *QuicSession) Open(ctx context.Context) (tunnel.Stream, error) {
 func (s *QuicSession) Close() error {
 	return s.Session.Close()
 }
+
+func (s *QuicSession) Context() context.Context {
+	return context.TODO()
+}

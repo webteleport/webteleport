@@ -42,3 +42,7 @@ func (s *QuicSession) Close() error {
 	s.Session.CloseWithError(1337, "foobar")
 	return http.ErrServerClosed
 }
+
+func (s *QuicSession) Context() context.Context {
+	return context.TODO()
+}

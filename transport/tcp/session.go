@@ -42,3 +42,7 @@ func (s *TcpSession) Close() error {
 	s.Session.Close()
 	return http.ErrServerClosed
 }
+
+func (s *TcpSession) Context() context.Context {
+	return context.TODO()
+}
