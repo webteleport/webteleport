@@ -13,7 +13,7 @@ var _ tunnel.Stream = (*StreamConn)(nil)
 
 // StreamsConn wraps webtransport.Stream into net.Conn
 type StreamConn struct {
-	webtransport.Stream
+	*webtransport.Stream
 	Session *webtransport.Session
 }
 

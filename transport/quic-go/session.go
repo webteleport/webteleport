@@ -12,7 +12,7 @@ import (
 var _ tunnel.Session = (*QuicSession)(nil)
 
 type QuicSession struct {
-	Session quic.Connection
+	Session *quic.Conn
 }
 
 func (s *QuicSession) Accept(ctx context.Context) (tunnel.Stream, error) {

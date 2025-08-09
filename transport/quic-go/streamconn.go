@@ -13,8 +13,8 @@ var _ tunnel.Stream = (*StreamConn)(nil)
 
 // StreamsConn wraps quic.Stream into net.Conn
 type StreamConn struct {
-	quic.Stream
-	Session quic.Connection
+	*quic.Stream
+	Session *quic.Conn
 }
 
 // Close calls CancelRead to avoid memory leak, see
