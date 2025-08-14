@@ -7,13 +7,13 @@ go 1.24
 require (
 	github.com/btwiuse/version v0.0.2
 	github.com/btwiuse/wsconn v0.0.4
+	github.com/coder/websocket v1.8.13
 	github.com/ebi-yade/altsvc-go v0.1.2-0.20220921153119-0c9cfefbad86
 	github.com/hashicorp/yamux v0.1.3-0.20250312043751-26e720ab6278
 	github.com/quic-go/quic-go v0.54.0
 	github.com/quic-go/webtransport-go v0.9.0
 	github.com/webteleport/utils v0.2.19-alpha.6
 	golang.org/x/net v0.42.0
-	nhooyr.io/websocket v1.8.17
 )
 
 require (
@@ -33,4 +33,5 @@ require (
 	golang.org/x/text v0.27.0 // indirect
 	golang.org/x/tools v0.35.0 // indirect
 	k8s.io/apimachinery v0.32.3 // indirect
+	nhooyr.io/websocket v1.8.17 // indirect
 )

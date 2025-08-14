@@ -5,7 +5,7 @@ package websocket
 import (
 	"net/http"
 
-	"nhooyr.io/websocket"
+	"github.com/coder/websocket"
 )
 
 func dialOptions(http.Header) *websocket.DialOptions {

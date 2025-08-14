@@ -6,7 +6,7 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	"nhooyr.io/websocket"
+	"github.com/coder/websocket"
 )
 
 func dialOptions(hdr http.Header) *websocket.DialOptions {

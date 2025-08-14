@@ -8,9 +8,9 @@ import (
 	"net/url"
 
 	"github.com/btwiuse/version"
+	"github.com/coder/websocket"
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/transport/common"
-	"nhooyr.io/websocket"
 )
 
 func DialAddr(addr string, relayURL *url.URL) (string, error) {
