@@ -47,7 +47,6 @@ func ExtractAltSvcEndpoints(hostname, line, protocolId string) (endpoints []Endp
 // fallback to websocket so that resolve always returns at least one endpoint
 func Resolve(u *url.URL) (endpoints []Endpoint) {
 	endpoints = append(endpoints, eps(u.Hostname(), ENV("ALT_SVC"))...)
-	endpoints = append(endpoints, eps(u.Hostname(), TXT(u.Hostname()))...)
 	endpoints = append(endpoints, eps(u.Hostname(), HEAD(u.Host))...)
 	if len(endpoints) == 0 {
 		endpoints = append(endpoints, Endpoint{
