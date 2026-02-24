@@ -3,7 +3,6 @@ package webtransport
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/quic-go/webtransport-go"
 	"github.com/webteleport/webteleport/tunnel"
@@ -39,6 +38,5 @@ func (s *WebtransportSession) Open(ctx context.Context) (tunnel.Stream, error) {
 }
 
 func (s *WebtransportSession) Close() error {
-	s.Session.CloseWithError(1337, "foobar")
-	return http.ErrServerClosed
+	return s.Session.CloseWithError(ErrSessionClosed, "session closed")
 }

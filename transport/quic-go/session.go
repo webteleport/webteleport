@@ -3,7 +3,6 @@ package quic
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/quic-go/quic-go"
 	"github.com/webteleport/webteleport/tunnel"
@@ -39,8 +38,7 @@ func (s *QuicSession) Open(ctx context.Context) (tunnel.Stream, error) {
 }
 
 func (s *QuicSession) Close() error {
-	s.Session.CloseWithError(1337, "foobar")
-	return http.ErrServerClosed
+	return s.Session.CloseWithError(ErrSessionClosed, "session closed")
 }
 
 func (s *QuicSession) Context() context.Context {

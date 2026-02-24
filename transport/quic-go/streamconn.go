@@ -29,6 +29,8 @@ func (sc *StreamConn) Close() error {
 var CancelRead quic.StreamErrorCode = 3558
 var CancelWrite quic.StreamErrorCode = 3559
 
+var ErrSessionClosed quic.ApplicationErrorCode = 0
+
 // LocalAddr is required to impl net.Conn
 func (sc *StreamConn) LocalAddr() net.Addr { return sc.Session.LocalAddr() }
 

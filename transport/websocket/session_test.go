@@ -131,3 +131,31 @@ func TestWebsocketTransportWithNetPipe(t *testing.T) {
 	clientSession.Close()
 	serverSession.Close()
 }
+
+func TestWebsocketSessionCloseReturnsError(t *testing.T) {
+	client, server := net.Pipe()
+
+	serverYamuxSession, err := yamux.Server(server, yamux.DefaultConfig())
+	if err != nil {
+		t.Fatalf("Failed to create server session: %v", err)
+	}
+	clientYamuxSession, err := yamux.Client(client, yamux.DefaultConfig())
+	if err != nil {
+		t.Fatalf("Failed to create client session: %v", err)
+	}
+
+	session := &WebsocketSession{Session: clientYamuxSession}
+
+	// Close should return nil on success, not http.ErrServerClosed
+	if err := session.Close(); err != nil {
+		t.Fatalf("Expected nil error on close, got: %v", err)
+	}
+
+	// After close, Open should fail
+	_, err = session.Open(context.Background())
+	if err == nil {
+		t.Fatal("Expected error when opening stream on closed session")
+	}
+
+	serverYamuxSession.Close()
+}
