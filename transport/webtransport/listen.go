@@ -29,9 +29,9 @@ func Listen(ctx context.Context, addr string) (*common.Listener, error) {
 	go func() {
 		scanner := bufio.NewScanner(stm0)
 		for scanner.Scan() {
-			kind, payload, ok := parseControlLine(scanner.Text())
+			line := scanner.Text()
+			kind, payload, ok := parseControlLine(line)
 			if !ok {
-				line := scanner.Text()
 				if line == "" || line == "PING" {
 					continue
 				}
