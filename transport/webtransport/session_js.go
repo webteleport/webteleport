@@ -5,7 +5,6 @@ package webtransport
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"syscall/js"
 
 	"github.com/webteleport/webteleport/tunnel"
@@ -37,7 +36,7 @@ func (s *WebtransportSession) Accept(ctx context.Context) (tunnel.Stream, error)
 		return nil, err
 	}
 	if result.Get("done").Bool() {
-		return nil, http.ErrServerClosed
+		return nil, context.Canceled
 	}
 	WebtransportConnsAccepted.Add(1)
 	return newStreamConn(result.Get("value"), s.addr), nil
@@ -60,7 +59,7 @@ func (s *WebtransportSession) Close() error {
 	if !(s.incoming.IsUndefined() || s.incoming.IsNull()) {
 		_, _ = awaitPromise(context.Background(), s.incoming.Call("cancel"))
 	}
-	return http.ErrServerClosed
+	return nil
 }
 
 func (s *WebtransportSession) Context() context.Context {
