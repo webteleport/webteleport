@@ -2,12 +2,14 @@ package webtransport
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"net/url"
 
 	"github.com/btwiuse/version"
 	"github.com/quic-go/quic-go"
+	"github.com/quic-go/quic-go/http3"
 	"github.com/quic-go/webtransport-go"
 	"github.com/webteleport/utils"
 )
@@ -43,6 +45,9 @@ func Dial(ctx context.Context, addr string, hdr http.Header) (*WebtransportSessi
 		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
 	}
 	dialer := &webtransport.Dialer{
+		TLSClientConfig: &tls.Config{
+			NextProtos: []string{http3.NextProtoH3},
+		},
 		QUICConfig: QUICConfig,
 	}
 	_, session, err := dialer.Dial(ctx, addr, ModifyHeader(hdr))
