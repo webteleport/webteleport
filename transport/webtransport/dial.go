@@ -16,8 +16,9 @@ import (
 var MaxIncomingStreams int64 = 1 << 60
 
 var QUICConfig = &quic.Config{
-	EnableDatagrams:    true,
-	MaxIncomingStreams: MaxIncomingStreams,
+	EnableDatagrams:                  true,
+	MaxIncomingStreams:                MaxIncomingStreams,
+	EnableStreamResetPartialDelivery: true,
 }
 
 func DialAddr(addr string, relayURL *url.URL) (string, error) {
