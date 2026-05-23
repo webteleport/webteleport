@@ -16,6 +16,8 @@ type WebtransportSession struct {
 	transport js.Value
 	incoming  js.Value
 	addr      string
+	ctx       context.Context
+	cancel    context.CancelFunc
 }
 
 func newWebtransportSession(transport js.Value, addr string) (*WebtransportSession, error) {
@@ -23,11 +25,19 @@ func newWebtransportSession(transport js.Value, addr string) (*WebtransportSessi
 	if incoming.IsUndefined() || incoming.IsNull() {
 		return nil, fmt.Errorf("incoming bidirectional streams are unavailable")
 	}
-	return &WebtransportSession{
+	ctx, cancel := context.WithCancel(context.Background())
+	s := &WebtransportSession{
 		transport: transport,
 		incoming:  incoming.Call("getReader"),
 		addr:      addr,
-	}, nil
+		ctx:       ctx,
+		cancel:    cancel,
+	}
+	go func() {
+		_, _ = awaitPromise(context.Background(), transport.Get("closed"))
+		cancel()
+	}()
+	return s, nil
 }
 
 func (s *WebtransportSession) Accept(ctx context.Context) (tunnel.Stream, error) {
@@ -36,6 +46,9 @@ func (s *WebtransportSession) Accept(ctx context.Context) (tunnel.Stream, error)
 		return nil, err
 	}
 	if result.Get("done").Bool() {
+		if err := s.ctx.Err(); err != nil {
+			return nil, err
+		}
 		return nil, context.Canceled
 	}
 	WebtransportConnsAccepted.Add(1)
@@ -55,6 +68,7 @@ func (s *WebtransportSession) Open(ctx context.Context) (tunnel.Stream, error) {
 }
 
 func (s *WebtransportSession) Close() error {
+	s.cancel()
 	s.transport.Call("close")
 	if !(s.incoming.IsUndefined() || s.incoming.IsNull()) {
 		_, _ = awaitPromise(context.Background(), s.incoming.Call("cancel"))
@@ -63,5 +77,5 @@ func (s *WebtransportSession) Close() error {
 }
 
 func (s *WebtransportSession) Context() context.Context {
-	return context.TODO()
+	return s.ctx
 }

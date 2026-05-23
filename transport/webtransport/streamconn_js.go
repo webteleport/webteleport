@@ -74,7 +74,7 @@ func (sc *StreamConn) Read(p []byte) (int, error) {
 	}
 
 	sc.mu.Lock()
-	sc.readBuf = append(sc.readBuf[:0], chunk...)
+	sc.readBuf = chunk
 	n := copy(p, sc.readBuf)
 	sc.readBuf = sc.readBuf[n:]
 	sc.mu.Unlock()
