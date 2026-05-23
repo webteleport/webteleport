@@ -37,9 +37,15 @@ func TestDialAddrPreservesRelayPathAndUpgrade(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DialAddr returned error: %v", err)
 	}
-	if addr != "https://edge.example.com:4443/demo?token=abc&x-webtransport-upgrade=1" &&
-		addr != "https://edge.example.com:4443/demo?x-webtransport-upgrade=1&token=abc" {
+	u := mustURL(t, addr)
+	if u.Scheme != "https" || u.Host != "edge.example.com:4443" || u.Path != "/demo" {
 		t.Fatalf("unexpected dial addr: %s", addr)
+	}
+	if got := u.Query().Get("token"); got != "abc" {
+		t.Fatalf("unexpected token query: %q", got)
+	}
+	if got := u.Query().Get(UpgradeQuery); got != "1" {
+		t.Fatalf("unexpected upgrade query: %q", got)
 	}
 }
 
