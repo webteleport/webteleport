@@ -35,7 +35,7 @@ func Listen(ctx context.Context, addr string) (*common.Listener, error) {
 				if line == "" || line == "PING" {
 					continue
 				}
-				slog.Warn(fmt.Sprintf("stm0: unknown command: %s", line))
+				slog.Warn("stm0: unknown command", "line", line)
 				continue
 			}
 			if kind == "HOST" {

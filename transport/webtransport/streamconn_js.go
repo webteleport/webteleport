@@ -166,11 +166,17 @@ type promiseResult struct {
 
 func awaitPromise(ctx context.Context, promise js.Value) (js.Value, error) {
 	resultc := make(chan promiseResult, 1)
-
 	var thenFunc, catchFunc js.Func
+	var once sync.Once
+	cleanup := func() {
+		once.Do(func() {
+			thenFunc.Release()
+			catchFunc.Release()
+		})
+	}
+
 	thenFunc = js.FuncOf(func(this js.Value, args []js.Value) any {
-		defer thenFunc.Release()
-		defer catchFunc.Release()
+		defer cleanup()
 		value := js.Undefined()
 		if len(args) > 0 {
 			value = args[0]
@@ -179,8 +185,7 @@ func awaitPromise(ctx context.Context, promise js.Value) (js.Value, error) {
 		return nil
 	})
 	catchFunc = js.FuncOf(func(this js.Value, args []js.Value) any {
-		defer thenFunc.Release()
-		defer catchFunc.Release()
+		defer cleanup()
 		err := fmt.Errorf("webtransport promise rejected")
 		if len(args) > 0 {
 			err = jsError(args[0])
