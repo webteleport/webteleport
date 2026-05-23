@@ -8,4 +8,8 @@
 // With webteleport, you can easily serve on a public address, even if you are behind a firewall.
 //
 // For possible use cases, check https://github.com/webteleport/ufo
+//
+// When targeting js/wasm, the webtransport transport uses the browser's native WebTransport
+// client API. This mode only supports dialing a webteleport server and requires the server to
+// expose a compatible WebTransport endpoint via the usual relay path and Alt-Svc discovery flow.
 package webteleport

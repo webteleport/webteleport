@@ -29,20 +29,23 @@ func Listen(ctx context.Context, addr string) (*common.Listener, error) {
 	go func() {
 		scanner := bufio.NewScanner(stm0)
 		for scanner.Scan() {
-			line := scanner.Text()
-			// ignore server pings
-			if line == "" || line == "PING" {
+			kind, payload, ok := parseControlLine(scanner.Text())
+			if !ok {
+				line := scanner.Text()
+				if line == "" || line == "PING" {
+					continue
+				}
+				slog.Warn(fmt.Sprintf("stm0: unknown command: %s", line))
 				continue
 			}
-			if strings.HasPrefix(line, "HOST ") {
-				hostchan <- strings.TrimPrefix(line, "HOST ")
+			if kind == "HOST" {
+				hostchan <- payload
 				continue
 			}
-			if strings.HasPrefix(line, "ERR ") {
-				errchan <- strings.TrimPrefix(line, "ERR ")
+			if kind == "ERR" {
+				errchan <- payload
 				continue
 			}
-			slog.Warn(fmt.Sprintf("stm0: unknown command: %s", line))
 		}
 	}()
 
@@ -57,4 +60,17 @@ func Listen(ctx context.Context, addr string) (*common.Listener, error) {
 		ln.Address = hostport
 		return ln, nil
 	}
+}
+
+func parseControlLine(line string) (kind, payload string, ok bool) {
+	if line == "" || line == "PING" {
+		return "", "", false
+	}
+	if strings.HasPrefix(line, "HOST ") {
+		return "HOST", strings.TrimPrefix(line, "HOST "), true
+	}
+	if strings.HasPrefix(line, "ERR ") {
+		return "ERR", strings.TrimPrefix(line, "ERR "), true
+	}
+	return "", "", false
 }
