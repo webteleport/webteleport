@@ -4,7 +4,6 @@ package webtransport
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -26,13 +25,13 @@ type Upgrader struct {
 func (s *Upgrader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ssn, err := s.Server.Upgrade(w, r)
 	if err != nil {
-		slog.Warn(fmt.Errorf("webtransport upgrade failed: %w", err).Error())
+		slog.Warn("webtransport upgrade failed", "error", err)
 	}
 
 	tssn := &WebtransportSession{Session: ssn}
 	tstm, err := tssn.Open(context.Background())
 	if err != nil {
-		slog.Warn(fmt.Errorf("webtransport stm0 init failed: %w", err).Error())
+		slog.Warn("webtransport stm0 init failed", "error", err)
 	}
 
 	R := &edge.Edge{
