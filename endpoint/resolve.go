@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"os"
 	"slices"
-	"time"
 
 	"github.com/ebi-yade/altsvc-go"
 	"github.com/webteleport/utils"
@@ -70,7 +69,7 @@ func AltSvcFromEnv(key string) []string {
 
 // AltSvcFromHEAD fetches Alt-Svc headers from the given URL via an HTTP HEAD request.
 func AltSvcFromHEAD(ctx context.Context, rawurl string) []string {
-	client := &http.Client{Timeout: 5 * time.Second}
+	client := &http.Client{}
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, rawurl, nil)
 	if err != nil {
 		slog.Warn("http req error", "error", err)
