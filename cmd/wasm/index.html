@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webteleport – js/wasm example</title>
+  <style>
+    body { font-family: monospace; padding: 1em; }
+    #log { white-space: pre; border: 1px solid #ccc; padding: 0.5em; min-height: 4em; }
+    button { margin: 0.25em; }
+  </style>
+</head>
+<body>
+  <h2>webteleport js/wasm demo</h2>
+
+  <label>Relay address: <input id="relay" type="text" value="wss://relay.example.com" size="40" /></label>
+  <br /><br />
+  <button id="btn-listen">Listen</button>
+  <button id="btn-close" disabled>Close listener</button>
+
+  <h3>Log</h3>
+  <div id="log"></div>
+
+  <!--
+    wasm_exec.js is shipped with the Go toolchain.
+    Copy it from $(go env GOROOT)/misc/wasm/wasm_exec.js
+    or $(go env GOROOT)/lib/wasm/wasm_exec.js (Go ≥ 1.24).
+  -->
+  <script src="wasm_exec.js"></script>
+  <script>
+    const logEl = document.getElementById("log");
+    function log(msg) {
+      logEl.textContent += msg + "\n";
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // Instantiate the wasm module and start the Go runtime.
+    const go = new Go();
+    WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
+      .then(result => {
+        go.run(result.instance);
+        log("wasm module ready – webteleportListen is now available");
+      })
+      .catch(err => log("failed to load wasm: " + err));
+
+    let listener = null;
+
+    document.getElementById("btn-listen").addEventListener("click", async () => {
+      const relay = document.getElementById("relay").value.trim();
+      log("Connecting to " + relay + " …");
+      try {
+        listener = await webteleportListen(relay);
+        log("Listening – assigned address: " + listener.addr);
+        document.getElementById("btn-listen").disabled = true;
+        document.getElementById("btn-close").disabled = false;
+        acceptLoop();
+      } catch (err) {
+        log("Listen error: " + err.message);
+      }
+    });
+
+    document.getElementById("btn-close").addEventListener("click", () => {
+      if (listener) {
+        const err = listener.close();
+        if (err) log("Close error: " + err);
+        listener = null;
+        log("Listener closed");
+        document.getElementById("btn-listen").disabled = false;
+        document.getElementById("btn-close").disabled = true;
+      }
+    });
+
+    // Accept incoming connections and echo data back.
+    async function acceptLoop() {
+      while (listener) {
+        let conn;
+        try {
+          conn = await listener.accept();
+        } catch (err) {
+          log("Accept error (listener closed?): " + err.message);
+          break;
+        }
+        log("New connection from " + conn.remoteAddr);
+        handleConn(conn);
+      }
+    }
+
+    async function handleConn(conn) {
+      try {
+          while (true) {
+          const data = await conn.read(4096);
+          if (data === null) {
+            log("[" + conn.remoteAddr + "] EOF");
+            break;
+          }
+          const text = new TextDecoder().decode(data);
+          log("[" + conn.remoteAddr + "] received: " + text.trim());
+
+          // Echo back.
+          const reply = new TextEncoder().encode("echo: " + text);
+          await conn.write(reply);
+        }
+      } catch (err) {
+        log("[" + conn.remoteAddr + "] error: " + err.message);
+      } finally {
+        const closeErr = conn.close();
+        if (closeErr) log("[" + conn.remoteAddr + "] close error: " + closeErr);
+      }
+    }
+  </script>
+</body>
+</html>
