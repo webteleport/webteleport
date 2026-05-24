@@ -1,3 +1,5 @@
+//go:build !js
+
 package webtransport
 
 import (
@@ -11,11 +13,6 @@ import (
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/edge"
 	"github.com/webteleport/webteleport/transport/common"
-)
-
-var (
-	UpgradeQuery  = "x-webtransport-upgrade"
-	UpgradeHeader = http.CanonicalHeaderKey(UpgradeQuery)
 )
 
 var _ edge.HTTPUpgrader = (*Upgrader)(nil)
