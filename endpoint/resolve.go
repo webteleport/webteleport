@@ -44,6 +44,9 @@ func ExtractWebteleport(hostname string, lines ...string) (endpoints []Endpoint)
 // Resolve discovers webteleport endpoints from Alt-Svc via env (ALT_SVC) and HTTP HEAD request.
 // Always appends a websocket endpoint on the original host as the final option.
 func Resolve(ctx context.Context, u *url.URL) (endpoints []Endpoint) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	endpoints = ExtractWebteleport(
 		u.Hostname(),
 		slices.Concat(
