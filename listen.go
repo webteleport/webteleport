@@ -2,6 +2,7 @@ package webteleport
 
 import (
 	"context"
+	"log/slog"
 	"net"
 	"net/url"
 
@@ -11,6 +12,36 @@ import (
 	"github.com/webteleport/webteleport/transport/webtransport"
 	"github.com/webteleport/webteleport/tunnel"
 )
+
+type candidate struct {
+	dialAddr string
+	tr       tunnel.Transport
+}
+
+func fromEndpoints(eps []endpoint.Endpoint, relayURL *url.URL) []candidate {
+	var cs []candidate
+	for _, ep := range eps {
+		var (
+			dialAddr string
+			tr       tunnel.Transport
+			err      error
+		)
+		switch ep.Protocol {
+		case "webtransport":
+			dialAddr, err = webtransport.DialAddr(ep.Addr, relayURL)
+			tr = &webtransport.Transport{}
+		case "websocket":
+			dialAddr, err = websocket.DialAddr(ep.Addr, relayURL)
+			tr = &websocket.Transport{}
+		}
+		if err != nil {
+			slog.Warn("dial error", "protocol", ep.Protocol, "addr", ep.Addr, "error", err)
+			continue
+		}
+		cs = append(cs, candidate{dialAddr: dialAddr, tr: tr})
+	}
+	return cs
+}
 
 // Listen calls [Dial] to create a [Listener], which is essentially a wrapper struct
 // around a webtransport session, which in turn is able to spawn arbitrary number of streams
@@ -27,28 +58,14 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 		return nil, err
 	}
 
-	// try to find ALT_SVC records in ENV/DNS/HEAD, see endpoint.Resolve
-	ep := endpoint.Resolve(relayURL)[0]
-
-	// TODO: compute dialAddr in Endpoint.Resolve
-	var (
-		dialAddr string
-		tr       tunnel.Transport
-	)
-
-	switch ep.Protocol {
-	case "webtransport":
-		dialAddr, err = webtransport.DialAddr(ep.Addr, relayURL)
+	var lastErr error
+	for _, c := range fromEndpoints(endpoint.Resolve(relayURL), relayURL) {
+		l, err := c.tr.Listen(ctx, c.dialAddr)
 		if err != nil {
-			return nil, err
+			slog.Warn("listen error", "dialAddr", c.dialAddr, "error", err)
+			continue
 		}
-		tr = &webtransport.Transport{}
-	default:
-		dialAddr, err = websocket.DialAddr(ep.Addr, relayURL)
-		if err != nil {
-			return nil, err
-		}
-		tr = &websocket.Transport{}
+		return l, nil
 	}
-	return tr.Listen(ctx, dialAddr)
+	return nil, lastErr
 }
