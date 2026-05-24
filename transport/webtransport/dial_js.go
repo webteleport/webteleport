@@ -9,7 +9,7 @@ import (
 	"net/url"
 
 	"github.com/webteleport/utils"
-	"github.com/webteleport/webteleport/webtransportjs"
+	"github.com/webtransport/webtransport"
 )
 
 func DialAddr(addr string, relayURL *url.URL) (string, error) {
@@ -33,7 +33,7 @@ func Dial(ctx context.Context, addr string, hdr http.Header) (*WebtransportSessi
 	}
 
 	addr = applyHeaderQuery(addr, hdr)
-	session, err := webtransportjs.Dial(ctx, addr)
+	session, err := webtransport.Dial(ctx, addr)
 	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (WebTransport): %w", u.Hostname(), err)
 	}

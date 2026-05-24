@@ -7,13 +7,13 @@ import (
 	"fmt"
 
 	"github.com/webteleport/webteleport/tunnel"
-	"github.com/webteleport/webteleport/webtransportjs"
+	"github.com/webtransport/webtransport"
 )
 
 var _ tunnel.Session = (*WebtransportSession)(nil)
 
 type WebtransportSession struct {
-	Session *webtransportjs.Session
+	Session *webtransport.Session
 }
 
 func (s *WebtransportSession) Accept(ctx context.Context) (tunnel.Stream, error) {
@@ -21,7 +21,7 @@ func (s *WebtransportSession) Accept(ctx context.Context) (tunnel.Stream, error)
 	if err != nil {
 		return nil, err
 	}
-	stm, ok := conn.(*webtransportjs.Conn)
+	stm, ok := conn.(*webtransport.Conn)
 	if !ok {
 		return nil, fmt.Errorf("unexpected webtransport stream type %T", conn)
 	}
@@ -34,7 +34,7 @@ func (s *WebtransportSession) Open(ctx context.Context) (tunnel.Stream, error) {
 	if err != nil {
 		return nil, err
 	}
-	stm, ok := conn.(*webtransportjs.Conn)
+	stm, ok := conn.(*webtransport.Conn)
 	if !ok {
 		return nil, fmt.Errorf("unexpected webtransport stream type %T", conn)
 	}

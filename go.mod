@@ -13,6 +13,7 @@ require (
 	github.com/quic-go/quic-go v0.59.0
 	github.com/quic-go/webtransport-go v0.10.0
 	github.com/webteleport/utils v0.2.19-alpha.10
+	github.com/webtransport/webtransport v0.0.1
 	golang.org/x/net v0.49.0
 )
 

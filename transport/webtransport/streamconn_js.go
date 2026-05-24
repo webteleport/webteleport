@@ -6,7 +6,7 @@ import (
 	"net"
 
 	"github.com/webteleport/webteleport/tunnel"
-	"github.com/webteleport/webteleport/webtransportjs"
+	"github.com/webtransport/webtransport"
 )
 
 var _ net.Conn = (*StreamConn)(nil)
@@ -14,7 +14,7 @@ var _ net.Conn = (*StreamConn)(nil)
 var _ tunnel.Stream = (*StreamConn)(nil)
 
 type StreamConn struct {
-	*webtransportjs.Conn
+	*webtransport.Conn
 }
 
 func (sc *StreamConn) Close() error {
