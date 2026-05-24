@@ -5,77 +5,47 @@ package webtransport
 import (
 	"context"
 	"fmt"
-	"syscall/js"
 
 	"github.com/webteleport/webteleport/tunnel"
+	"github.com/webtransport/webtransport"
 )
 
 var _ tunnel.Session = (*WebtransportSession)(nil)
 
 type WebtransportSession struct {
-	transport js.Value
-	incoming  js.Value
-	addr      string
-	ctx       context.Context
-	cancel    context.CancelFunc
-}
-
-func newWebtransportSession(transport js.Value, addr string) (*WebtransportSession, error) {
-	incoming := transport.Get("incomingBidirectionalStreams")
-	if incoming.IsUndefined() || incoming.IsNull() {
-		return nil, fmt.Errorf("incoming bidirectional streams are unavailable")
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-	s := &WebtransportSession{
-		transport: transport,
-		incoming:  incoming.Call("getReader"),
-		addr:      addr,
-		ctx:       ctx,
-		cancel:    cancel,
-	}
-	go func() {
-		_, _ = awaitPromise(context.Background(), transport.Get("closed"))
-		cancel()
-	}()
-	return s, nil
+	Session *webtransport.Session
 }
 
 func (s *WebtransportSession) Accept(ctx context.Context) (tunnel.Stream, error) {
-	result, err := awaitPromise(ctx, s.incoming.Call("read"))
+	conn, err := s.Session.Accept(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if result.Get("done").Bool() {
-		if err := s.ctx.Err(); err != nil {
-			return nil, err
-		}
-		return nil, context.Canceled
+	stm, ok := conn.(*webtransport.Conn)
+	if !ok {
+		return nil, fmt.Errorf("unexpected webtransport stream type %T", conn)
 	}
 	WebtransportConnsAccepted.Add(1)
-	return newStreamConn(result.Get("value"), s.addr), nil
+	return &StreamConn{Conn: stm}, nil
 }
 
 func (s *WebtransportSession) Open(ctx context.Context) (tunnel.Stream, error) {
-	stream, err := awaitPromise(ctx, s.transport.Call("createBidirectionalStream"))
+	conn, err := s.Session.Open(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if stream.IsUndefined() || stream.IsNull() {
-		return nil, fmt.Errorf("stream is empty")
+	stm, ok := conn.(*webtransport.Conn)
+	if !ok {
+		return nil, fmt.Errorf("unexpected webtransport stream type %T", conn)
 	}
 	WebtransportConnsOpened.Add(1)
-	return newStreamConn(stream, s.addr), nil
+	return &StreamConn{Conn: stm}, nil
 }
 
 func (s *WebtransportSession) Close() error {
-	s.cancel()
-	s.transport.Call("close")
-	if !(s.incoming.IsUndefined() || s.incoming.IsNull()) {
-		_, _ = awaitPromise(context.Background(), s.incoming.Call("cancel"))
-	}
-	return nil
+	return s.Session.Close()
 }
 
 func (s *WebtransportSession) Context() context.Context {
-	return s.ctx
+	return s.Session.Context()
 }
