@@ -59,7 +59,7 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 	}
 
 	var lastErr error
-	for _, c := range fromEndpoints(endpoint.Resolve(relayURL), relayURL) {
+	for _, c := range fromEndpoints(endpoint.Resolve(ctx, relayURL), relayURL) {
 		l, err := c.tr.Listen(ctx, c.dialAddr)
 		if err != nil {
 			slog.Warn("listen error", "dialAddr", c.dialAddr, "error", err)
