@@ -10,6 +10,8 @@
 // For possible use cases, check https://github.com/webteleport/ufo
 //
 // When targeting js/wasm, the webtransport transport uses the browser's native WebTransport
-// client API. This mode only supports dialing a webteleport server and requires the server to
-// expose a compatible WebTransport endpoint via the usual relay path and Alt-Svc discovery flow.
+// client API via package github.com/webteleport/webteleport/webtransportjs, which is protocol-agnostic
+// and can be reused outside webteleport. This mode only supports dialing a webteleport server and
+// requires the server to expose a compatible WebTransport endpoint via the usual relay path and
+// Alt-Svc discovery flow.
 package webteleport

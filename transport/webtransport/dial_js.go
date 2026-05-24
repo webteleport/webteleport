@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"syscall/js"
 
 	"github.com/webteleport/utils"
+	"github.com/webteleport/webteleport/webtransportjs"
 )
 
 func DialAddr(addr string, relayURL *url.URL) (string, error) {
@@ -32,18 +32,13 @@ func Dial(ctx context.Context, addr string, hdr http.Header) (*WebtransportSessi
 		return nil, fmt.Errorf("error parsing %s: %w", addr, err)
 	}
 
-	webTransport := js.Global().Get("WebTransport")
-	if webTransport.IsUndefined() || webTransport.IsNull() {
-		return nil, fmt.Errorf("error dialing %s (WebTransport): WebTransport API is unavailable", u.Hostname())
-	}
-
 	addr = applyHeaderQuery(addr, hdr)
-	transport := webTransport.New(addr)
-	if _, err := awaitPromise(ctx, transport.Get("ready")); err != nil {
+	session, err := webtransportjs.Dial(ctx, addr)
+	if err != nil {
 		return nil, fmt.Errorf("error dialing %s (WebTransport): %w", u.Hostname(), err)
 	}
 
-	return newWebtransportSession(transport, addr)
+	return &WebtransportSession{Session: session}, nil
 }
 
 func ModifyHeader(hdr http.Header) http.Header {
