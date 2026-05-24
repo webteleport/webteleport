@@ -111,9 +111,10 @@ func (sc *StreamConn) Close() error {
 	sc.mu.Unlock()
 
 	WebtransportConnsClosed.Add(1)
-	_, _ = awaitPromise(context.Background(), sc.reader.Call("cancel"))
-	_, _ = awaitPromise(context.Background(), sc.writer.Call("close"))
-	return nil
+
+	_, errCancel := awaitPromise(context.Background(), sc.reader.Call("cancel"))
+	_, errClose := awaitPromise(context.Background(), sc.writer.Call("close"))
+	return errors.Join(normalizeStreamError(errCancel), normalizeStreamError(errClose))
 }
 
 func (sc *StreamConn) LocalAddr() net.Addr { return sc.addr }
