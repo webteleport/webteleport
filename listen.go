@@ -2,6 +2,7 @@ package webteleport
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net"
 	"net/url"
@@ -58,10 +59,11 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 		return nil, err
 	}
 
-	var lastErr error
-	for _, c := range fromEndpoints(endpoint.Resolve(relayURL), relayURL) {
+	var lastErr error = errors.New("no endpoints available to attempt connection")
+	for _, c := range fromEndpoints(endpoint.Resolve(ctx, relayURL), relayURL) {
 		l, err := c.tr.Listen(ctx, c.dialAddr)
 		if err != nil {
+			lastErr = err
 			slog.Warn("listen error", "dialAddr", c.dialAddr, "error", err)
 			continue
 		}

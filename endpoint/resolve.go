@@ -1,12 +1,12 @@
 package endpoint
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
 	"slices"
-	"time"
 
 	"github.com/ebi-yade/altsvc-go"
 	"github.com/webteleport/utils"
@@ -43,12 +43,15 @@ func ExtractWebteleport(hostname string, lines ...string) (endpoints []Endpoint)
 
 // Resolve discovers webteleport endpoints from Alt-Svc via env (ALT_SVC) and HTTP HEAD request.
 // Always appends a websocket endpoint on the original host as the final option.
-func Resolve(u *url.URL) (endpoints []Endpoint) {
+func Resolve(ctx context.Context, u *url.URL) (endpoints []Endpoint) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	endpoints = ExtractWebteleport(
 		u.Hostname(),
 		slices.Concat(
 			AltSvcFromEnv("ALT_SVC"),
-			AltSvcFromHEAD(u.String()),
+			AltSvcFromHEAD(ctx, u.String()),
 		)...,
 	)
 	endpoints = append(endpoints, Endpoint{
@@ -68,9 +71,9 @@ func AltSvcFromEnv(key string) []string {
 }
 
 // AltSvcFromHEAD fetches Alt-Svc headers from the given URL via an HTTP HEAD request.
-func AltSvcFromHEAD(rawurl string) []string {
-	client := &http.Client{Timeout: 5 * time.Second}
-	req, err := http.NewRequest(http.MethodHead, rawurl, nil)
+func AltSvcFromHEAD(ctx context.Context, rawurl string) []string {
+	client := &http.Client{}
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, rawurl, nil)
 	if err != nil {
 		slog.Warn("http req error", "error", err)
 		return nil
