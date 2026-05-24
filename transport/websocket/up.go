@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -28,20 +27,20 @@ type Upgrader struct {
 func (s *Upgrader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn, err := wsconn.Wrconn(w, r)
 	if err != nil {
-		slog.Warn(fmt.Errorf("websocket upgrade failed: %w", err).Error())
+		slog.Warn("websocket upgrade failed", "error", err)
 		return
 	}
 
 	ssn, err := common.YamuxClient(conn)
 	if err != nil {
-		slog.Warn(fmt.Errorf("websocket creating yamux client failed: %w", err).Error())
+		slog.Warn("websocket creating yamux client failed", "error", err)
 		return
 	}
 
 	tssn := &WebsocketSession{Session: ssn}
 	tstm, err := tssn.Open(context.Background())
 	if err != nil {
-		slog.Warn(fmt.Errorf("websocket stm0 init failed: %w", err).Error())
+		slog.Warn("websocket stm0 init failed", "error", err)
 		return
 	}
 

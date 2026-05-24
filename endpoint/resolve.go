@@ -1,7 +1,6 @@
 package endpoint
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -81,12 +80,12 @@ func HEAD(s string) (v []string) {
 	}
 	req, err := http.NewRequest(http.MethodHead, utils.AsURL(s), nil)
 	if err != nil {
-		slog.Warn(fmt.Sprintf("http req error: %v", err))
+		slog.Warn("http req error", "error", err)
 		return
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		slog.Warn(fmt.Sprintf("http head error: %v", err))
+		slog.Warn("http head error", "error", err)
 		return
 	}
 	return resp.Header.Values("Alt-Svc")
@@ -101,7 +100,7 @@ func TXT(h string) []string {
 	}
 	txts, err := utils.LookupHostTXT(h, "1.1.1.1:53")
 	if err != nil {
-		slog.Warn(fmt.Sprintf("dns lookup error: %s: %v", h, err))
+		slog.Warn("dns lookup error", "host", h, "error", err)
 	}
 	return altsvcLines(txts)
 }

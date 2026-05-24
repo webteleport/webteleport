@@ -45,7 +45,7 @@ func Listen(ctx context.Context, addr string) (*common.Listener, error) {
 				errchan <- strings.TrimPrefix(line, "ERR ")
 				continue
 			}
-			slog.Warn(fmt.Sprintf("stm0: unknown command: %s", line))
+			slog.Warn("stm0: unknown command", "command", line)
 		}
 	}()
 
