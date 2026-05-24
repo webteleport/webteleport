@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
+	"slices"
 	"time"
 
 	"github.com/ebi-yade/altsvc-go"
@@ -17,106 +17,68 @@ type Endpoint struct {
 	Addr     string // host:port
 }
 
-// ExtractAltSvcH3Endpoints reads Alt-Svc value
-// returns a list of [host]:port endpoints
-func ExtractAltSvcEndpoints(hostname, line, protocolId string) (endpoints []Endpoint) {
-	svcs, err := altsvc.Parse(line)
-	if err != nil {
-		return
-	}
-	for _, svc := range svcs {
-		if svc.ProtocolID != protocolId {
+// ExtractWebteleport parses Alt-Svc header lines, keeps only
+// entries with protocol ID "webteleport", and returns endpoints.
+func ExtractWebteleport(hostname string, lines ...string) (endpoints []Endpoint) {
+	for _, line := range lines {
+		svcs, err := altsvc.Parse(line)
+		if err != nil {
+			slog.Warn("altsvc parse error", "line", line, "error", err)
 			continue
 		}
-		// host could be empty, port must not
-		addr := svc.AltAuthority.Host + ":" + svc.AltAuthority.Port
-		ep := Endpoint{
-			// TODO: support ALT_SVC keys like "webteleport-ws" for specifying ws endpoints on non-bootstrap ports
-			// Until then, we assume that all endpoints are websockets by default
-			// Protocol: "websocket",
-			Protocol: "webtransport",
-			Addr:     utils.Graft(hostname, addr),
+		for _, svc := range svcs {
+			if svc.ProtocolID != "webteleport" {
+				continue
+			}
+			addr := svc.AltAuthority.Host + ":" + svc.AltAuthority.Port
+			ep := Endpoint{
+				Protocol: "webtransport",
+				Addr:     utils.Graft(hostname, addr),
+			}
+			endpoints = append(endpoints, ep)
 		}
-		endpoints = append(endpoints, ep)
 	}
 	return
 }
 
-// Resolve gets all webteleport endpoints from Alt-Svc dns records / headers
-// fallback to websocket so that resolve always returns at least one endpoint
+// Resolve discovers webteleport endpoints from Alt-Svc via env (ALT_SVC) and HTTP HEAD request.
+// Always appends a websocket endpoint on the original host as the final option.
 func Resolve(u *url.URL) (endpoints []Endpoint) {
-	endpoints = append(endpoints, eps(u.Hostname(), ENV("ALT_SVC"))...)
-	endpoints = append(endpoints, eps(u.Hostname(), HEAD(u.Host))...)
-	if len(endpoints) == 0 {
-		endpoints = append(endpoints, Endpoint{
-			Protocol: "websocket",
-			Addr:     u.Hostname(),
-		})
-	}
+	endpoints = ExtractWebteleport(
+		u.Hostname(),
+		slices.Concat(
+			AltSvcFromEnv("ALT_SVC"),
+			AltSvcFromHEAD(u.String()),
+		)...,
+	)
+	endpoints = append(endpoints, Endpoint{
+		Protocol: "websocket",
+		Addr:     u.Hostname(),
+	})
 	return
 }
 
-func eps(hostname string, altsvcs []string) (endpoints []Endpoint) {
-	for _, v := range altsvcs {
-		es := ExtractAltSvcEndpoints(hostname, v, "webteleport")
-		endpoints = append(endpoints, es...)
-	}
-	return
-}
-
-// ENV gets altsvc value from env
-func ENV(s string) []string {
-	v, ok := os.LookupEnv(s)
+// AltSvcFromEnv reads the Alt-Svc value from the given environment variable.
+func AltSvcFromEnv(key string) []string {
+	v, ok := os.LookupEnv(key)
 	if ok {
 		return []string{v}
 	}
-	return []string{}
+	return nil
 }
 
-// HEAD gets all altsvcs from Alt-Svc header values of given url
-func HEAD(s string) (v []string) {
-	client := &http.Client{
-		Timeout: 5 * time.Second,
-	}
-	req, err := http.NewRequest(http.MethodHead, utils.AsURL(s), nil)
+// AltSvcFromHEAD fetches Alt-Svc headers from the given URL via an HTTP HEAD request.
+func AltSvcFromHEAD(rawurl string) []string {
+	client := &http.Client{Timeout: 5 * time.Second}
+	req, err := http.NewRequest(http.MethodHead, rawurl, nil)
 	if err != nil {
 		slog.Warn("http req error", "error", err)
-		return
+		return nil
 	}
 	resp, err := client.Do(req)
 	if err != nil {
 		slog.Warn("http head error", "error", err)
-		return
+		return nil
 	}
 	return resp.Header.Values("Alt-Svc")
-}
-
-// TXT gets all altsvcs from TXT records of given host
-func TXT(h string) []string {
-	// skip common local addresses
-	switch h {
-	case "localhost", "127.0.0.1", "::1":
-		return []string{}
-	}
-	txts, err := utils.LookupHostTXT(h, "1.1.1.1:53")
-	if err != nil {
-		slog.Warn("dns lookup error", "host", h, "error", err)
-	}
-	return altsvcLines(txts)
-}
-
-func altsvcLines(txts []string) []string {
-	const prefix = "Alt-Svc: "
-
-	altsvcs := []string{}
-
-	for _, txt := range txts {
-		// Case insensitive prefix match. See Issue 22736.
-		if len(txt) < len(prefix) || !strings.EqualFold(txt[:len(prefix)], prefix) {
-			continue
-		}
-		altsvcs = append(altsvcs, txt[len(prefix):])
-	}
-
-	return altsvcs
 }

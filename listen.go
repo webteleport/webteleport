@@ -2,6 +2,7 @@ package webteleport
 
 import (
 	"context"
+	"log/slog"
 	"net"
 	"net/url"
 
@@ -28,27 +29,27 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 	}
 
 	// try to find ALT_SVC records in ENV/DNS/HEAD, see endpoint.Resolve
-	ep := endpoint.Resolve(relayURL)[0]
-
-	// TODO: compute dialAddr in Endpoint.Resolve
 	var (
 		dialAddr string
 		tr       tunnel.Transport
 	)
-
-	switch ep.Protocol {
-	case "webtransport":
-		dialAddr, err = webtransport.DialAddr(ep.Addr, relayURL)
-		if err != nil {
-			return nil, err
+	for _, ep := range endpoint.Resolve(relayURL) {
+		switch ep.Protocol {
+		case "webtransport":
+			dialAddr, err = webtransport.DialAddr(ep.Addr, relayURL)
+			if err != nil {
+				slog.Warn("webtransport dial error", "addr", ep.Addr, "error", err)
+				continue
+			}
+			tr = &webtransport.Transport{}
+		case "websocket":
+			dialAddr, err = websocket.DialAddr(ep.Addr, relayURL)
+			if err != nil {
+				return nil, err
+			}
+			tr = &websocket.Transport{}
 		}
-		tr = &webtransport.Transport{}
-	default:
-		dialAddr, err = websocket.DialAddr(ep.Addr, relayURL)
-		if err != nil {
-			return nil, err
-		}
-		tr = &websocket.Transport{}
+		break
 	}
 	return tr.Listen(ctx, dialAddr)
 }
