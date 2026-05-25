@@ -3,7 +3,6 @@ package tcp
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/hashicorp/yamux"
 	"github.com/webteleport/webteleport/tunnel"
@@ -39,8 +38,7 @@ func (s *TcpSession) Open(context.Context) (tunnel.Stream, error) {
 }
 
 func (s *TcpSession) Close() error {
-	s.Session.Close()
-	return http.ErrServerClosed
+	return s.Session.Close()
 }
 
 func (s *TcpSession) Context() context.Context {

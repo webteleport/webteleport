@@ -31,6 +31,8 @@ func (sc *StreamConn) Close() error {
 var CancelRead webtransport.StreamErrorCode = 3558
 var CancelWrite webtransport.StreamErrorCode = 3559
 
+var ErrSessionClosed webtransport.SessionErrorCode = 0
+
 // LocalAddr is required to impl net.Conn
 func (sc *StreamConn) LocalAddr() net.Addr { return sc.Session.LocalAddr() }
 
