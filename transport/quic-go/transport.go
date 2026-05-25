@@ -7,7 +7,9 @@ import (
 	"github.com/webteleport/webteleport/tunnel"
 )
 
-type Transport struct{}
+type Transport struct {
+	DialAddr string
+}
 
 var _ tunnel.Transport = (*Transport)(nil)
 
@@ -16,5 +18,8 @@ func (t *Transport) Dial(ctx context.Context, addr string) (tunnel.Session, erro
 }
 
 func (t *Transport) Listen(ctx context.Context, addr string) (net.Listener, error) {
+	if addr == "" {
+		addr = t.DialAddr
+	}
 	return Listen(ctx, addr)
 }

@@ -18,13 +18,8 @@ import (
 	"github.com/webteleport/webteleport/tunnel"
 )
 
-type candidate struct {
-	dialAddr string
-	tr       tunnel.Transport
-}
-
-func fromEndpoints(eps []endpoint.Endpoint, relayURL *url.URL) []candidate {
-	var cs []candidate
+func fromEndpoints(eps []endpoint.Endpoint, relayURL *url.URL) []tunnel.Transport {
+	var ts []tunnel.Transport
 	for _, ep := range eps {
 		var (
 			dialAddr string
@@ -34,39 +29,36 @@ func fromEndpoints(eps []endpoint.Endpoint, relayURL *url.URL) []candidate {
 		switch ep.Protocol {
 		case "webtransport":
 			dialAddr, dialErr = webtransport.DialAddr(ep.Addr, relayURL)
-			tr = &webtransport.Transport{}
+			tr = &webtransport.Transport{DialAddr: dialAddr}
 		case "net-quic":
 			if runtime.GOOS == "js" {
 				dialErr = errors.New("net-quic unsupported on js/wasm")
 				break
 			}
-			dialAddr = ep.Addr
-			tr = &netquic.Transport{}
+			tr = &netquic.Transport{DialAddr: ep.Addr}
 		case "quic", "quic-go":
 			if runtime.GOOS == "js" {
 				dialErr = errors.New("quic unsupported on js/wasm")
 				break
 			}
-			dialAddr = ep.Addr
-			tr = &quicgo.Transport{}
+			tr = &quicgo.Transport{DialAddr: ep.Addr}
 		case "tcp":
 			if runtime.GOOS == "js" {
 				dialErr = errors.New("tcp unsupported on js/wasm")
 				break
 			}
-			dialAddr = ep.Addr
-			tr = &tcp.Transport{}
+			tr = &tcp.Transport{DialAddr: ep.Addr}
 		case "websocket":
 			dialAddr, dialErr = websocket.DialAddr(ep.Addr, relayURL)
-			tr = &websocket.Transport{}
+			tr = &websocket.Transport{DialAddr: dialAddr}
 		}
 		if dialErr != nil {
 			slog.Warn("dial error", "protocol", ep.Protocol, "addr", ep.Addr, "error", dialErr)
 			continue
 		}
-		cs = append(cs, candidate{dialAddr: dialAddr, tr: tr})
+		ts = append(ts, tr)
 	}
-	return cs
+	return ts
 }
 
 // Listen calls [Dial] to create a [Listener], which is essentially a wrapper struct
@@ -85,11 +77,11 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 	}
 
 	var lastErr error = errors.New("no endpoints available to attempt connection")
-	for _, c := range fromEndpoints(endpoint.Resolve(ctx, relayURL), relayURL) {
-		l, err := c.tr.Listen(ctx, c.dialAddr)
+	for _, tr := range fromEndpoints(endpoint.Resolve(ctx, relayURL), relayURL) {
+		l, err := tr.Listen(ctx, "")
 		if err != nil {
 			lastErr = err
-			slog.Warn("listen error", "dialAddr", c.dialAddr, "error", err)
+			slog.Warn("listen error", "error", err)
 			continue
 		}
 		return l, nil
