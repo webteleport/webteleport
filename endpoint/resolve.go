@@ -13,7 +13,7 @@ import (
 )
 
 type Endpoint struct {
-	Protocol string // "websocket" or "webtransport"
+	Protocol string // "tcp", "quic", "quic-go", "websocket", "webtransport", "net-quic", etc.
 	Addr     string // host:port
 }
 
@@ -43,6 +43,7 @@ func ExtractWebteleport(hostname string, lines ...string) (endpoints []Endpoint)
 
 // Resolve discovers webteleport endpoints from Alt-Svc via env (ALT_SVC) and HTTP HEAD request.
 // Always appends a websocket endpoint on the original host as the final option.
+// For raw protocols (tcp, quic, etc.), callers can construct endpoints directly.
 func Resolve(ctx context.Context, u *url.URL) (endpoints []Endpoint) {
 	if ctx == nil {
 		ctx = context.Background()

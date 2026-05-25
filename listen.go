@@ -9,6 +9,9 @@ import (
 
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/endpoint"
+	quicgo "github.com/webteleport/webteleport/transport/quic-go"
+	netquic "github.com/webteleport/webteleport/transport/net-quic"
+	"github.com/webteleport/webteleport/transport/tcp"
 	"github.com/webteleport/webteleport/transport/websocket"
 	"github.com/webteleport/webteleport/transport/webtransport"
 	"github.com/webteleport/webteleport/tunnel"
@@ -31,6 +34,15 @@ func fromEndpoints(eps []endpoint.Endpoint, relayURL *url.URL) []candidate {
 		case "webtransport":
 			dialAddr, err = webtransport.DialAddr(ep.Addr, relayURL)
 			tr = &webtransport.Transport{}
+		case "net-quic":
+			dialAddr = ep.Addr
+			tr = &netquic.Transport{}
+		case "quic", "quic-go":
+			dialAddr = ep.Addr
+			tr = &quicgo.Transport{}
+		case "tcp":
+			dialAddr = ep.Addr
+			tr = &tcp.Transport{}
 		case "websocket":
 			dialAddr, err = websocket.DialAddr(ep.Addr, relayURL)
 			tr = &websocket.Transport{}
