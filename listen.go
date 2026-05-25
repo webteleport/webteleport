@@ -24,36 +24,36 @@ func fromEndpoints(eps []endpoint.Endpoint, relayURL *url.URL) []tunnel.Transpor
 		var (
 			dialAddr string
 			tr       tunnel.Transport
-			dialErr  error
+			err      error
 		)
 		switch ep.Protocol {
 		case "webtransport":
-			dialAddr, dialErr = webtransport.DialAddr(ep.Addr, relayURL)
+			dialAddr, err = webtransport.DialAddr(ep.Addr, relayURL)
 			tr = &webtransport.Transport{DialAddr: dialAddr}
 		case "net-quic":
 			if runtime.GOOS == "js" {
-				dialErr = errors.New("net-quic unsupported on js/wasm")
+				err = errors.New("net-quic unsupported on js/wasm")
 				break
 			}
 			tr = &netquic.Transport{DialAddr: ep.Addr}
 		case "quic", "quic-go":
 			if runtime.GOOS == "js" {
-				dialErr = errors.New("quic unsupported on js/wasm")
+				err = errors.New("quic unsupported on js/wasm")
 				break
 			}
 			tr = &quicgo.Transport{DialAddr: ep.Addr}
 		case "tcp":
 			if runtime.GOOS == "js" {
-				dialErr = errors.New("tcp unsupported on js/wasm")
+				err = errors.New("tcp unsupported on js/wasm")
 				break
 			}
 			tr = &tcp.Transport{DialAddr: ep.Addr}
 		case "websocket":
-			dialAddr, dialErr = websocket.DialAddr(ep.Addr, relayURL)
+			dialAddr, err = websocket.DialAddr(ep.Addr, relayURL)
 			tr = &websocket.Transport{DialAddr: dialAddr}
 		}
-		if dialErr != nil {
-			slog.Warn("dial error", "protocol", ep.Protocol, "addr", ep.Addr, "error", dialErr)
+		if err != nil {
+			slog.Warn("skip transport", "protocol", ep.Protocol, "addr", ep.Addr, "error", err)
 			continue
 		}
 		ts = append(ts, tr)
