@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net"
 	"net/url"
+	"runtime"
 
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/endpoint"
@@ -28,27 +29,39 @@ func fromEndpoints(eps []endpoint.Endpoint, relayURL *url.URL) []candidate {
 		var (
 			dialAddr string
 			tr       tunnel.Transport
-			err      error
+			dialErr  error
 		)
 		switch ep.Protocol {
 		case "webtransport":
-			dialAddr, err = webtransport.DialAddr(ep.Addr, relayURL)
+			dialAddr, dialErr = webtransport.DialAddr(ep.Addr, relayURL)
 			tr = &webtransport.Transport{}
 		case "net-quic":
+			if runtime.GOOS == "js" {
+				dialErr = errors.New("net-quic unsupported on js/wasm")
+				break
+			}
 			dialAddr = ep.Addr
 			tr = &netquic.Transport{}
 		case "quic", "quic-go":
+			if runtime.GOOS == "js" {
+				dialErr = errors.New("quic unsupported on js/wasm")
+				break
+			}
 			dialAddr = ep.Addr
 			tr = &quicgo.Transport{}
 		case "tcp":
+			if runtime.GOOS == "js" {
+				dialErr = errors.New("tcp unsupported on js/wasm")
+				break
+			}
 			dialAddr = ep.Addr
 			tr = &tcp.Transport{}
 		case "websocket":
-			dialAddr, err = websocket.DialAddr(ep.Addr, relayURL)
+			dialAddr, dialErr = websocket.DialAddr(ep.Addr, relayURL)
 			tr = &websocket.Transport{}
 		}
-		if err != nil {
-			slog.Warn("dial error", "protocol", ep.Protocol, "addr", ep.Addr, "error", err)
+		if dialErr != nil {
+			slog.Warn("dial error", "protocol", ep.Protocol, "addr", ep.Addr, "error", dialErr)
 			continue
 		}
 		cs = append(cs, candidate{dialAddr: dialAddr, tr: tr})
