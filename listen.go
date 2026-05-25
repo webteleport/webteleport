@@ -10,8 +10,8 @@ import (
 
 	"github.com/webteleport/utils"
 	"github.com/webteleport/webteleport/endpoint"
-	quicgo "github.com/webteleport/webteleport/transport/quic-go"
 	netquic "github.com/webteleport/webteleport/transport/net-quic"
+	quicgo "github.com/webteleport/webteleport/transport/quic-go"
 	"github.com/webteleport/webteleport/transport/tcp"
 	"github.com/webteleport/webteleport/transport/websocket"
 	"github.com/webteleport/webteleport/transport/webtransport"

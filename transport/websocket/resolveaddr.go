@@ -2,20 +2,11 @@ package websocket
 
 import (
 	"net/url"
-
-	"github.com/webteleport/utils"
 )
 
-func ResolveAddr(addr string, relayURL *url.URL) (string, error) {
-	u, err := url.Parse(utils.AsURL(addr))
-	if err != nil {
-		return "", err
-	}
-	u.Host = relayURL.Host
-	u.Scheme = relayURL.Scheme
-	u.Path = relayURL.Path
-	u.RawPath = relayURL.RawPath
-	params := relayURL.Query()
+func ResolveAddr(_ string, relayURL *url.URL) (string, error) {
+	u := *relayURL
+	params := u.Query()
 	params.Set(UpgradeQuery, "1")
 	u.RawQuery = params.Encode()
 	return u.String(), nil

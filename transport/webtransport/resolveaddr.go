@@ -2,11 +2,15 @@ package webtransport
 
 import (
 	"net/url"
+	"strings"
 
 	"github.com/webteleport/utils"
 )
 
 func ResolveAddr(addr string, relayURL *url.URL) (string, error) {
+	if strings.HasPrefix(addr, ":") {
+		addr = utils.Graft(relayURL.Host, addr)
+	}
 	u, err := url.Parse(utils.AsURL(addr))
 	if err != nil {
 		return "", err
