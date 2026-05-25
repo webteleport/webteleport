@@ -8,23 +8,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/webteleport/utils"
 	"github.com/webtransport/webtransport"
 )
-
-func DialAddr(addr string, relayURL *url.URL) (string, error) {
-	u, err := url.Parse(utils.AsURL(addr))
-	if err != nil {
-		return "", err
-	}
-	u.Scheme = "https"
-	u.Path = relayURL.Path
-	u.RawPath = relayURL.RawPath
-	params := relayURL.Query()
-	params.Set(UpgradeQuery, "1")
-	u.RawQuery = params.Encode()
-	return u.String(), nil
-}
 
 func Dial(ctx context.Context, addr string, hdr http.Header) (*WebtransportSession, error) {
 	u, err := url.Parse(addr)

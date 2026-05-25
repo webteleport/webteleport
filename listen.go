@@ -28,28 +28,31 @@ func fromEndpoints(eps []endpoint.Endpoint, relayURL *url.URL) []tunnel.Transpor
 		)
 		switch ep.Protocol {
 		case "webtransport":
-			dialAddr, err = webtransport.DialAddr(ep.Addr, relayURL)
+			dialAddr, err = webtransport.ResolveAddr(ep.Addr, relayURL)
 			tr = &webtransport.Transport{DialAddr: dialAddr}
 		case "net-quic":
 			if runtime.GOOS == "js" {
 				err = errors.New("net-quic unsupported on js/wasm")
 				break
 			}
-			tr = &netquic.Transport{DialAddr: ep.Addr}
+			dialAddr, err = netquic.ResolveAddr(ep.Addr, relayURL)
+			tr = &netquic.Transport{DialAddr: dialAddr}
 		case "quic", "quic-go":
 			if runtime.GOOS == "js" {
 				err = errors.New("quic unsupported on js/wasm")
 				break
 			}
-			tr = &quicgo.Transport{DialAddr: ep.Addr}
+			dialAddr, err = quicgo.ResolveAddr(ep.Addr, relayURL)
+			tr = &quicgo.Transport{DialAddr: dialAddr}
 		case "tcp":
 			if runtime.GOOS == "js" {
 				err = errors.New("tcp unsupported on js/wasm")
 				break
 			}
-			tr = &tcp.Transport{DialAddr: ep.Addr}
+			dialAddr, err = tcp.ResolveAddr(ep.Addr, relayURL)
+			tr = &tcp.Transport{DialAddr: dialAddr}
 		case "websocket":
-			dialAddr, err = websocket.DialAddr(ep.Addr, relayURL)
+			dialAddr, err = websocket.ResolveAddr(ep.Addr, relayURL)
 			tr = &websocket.Transport{DialAddr: dialAddr}
 		}
 		if err != nil {

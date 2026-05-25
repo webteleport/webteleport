@@ -28,22 +28,6 @@ var QUICConfig = &quic.Config{
 	KeepAlivePeriod:                  15 * time.Second,
 }
 
-func DialAddr(addr string, relayURL *url.URL) (string, error) {
-	u, err := url.Parse(utils.AsURL(addr))
-	if err != nil {
-		return "", err
-	}
-	// we are dialing an HTTP/3 address, so it is guaranteed to be https
-	u.Scheme = "https"
-	// u.Host = relayURL.Host
-	u.Path = relayURL.Path
-	u.RawPath = relayURL.RawPath
-	params := relayURL.Query()
-	params.Add("x-webtransport-upgrade", "1")
-	u.RawQuery = params.Encode()
-	return u.String(), nil
-}
-
 func Dial(ctx context.Context, addr string, hdr http.Header) (*WebtransportSession, error) {
 	u, err := url.Parse(addr)
 	if err != nil {

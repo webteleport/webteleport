@@ -13,21 +13,6 @@ import (
 	"github.com/webteleport/webteleport/transport/common"
 )
 
-func DialAddr(addr string, relayURL *url.URL) (string, error) {
-	u, err := url.Parse(utils.AsURL(addr))
-	if err != nil {
-		return "", err
-	}
-	u.Host = relayURL.Host
-	u.Scheme = relayURL.Scheme
-	u.Path = relayURL.Path
-	u.RawPath = relayURL.RawPath
-	params := relayURL.Query()
-	params.Add(UpgradeQuery, "1")
-	u.RawQuery = params.Encode()
-	return u.String(), nil
-}
-
 func Dial(ctx context.Context, addr string, hdr http.Header) (*WebsocketSession, error) {
 	u, err := url.Parse(addr)
 	if err != nil {
