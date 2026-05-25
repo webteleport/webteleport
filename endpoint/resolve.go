@@ -83,5 +83,6 @@ func AltSvcFromHEAD(ctx context.Context, rawurl string) []string {
 		slog.Warn("http head error", "error", err)
 		return nil
 	}
+	defer resp.Body.Close()
 	return resp.Header.Values("Alt-Svc")
 }
