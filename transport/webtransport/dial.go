@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/btwiuse/version"
 	"github.com/quic-go/quic-go"
@@ -21,8 +22,10 @@ var MaxIncomingStreams int64 = 1 << 60
 
 var QUICConfig = &quic.Config{
 	EnableDatagrams:                  true,
-	MaxIncomingStreams:                MaxIncomingStreams,
+	MaxIncomingStreams:               MaxIncomingStreams,
 	EnableStreamResetPartialDelivery: true,
+	MaxIdleTimeout:                   30 * time.Second,
+	KeepAlivePeriod:                  15 * time.Second,
 }
 
 func DialAddr(addr string, relayURL *url.URL) (string, error) {
