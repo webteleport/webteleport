@@ -2,18 +2,29 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/webteleport/webteleport"
 )
 
+func relay() string {
+	addr := os.Getenv("RELAY")
+	if addr == "" {
+		return "localhost:8080"
+	}
+	return addr
+}
+
 func main() {
-	ln, err := webteleport.Listen(context.TODO(), "localhost:8080")
+	ln, err := webteleport.Listen(context.Background(), relay())
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Listening on", ln.Addr())
+	endpoint := fmt.Sprintf("%s://%s", ln.Addr().Network(), ln.Addr().String())
+	log.Println("Listening on", endpoint)
 	defer ln.Close()
 	http.Serve(ln, http.HandlerFunc(teapot))
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/url"
 
 	"github.com/webteleport/webteleport/tunnel"
 )
@@ -16,6 +17,7 @@ type Listener struct {
 	Session tunnel.Session
 	Scheme  string
 	Address string // host[:port][/path/]
+	Relay   *url.URL
 }
 
 // calling Accept returns a new [net.Conn]
@@ -31,10 +33,20 @@ func (l *Listener) Close() error {
 	return l.Session.Close()
 }
 
-// Addr returns Listener itself which is an implementor of [net.Addr]
+// Addr returns Listener's full address.
+// When Relay is set, Addr().String() joins Address with Relay.Host.
 func (l *Listener) Addr() net.Addr {
-	return l
+	if l.Relay == nil {
+		return l
+	}
+	return &subdomainAddr{l}
 }
+
+// subdomainAddr joins Address and Relay.Host with a dot.
+type subdomainAddr struct{ l *Listener }
+
+func (a *subdomainAddr) Network() string { return a.l.Network() }
+func (a *subdomainAddr) String() string  { return a.l.Address + "." + a.l.Relay.Host }
 
 // Network returns the protocol scheme, either http or https
 func (l *Listener) Network() string {

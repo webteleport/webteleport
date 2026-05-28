@@ -34,6 +34,7 @@ func Listen(ctx context.Context, addr string) (*common.Listener, error) {
 		Session: session,
 		Scheme:  u.Scheme,
 		Address: hostport,
+		Relay:   u,
 	}, nil
 
 }
