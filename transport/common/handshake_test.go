@@ -81,9 +81,9 @@ func TestReadHandshake(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:  "unknown command ignored before host",
-			input: []string{"FOO", "HOST ok:1"},
-			want:  "ok:1",
+			name:    "unknown command before host",
+			input:   []string{"FOO", "HOST ok:1"},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {

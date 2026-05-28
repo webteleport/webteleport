@@ -34,6 +34,8 @@ func ReadHandshake(stm0 io.Reader) (string, error) {
 				return
 			}
 			slog.Warn("stm0: unknown command", "command", line)
+			errchan <- fmt.Sprintf("stm0: unknown command: %s", line)
+			return
 		}
 	}()
 	select {
