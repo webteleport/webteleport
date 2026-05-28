@@ -1,9 +1,42 @@
 package common
 
 import (
+	"io"
 	"strings"
 	"testing"
+	"time"
 )
+
+func TestReadHandshakeTimeout(t *testing.T) {
+	// A reader that never produces data should trigger the timeout.
+	r := io.NopCloser(strings.NewReader(""))
+	// Override timeout for test to avoid waiting 10s.
+	oldTimeout := HandshakeTimeout
+	HandshakeTimeout = 50 * time.Millisecond
+	defer func() { HandshakeTimeout = oldTimeout }()
+	_, err := ReadHandshake(r)
+	if err == nil {
+		t.Fatal("expected timeout error, got nil")
+	}
+	if !strings.Contains(err.Error(), "timeout") {
+		t.Fatalf("expected timeout error, got: %v", err)
+	}
+}
+
+func TestReadHandshakeNoTimeout(t *testing.T) {
+	// A reader that produces HOST immediately should NOT hit the timeout.
+	oldTimeout := HandshakeTimeout
+	HandshakeTimeout = 50 * time.Millisecond
+	defer func() { HandshakeTimeout = oldTimeout }()
+	r := strings.NewReader("HOST example.com:8080")
+	got, err := ReadHandshake(r)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got != "example.com:8080" {
+		t.Errorf("ReadHandshake() = %q, want %q", got, "example.com:8080")
+	}
+}
 
 func TestReadHandshake(t *testing.T) {
 	tests := []struct {

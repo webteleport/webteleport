@@ -6,11 +6,15 @@ import (
 	"io"
 	"log/slog"
 	"strings"
+	"time"
 )
+
+var HandshakeTimeout = 10 * time.Second
 
 // ReadHandshake reads the HOST/ERR handshake protocol from stm0.
 // Empty lines and "PING" are ignored. "HOST <addr>" returns the address.
 // "ERR <msg>" returns an error. Unknown lines are logged as a warning.
+// Returns an error if no valid handshake is received within HandshakeTimeout.
 func ReadHandshake(stm0 io.Reader) (string, error) {
 	errchan := make(chan string)
 	hostchan := make(chan string)
@@ -23,11 +27,11 @@ func ReadHandshake(stm0 io.Reader) (string, error) {
 			}
 			if v, ok := strings.CutPrefix(line, "HOST "); ok {
 				hostchan <- v
-				continue
+				return
 			}
 			if v, ok := strings.CutPrefix(line, "ERR "); ok {
 				errchan <- v
-				continue
+				return
 			}
 			slog.Warn("stm0: unknown command", "command", line)
 		}
@@ -37,5 +41,7 @@ func ReadHandshake(stm0 io.Reader) (string, error) {
 		return "", fmt.Errorf("server: %s", emsg)
 	case hostport := <-hostchan:
 		return hostport, nil
+	case <-time.After(HandshakeTimeout):
+		return "", fmt.Errorf("handshake timeout after %v", HandshakeTimeout)
 	}
 }
