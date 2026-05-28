@@ -34,6 +34,11 @@ func (sc *StreamConn) RemoteAddr() net.Addr {
 	}
 }
 
+func (sc *StreamConn) Close() error {
+	StreamMetrics.Closed.Add(1)
+	return sc.Stream.Close()
+}
+
 // SetDeadline is required to impl net.Conn
 func (sc *StreamConn) SetDeadline(time.Time) error { return nil }
 

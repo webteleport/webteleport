@@ -22,7 +22,7 @@ type StreamConn struct {
 // - https://pkg.go.dev/github.com/quic-go/quic-go#Stream
 func (sc *StreamConn) Close() error {
 	sc.Stream.CancelRead(CancelRead)
-	QuicGoConnsClosed.Add(1)
+	StreamMetrics.Closed.Add(1)
 	return sc.Stream.Close()
 }
 

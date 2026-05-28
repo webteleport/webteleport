@@ -1,11 +1,5 @@
 package websocket
 
-import (
-	"expvar"
-)
+import "github.com/webteleport/webteleport/transport/common"
 
-var (
-	WebsocketConnsAccepted = expvar.NewInt("websocket_conns_accepted")
-	WebsocketConnsOpened   = expvar.NewInt("websocket_conns_opened")
-	WebsocketConnsClosed   = expvar.NewInt("websocket_conns_closed")
-)
+var StreamMetrics = common.NewStreamMetrics("websocket")

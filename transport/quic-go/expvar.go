@@ -1,11 +1,5 @@
 package quic
 
-import (
-	"expvar"
-)
+import "github.com/webteleport/webteleport/transport/common"
 
-var (
-	QuicGoConnsAccepted = expvar.NewInt("quic_go_conns_accepted")
-	QuicGoConnsOpened   = expvar.NewInt("quic_go_conns_opened")
-	QuicGoConnsClosed   = expvar.NewInt("quic_go_conns_closed")
-)
+var StreamMetrics = common.NewStreamMetrics("quic_go")

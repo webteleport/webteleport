@@ -20,7 +20,7 @@ func (s *TcpSession) Accept(context.Context) (tunnel.Stream, error) {
 	if err != nil {
 		return nil, err
 	}
-	TcpConnsAccepted.Add(1)
+	StreamMetrics.Accepted.Add(1)
 	return &StreamConn{stm}, nil
 }
 
@@ -34,7 +34,7 @@ func (s *TcpSession) Open(context.Context) (tunnel.Stream, error) {
 	if stm == nil {
 		return nil, fmt.Errorf("stream is empty")
 	}
-	TcpConnsOpened.Add(1)
+	StreamMetrics.Opened.Add(1)
 	return &StreamConn{stm}, nil
 }
 

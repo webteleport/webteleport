@@ -22,7 +22,7 @@ func (s *WebtransportSession) Accept(ctx context.Context) (tunnel.Stream, error)
 	if err != nil {
 		return nil, err
 	}
-	WebtransportConnsAccepted.Add(1)
+	StreamMetrics.Accepted.Add(1)
 	return &StreamConn{stm, s.Session}, nil
 }
 
@@ -36,7 +36,7 @@ func (s *WebtransportSession) Open(ctx context.Context) (tunnel.Stream, error) {
 	if stm == nil {
 		return nil, fmt.Errorf("stream is empty")
 	}
-	WebtransportConnsOpened.Add(1)
+	StreamMetrics.Opened.Add(1)
 	return &StreamConn{stm, s.Session}, nil
 }
 

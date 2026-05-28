@@ -1,11 +1,5 @@
 package tcp
 
-import (
-	"expvar"
-)
+import "github.com/webteleport/webteleport/transport/common"
 
-var (
-	TcpConnsAccepted = expvar.NewInt("tcp_conns_accepted")
-	TcpConnsOpened   = expvar.NewInt("tcp_conns_opened")
-	TcpConnsClosed   = expvar.NewInt("tcp_conns_closed")
-)
+var StreamMetrics = common.NewStreamMetrics("tcp")

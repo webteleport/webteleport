@@ -17,7 +17,7 @@ type StreamConn struct {
 }
 
 func (sc *StreamConn) Close() error {
-	TcpConnsClosed.Add(1)
+	StreamMetrics.Closed.Add(1)
 	return sc.Stream.Close()
 }
 

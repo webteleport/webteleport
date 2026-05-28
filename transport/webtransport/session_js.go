@@ -25,7 +25,7 @@ func (s *WebtransportSession) Accept(ctx context.Context) (tunnel.Stream, error)
 	if !ok {
 		return nil, fmt.Errorf("unexpected webtransport stream type %T", conn)
 	}
-	WebtransportConnsAccepted.Add(1)
+	StreamMetrics.Accepted.Add(1)
 	return &StreamConn{Conn: stm}, nil
 }
 
@@ -38,7 +38,7 @@ func (s *WebtransportSession) Open(ctx context.Context) (tunnel.Stream, error) {
 	if !ok {
 		return nil, fmt.Errorf("unexpected webtransport stream type %T", conn)
 	}
-	WebtransportConnsOpened.Add(1)
+	StreamMetrics.Opened.Add(1)
 	return &StreamConn{Conn: stm}, nil
 }
 

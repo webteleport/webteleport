@@ -1,11 +1,5 @@
 package webtransport
 
-import (
-	"expvar"
-)
+import "github.com/webteleport/webteleport/transport/common"
 
-var (
-	WebtransportConnsAccepted = expvar.NewInt("webtransport_conns_accepted")
-	WebtransportConnsOpened   = expvar.NewInt("webtransport_conns_opened")
-	WebtransportConnsClosed   = expvar.NewInt("webtransport_conns_closed")
-)
+var StreamMetrics = common.NewStreamMetrics("webtransport")

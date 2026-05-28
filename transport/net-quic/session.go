@@ -19,7 +19,7 @@ func (s *QuicSession) Accept(ctx context.Context) (tunnel.Stream, error) {
 	if err != nil {
 		return nil, err
 	}
-	GoQuicConnsAccepted.Add(1)
+	StreamMetrics.Accepted.Add(1)
 	return &StreamConn{stm, s.Session}, nil
 }
 
@@ -33,7 +33,7 @@ func (s *QuicSession) Open(ctx context.Context) (tunnel.Stream, error) {
 	if stm == nil {
 		return nil, fmt.Errorf("stream is empty")
 	}
-	GoQuicConnsOpened.Add(1)
+	StreamMetrics.Opened.Add(1)
 	return &StreamConn{stm, s.Session}, nil
 }
 
