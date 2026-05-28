@@ -76,12 +76,12 @@ func AltSvcFromHEAD(ctx context.Context, rawurl string) []string {
 	client := &http.Client{}
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, rawurl, nil)
 	if err != nil {
-		slog.Warn("http req error", "error", err)
+		slog.Warn("http req error", "error", utils.UnwrapInnermost(err))
 		return nil
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		slog.Warn("http head error", "error", err)
+		slog.Warn("http head error", "error", utils.UnwrapInnermost(err))
 		return nil
 	}
 	defer resp.Body.Close()
