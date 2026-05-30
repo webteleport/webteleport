@@ -13,6 +13,7 @@ import (
 	netquic "github.com/webteleport/webteleport/transport/net-quic"
 	quicgo "github.com/webteleport/webteleport/transport/quic-go"
 	"github.com/webteleport/webteleport/transport/tcp"
+	"github.com/webteleport/webteleport/transport/common"
 	"github.com/webteleport/webteleport/transport/websocket"
 	"github.com/webteleport/webteleport/transport/webtransport"
 	"github.com/webteleport/webteleport/tunnel"
@@ -86,6 +87,11 @@ func Listen(ctx context.Context, relayAddr string) (net.Listener, error) {
 			lastErr = err
 			slog.Warn("listen error", "error", err)
 			continue
+		}
+		// restore original relay URL so the advertised address uses
+		// the relay's port, not the webteleport Alt-Svc port
+		if cl, ok := l.(*common.Listener); ok {
+			cl.Relay = relayURL
 		}
 		return l, nil
 	}
